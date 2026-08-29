@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 
@@ -123,8 +125,20 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <main className="flex-1 flex flex-col relative w-full overflow-hidden">
+            <div className="p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 sticky top-0 flex items-center gap-4">
+              <SidebarTrigger />
+              <h1 className="font-semibold text-lg">Pin Collector Premium</h1>
+            </div>
+            <div className="flex-1 overflow-auto bg-slate-50/50">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+      </SidebarProvider>
       <Toaster />
     </QueryClientProvider>
   );
