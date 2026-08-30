@@ -1,16 +1,22 @@
 ﻿import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { toast } from "sonner";
 import {
-  Satellite, Upload, Play, Download, Sliders, FileArchive,
-  Loader2, CheckCircle2, Info, RotateCcw,
+  Satellite, Sliders, MapPin, Download, Save, RefreshCw,
+  Eye, Sparkles, Layers, FileArchive, Upload, ZoomIn,
+  Move, Type, Compass, CheckCircle2, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Separator } from "@/components/ui/separator";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FinishedCard } from "@/components/FinishedCard";
+import { listAllPins, type FullPin, upsertFullPin } from "@/lib/trips/trips-repo";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
@@ -18,242 +24,332 @@ export const Route = createFileRoute("/generator/")({
   component: GeneratorPage,
 });
 
-interface SatelliteParams {
-  zoom: number;
-  offsetX: number;
-  offsetY: number;
-  labelText: string;
-  fontScale: number;
-}
-
-const DEFAULT_PARAMS: SatelliteParams = {
-  zoom: 15,
-  offsetX: 0,
-  offsetY: 0,
-  labelText: "{city}, {country}",
-  fontScale: 1.0,
-};
-
 const GENERATOR_BUCKET = "generator-zip";
 
-function ParamSlider({
-  label,
-  value,
-  min,
-  max,
-  step,
-  unit,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  unit?: string;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm">{label}</Label>
-        <Badge variant="secondary" className="font-mono text-xs">
-          {value}{unit}
-        </Badge>
-      </div>
-      <Slider
-        min={min}
-        max={max}
-        step={step}
-        value={[value]}
-        onValueChange={([v]) => onChange(v)}
-        className="w-full"
-      />
-    </div>
-  );
-}
-
 function GeneratorPage() {
-  const [params, setParams] = useState<SatelliteParams>(DEFAULT_PARAMS);
-  const [zipFile, setZipFile] = useState<File | null>(null);
-  const [zipUploading, setZipUploading] = useState(false);
-  const [zipUploaded, setZipUploaded] = useState(false);
-  const [pendingPins, setPendingPins] = useState<number>(0);
-  const [loadingPins, setLoadingPins] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pins, setPins] = useState<FullPin[]>([]);
+  const [selectedPinId, setSelectedPinId] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const set = <K extends keyof SatelliteParams>(k: K, v: SatelliteParams[K]) =>
-    setParams((p) => ({ ...p, [k]: v }));
+  // Editable card parameters
+  const [zoom, setZoom] = useState<number>(14);
+  const [lat, setLat] = useState<number>(40.4168);
+  const [lon, setLon] = useState<number>(-3.7038);
+  const [customCity, setCustomCity] = useState<string>("");
+  const [customCountry, setCustomCountry] = useState<string>("");
+  const [customPinCode, setCustomPinCode] = useState<string>("");
+  const [pinScale, setPinScale] = useState<number>(100);
+
+  // ZIP management
+  const [zipUploading, setZipUploading] = useState(false);
+  const [zipSuccess, setZipSuccess] = useState(false);
+  const zipInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const load = async () => {
-      setLoadingPins(true);
-      const { count } = await supabase
-        .from("pins")
-        .select("id", { count: "exact", head: true })
-        .is("satellite_image_url", null);
-      setPendingPins(count ?? 0);
-      setLoadingPins(false);
+      setLoading(true);
+      try {
+        const data = await listAllPins();
+        setPins(data);
+        if (data.length > 0) {
+          selectPin(data[0]);
+        }
+      } catch {
+        toast.error("Error al cargar pines");
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
 
+  const selectPin = (pin: FullPin) => {
+    setSelectedPinId(pin.id);
+    setCustomCity(pin.city ?? "");
+    setCustomCountry(pin.country ?? "");
+    setCustomPinCode(pin.pin_id ?? "");
+    setZoom(pin.satellite_params?.zoom ?? 14);
+    if (pin.satellite_params?.lat && pin.satellite_params?.lon) {
+      setLat(pin.satellite_params.lat);
+      setLon(pin.satellite_params.lon);
+    }
+  };
+
+  const currentPin = useMemo(() => {
+    return pins.find((p) => p.id === selectedPinId);
+  }, [pins, selectedPinId]);
+
+  // Dynamic preview pin object with live parameter overrides
+  const previewPin = useMemo<FullPin | null>(() => {
+    if (!currentPin) return null;
+    return {
+      ...currentPin,
+      city: customCity || currentPin.city,
+      country: customCountry || currentPin.country,
+      pin_id: customPinCode || currentPin.pin_id,
+      satellite_params: {
+        ...currentPin.satellite_params,
+        zoom,
+        lat,
+        lon,
+      },
+    };
+  }, [currentPin, customCity, customCountry, customPinCode, zoom, lat, lon]);
+
+  const handleSaveParams = async () => {
+    if (!currentPin) return;
+    setSaving(true);
+    try {
+      const updatedParams = {
+        zoom,
+        lat,
+        lon,
+      };
+
+      await upsertFullPin({
+        id: currentPin.id,
+        city: customCity,
+        country: customCountry,
+        pin_id: customPinCode,
+        satellite_params: updatedParams,
+      });
+
+      setPins((prev) =>
+        prev.map((p) =>
+          p.id === currentPin.id
+            ? {
+                ...p,
+                city: customCity,
+                country: customCountry,
+                pin_id: customPinCode,
+                satellite_params: updatedParams,
+              }
+            : p
+        )
+      );
+
+      toast.success("¡Cartulina satelital actualizada con éxito! ✓");
+    } catch {
+      toast.error("Error al guardar la configuración");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleZipUpload = async (file: File) => {
     if (!file.name.endsWith(".zip")) {
-      toast.error("Solo se aceptan archivos .zip");
+      toast.error("Solo se admiten archivos .zip");
       return;
     }
-    setZipFile(file);
     setZipUploading(true);
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const blob = new Blob([arrayBuffer], { type: "application/zip" });
+      const blob = new Blob([await file.arrayBuffer()], { type: "application/zip" });
       const { error } = await supabase.storage
         .from(GENERATOR_BUCKET)
-        .upload("travel_pin_archive_generator.zip", blob, {
-          upsert: true,
-          contentType: "application/zip",
-        });
+        .upload("travel_pin_archive_generator.zip", blob, { upsert: true });
       if (error) throw error;
-      setZipUploaded(true);
-      toast.success("ZIP del generador actualizado ✓");
-    } catch (e) {
-      toast.error("Error al subir el ZIP");
+      setZipSuccess(true);
+      toast.success("Script motor del generador actualizado en Supabase Storage ✓");
+    } catch {
+      toast.error("Error al subir el ZIP del generador");
     } finally {
       setZipUploading(false);
     }
   };
 
-  const handleSaveParams = async () => {
-    // Save params as JSON to Supabase Storage for Python to read
-    const blob = new Blob([JSON.stringify(params, null, 2)], { type: "application/json" });
-    const { error } = await supabase.storage
-      .from(GENERATOR_BUCKET)
-      .upload("generator_params.json", blob, { upsert: true, contentType: "application/json" });
-    if (error) {
-      toast.error("Error al guardar parámetros");
-    } else {
-      toast.success("Parámetros guardados ✓ El generador los usará la próxima vez.");
-    }
-  };
-
-  const resetParams = () => {
-    setParams(DEFAULT_PARAMS);
-    toast.info("Parámetros restablecidos");
-  };
-
   return (
-    <div className="p-6 space-y-6 animate-float-in">
+    <div className="p-6 space-y-6 animate-float-in max-w-7xl mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Centro Satelital</h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Configura y lanza el generador de imágenes satelitales. Sin tocar una sola línea de código.
+            Personaliza visualmente el encuadre, zoom y datos de cada cartulina satelital en tiempo real.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {loadingPins ? (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-          ) : (
-            <Badge variant={pendingPins > 0 ? "destructive" : "secondary"} className="gap-1.5">
-              <Satellite className="h-3 w-3" />
-              {pendingPins} pines pendientes
-            </Badge>
-          )}
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="gap-1.5 py-1 px-3">
+            <Satellite className="h-3.5 w-3.5 text-primary" />
+            <span>{pins.length} Cartulinas Disponibles</span>
+          </Badge>
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-6">
-        {/* Left: Parameters */}
-        <div className="col-span-3 space-y-4">
-          <div className="bg-white rounded-2xl border border-border/50 shadow-sm p-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sliders className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-sm">Parámetros de Generación</h3>
+      <div className="grid grid-cols-12 gap-6">
+        {/* Left 4 Cols: Live Finished Card Preview */}
+        <div className="col-span-12 lg:col-span-5 space-y-4">
+          <div className="bg-white rounded-3xl p-6 border border-border/50 shadow-sm flex flex-col items-center justify-center min-h-[460px]">
+            <div className="flex items-center justify-between w-full mb-4">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Vista Previa en Vivo (55 × 75 mm)
+              </span>
+              <Badge variant="secondary" className="text-[10px]">
+                WYSIWYG
+              </Badge>
+            </div>
+
+            {previewPin ? (
+              <div className="w-64 max-w-full drop-shadow-2xl">
+                <FinishedCard pin={previewPin} />
               </div>
-              <Button size="sm" variant="ghost" onClick={resetParams} className="gap-1.5 text-xs text-muted-foreground">
-                <RotateCcw className="h-3.5 w-3.5" />
-                Restablecer
-              </Button>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                <p className="text-xs">Cargando previsualización...</p>
+              </div>
+            )}
 
-            <Separator />
-
-            <ParamSlider
-              label="Nivel de Zoom"
-              value={params.zoom}
-              min={8}
-              max={20}
-              step={1}
-              onChange={(v) => set("zoom", v)}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <ParamSlider
-                label="Offset X"
-                value={params.offsetX}
-                min={-500}
-                max={500}
-                step={10}
-                unit="px"
-                onChange={(v) => set("offsetX", v)}
-              />
-              <ParamSlider
-                label="Offset Y"
-                value={params.offsetY}
-                min={-500}
-                max={500}
-                step={10}
-                unit="px"
-                onChange={(v) => set("offsetY", v)}
-              />
-            </div>
-
-            <ParamSlider
-              label="Escala de texto"
-              value={params.fontScale}
-              min={0.5}
-              max={3.0}
-              step={0.1}
-              onChange={(v) => set("fontScale", v)}
-            />
-
-            <div className="space-y-2">
-              <Label htmlFor="labelText">Texto de la etiqueta</Label>
-              <Input
-                id="labelText"
-                value={params.labelText}
-                onChange={(e) => set("labelText", e.target.value)}
-                placeholder="{city}, {country}"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Variables disponibles: <code className="bg-slate-100 px-1 rounded text-xs">{"{city}"}</code>, <code className="bg-slate-100 px-1 rounded text-xs">{"{country}"}</code>, <code className="bg-slate-100 px-1 rounded text-xs">{"{date}"}</code>
-              </p>
-            </div>
-
-            <Button onClick={handleSaveParams} className="w-full gap-2 shadow-md">
-              <Download className="h-4 w-4" />
-              Guardar parámetros en la nube
-            </Button>
+            <p className="text-[11px] text-muted-foreground/70 text-center mt-4">
+              Filtro acuarela (#F4F1E8), banderas y vectores de rumbo calculados automáticamente.
+            </p>
           </div>
         </div>
 
-        {/* Right: ZIP Manager + Info */}
-        <div className="col-span-2 space-y-4">
-          {/* ZIP Upload */}
-          <div className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <FileArchive className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold text-sm">Script del generador</h3>
+        {/* Right 7 Cols: Interactive Controls */}
+        <div className="col-span-12 lg:col-span-7 space-y-4">
+          <div className="bg-white rounded-3xl p-6 border border-border/50 shadow-sm space-y-6">
+            {/* Pin Selector */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Seleccionar Pin a Editar
+              </Label>
+              <Select
+                value={selectedPinId}
+                onValueChange={(val) => {
+                  const p = pins.find((x) => x.id === val);
+                  if (p) selectPin(p);
+                }}
+              >
+                <SelectTrigger className="h-10 text-sm font-medium">
+                  <SelectValue placeholder="Elige un pin..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-64">
+                  {pins.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      <span className="font-semibold">{p.city || "Sin ciudad"}</span> · {p.country} ({p.pin_id || "PIN"})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Sube o reemplaza el ZIP con la nueva versión del generador. Se guarda en Supabase Storage para que lo puedas descargar cuando lo necesites.
-            </p>
 
+            <Tabs defaultValue="map" className="space-y-4">
+              <TabsList className="bg-slate-100 p-1 rounded-xl w-full grid grid-cols-2">
+                <TabsTrigger value="map" className="gap-2 text-xs">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Encuadre y Zoom Satelital
+                </TabsTrigger>
+                <TabsTrigger value="text" className="gap-2 text-xs">
+                  <Type className="h-3.5 w-3.5" />
+                  Tipografía y Etiquetas
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Map Zoom & Position */}
+              <TabsContent value="map" className="space-y-5 pt-2">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium">Nivel de Zoom Satelital</Label>
+                    <Badge variant="secondary" className="font-mono text-xs">
+                      Zoom {zoom} (
+                      {zoom <= 12 ? "Área metropolitana" : zoom <= 14 ? "Distrito / Ciudad" : "Detalle monumento"})
+                    </Badge>
+                  </div>
+                  <Slider
+                    min={10}
+                    max={18}
+                    step={1}
+                    value={[zoom]}
+                    onValueChange={([v]) => setZoom(v)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Latitud</Label>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      value={lat}
+                      onChange={(e) => setLat(parseFloat(e.target.value) || 0)}
+                      className="text-xs font-mono h-9"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Longitud</Label>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      value={lon}
+                      onChange={(e) => setLon(parseFloat(e.target.value) || 0)}
+                      className="text-xs font-mono h-9"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Text & Typography */}
+              <TabsContent value="text" className="space-y-4 pt-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Nombre de la Ciudad (Tipografía Serif)</Label>
+                  <Input
+                    value={customCity}
+                    onChange={(e) => setCustomCity(e.target.value)}
+                    placeholder="Ej: Madrid"
+                    className="text-xs h-9"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">País</Label>
+                    <Input
+                      value={customCountry}
+                      onChange={(e) => setCustomCountry(e.target.value)}
+                      placeholder="Ej: España"
+                      className="text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Código Identificador (Pin ID)</Label>
+                    <Input
+                      value={customPinCode}
+                      onChange={(e) => setCustomPinCode(e.target.value)}
+                      placeholder="Ej: MAD-2023-08"
+                      className="text-xs font-mono h-9"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Action Save Button */}
+            <Button
+              onClick={handleSaveParams}
+              disabled={saving || !currentPin}
+              className="w-full gap-2 shadow-md h-10 font-medium"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Guardar Cambios en la Cartulina
+            </Button>
+          </div>
+
+          {/* Generator Engine ZIP Sync */}
+          <div className="bg-slate-50 rounded-2xl border border-border/50 p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-white border border-border/40 flex items-center justify-center flex-shrink-0">
+                <FileArchive className="h-4 w-4 text-slate-700" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold">Motor Satelital Python (ZIP)</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Actualiza el archivo ZIP de generación masiva si tienes una nueva versión.
+                </p>
+              </div>
+            </div>
             <input
-              ref={fileInputRef}
+              ref={zipInputRef}
               type="file"
               accept=".zip"
               className="sr-only"
@@ -262,53 +358,16 @@ function GeneratorPage() {
                 if (f) handleZipUpload(f);
               }}
             />
-
-            <div
-              className={cn(
-                "rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition-all duration-200",
-                !zipUploaded && "border-border/50 hover:border-primary/40 hover:bg-primary/5",
-                zipUploaded && "border-emerald-300 bg-emerald-50"
-              )}
-              onClick={() => fileInputRef.current?.click()}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => zipInputRef.current?.click()}
+              disabled={zipUploading}
+              className="text-xs gap-1.5 flex-shrink-0"
             >
-              {zipUploading ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Subiendo ZIP...</p>
-                </div>
-              ) : zipUploaded ? (
-                <div className="flex flex-col items-center gap-2">
-                  <CheckCircle2 className="h-6 w-6 text-emerald-600" />
-                  <p className="text-sm text-emerald-700 font-medium">{zipFile?.name}</p>
-                  <p className="text-xs text-muted-foreground">Click para reemplazar</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="h-6 w-6 text-muted-foreground" />
-                  <p className="text-sm font-medium">Subir ZIP</p>
-                  <p className="text-xs text-muted-foreground">travel_pin_archive_generator.zip</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* How to run */}
-          <div className="bg-slate-50 rounded-2xl border border-border/50 p-5 space-y-3">
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm text-muted-foreground">Cómo ejecutar</h3>
-            </div>
-            <ol className="space-y-2 text-xs text-muted-foreground list-decimal list-inside">
-              <li>Guarda los parámetros en la nube usando el botón de arriba.</li>
-              <li>Descarga el ZIP desde Supabase Storage si actualizaste el script.</li>
-              <li>En tu PC, ejecuta: <code className="bg-white px-1.5 py-0.5 rounded border text-slate-700">python generate.py</code></li>
-              <li>El script leerá los parámetros automáticamente y procesará los pines pendientes.</li>
-            </ol>
-            <div className="bg-amber-50 rounded-xl border border-amber-200 p-3">
-              <p className="text-xs text-amber-800 font-medium">
-                🚀 Próximamente: Ejecución en la nube con un solo clic mediante Supabase Edge Functions.
-              </p>
-            </div>
+              {zipUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+              {zipSuccess ? "Actualizado ✓" : "Subir ZIP"}
+            </Button>
           </div>
         </div>
       </div>
