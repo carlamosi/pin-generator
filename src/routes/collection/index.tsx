@@ -58,7 +58,6 @@ function CollectionPage() {
     loadData();
   }, []);
 
-  // Available years
   const availableYears = useMemo(() => {
     const years = new Set<string>();
     pins.forEach((p) => {
@@ -69,7 +68,6 @@ function CollectionPage() {
     return Array.from(years).sort();
   }, [pins]);
 
-  // Filtered & Chronologically Sorted Pins
   const filteredPins = useMemo(() => {
     return pins
       .filter((p) => {
@@ -96,10 +94,7 @@ function CollectionPage() {
 
   const totalPages = Math.max(1, Math.ceil(filteredPins.length / PINS_PER_PAGE));
   const currentBatch = filteredPins.slice(page * PINS_PER_PAGE, (page + 1) * PINS_PER_PAGE);
-
-  // Fill up to 12 slots for the physical sheet layout
   const pageSlots = Array.from({ length: PINS_PER_PAGE }, (_, i) => currentBatch[i] ?? null);
-
   const nfcCount = pins.filter((p) => p.nfc_uid).length;
 
   const handleSaveNfc = async () => {
@@ -120,47 +115,55 @@ function CollectionPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 animate-float-in max-w-7xl mx-auto">
+    <div className="space-y-8 animate-float-in max-w-7xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Mi Álbum Físico</h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Visualización cronológica de tus cartulinas acabadas con mapa satelital, acuarela y pines montados.
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[11px] font-mono tracking-widest text-coral uppercase bg-coral/10 px-2.5 py-1 rounded-full border border-coral/20">
+              Colección Cronológica · 3×4
+            </span>
+          </div>
+          <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
+            Mi Álbum Físico
+          </h2>
+          <p className="text-muted-fg text-sm mt-1 max-w-2xl">
+            Simulador de tu álbum de colección física. Cada hoja contiene 12 cartulinas terminadas (55 × 75 mm) ordenadas cronológicamente.
           </p>
         </div>
+
         <div className="flex items-center gap-3">
-          <Badge variant="outline" className="gap-1.5 py-1 px-3">
-            <BookImage className="h-3.5 w-3.5 text-primary" />
+          <Badge className="bg-white/5 text-white border-white/15 gap-2 py-1.5 px-3.5 font-mono text-xs">
+            <BookImage className="h-3.5 w-3.5 text-cyan" />
             <span>Página {page + 1} de {totalPages}</span>
           </Badge>
-          <Badge variant="secondary" className="gap-1.5 py-1 px-3 bg-emerald-50 text-emerald-800 border-emerald-200">
-            <Wifi className="h-3.5 w-3.5 text-emerald-600" />
+          <Badge className="bg-neon/15 text-neon border-neon/30 gap-2 py-1.5 px-3.5 font-mono text-xs shadow-[0_0_16px_-4px_#00ffb2]">
+            <Wifi className="h-3.5 w-3.5" />
             <span>{nfcCount} NFC Vinculados</span>
           </Badge>
         </div>
       </div>
 
       {/* Control Bar: Filters & Sorting */}
-      <div className="bg-white rounded-2xl border border-border/50 p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="glass rounded-3xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* Search */}
-          <div className="relative w-60">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative w-64">
+            <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-fg" />
             <Input
               placeholder="Buscar ciudad o código..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-              className="pl-9 h-9 text-xs"
+              className="pl-10 h-10 text-xs bg-white/5 border-white/10 text-white placeholder:text-muted-fg rounded-xl focus-visible:ring-violet"
             />
           </div>
 
           {/* Country Filter */}
           <Select value={selectedCountry} onValueChange={(v) => { setSelectedCountry(v); setPage(0); }}>
-            <SelectTrigger className="w-44 h-9 text-xs">
+            <SelectTrigger className="w-48 h-10 text-xs bg-white/5 border-white/10 text-white rounded-xl">
               <SelectValue placeholder="Todos los países" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#0a0a14] border-white/15 text-white">
               <SelectItem value="all">Todos los países</SelectItem>
               {countries.map((c) => (
                 <SelectItem key={c.name} value={c.name}>
@@ -172,10 +175,10 @@ function CollectionPage() {
 
           {/* Year Filter */}
           <Select value={selectedYear} onValueChange={(v) => { setSelectedYear(v); setPage(0); }}>
-            <SelectTrigger className="w-36 h-9 text-xs">
+            <SelectTrigger className="w-40 h-10 text-xs bg-white/5 border-white/10 text-white rounded-xl">
               <SelectValue placeholder="Todos los años" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#0a0a14] border-white/15 text-white">
               <SelectItem value="all">Todos los años</SelectItem>
               {availableYears.map((y) => (
                 <SelectItem key={y} value={y}>
@@ -187,39 +190,34 @@ function CollectionPage() {
         </div>
 
         {/* Chronological Sorting Toggle */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSortAsc((prev) => !prev)}
-            className="text-xs gap-1.5 text-muted-foreground"
-          >
-            <ArrowUpDown className="h-3.5 w-3.5" />
-            {sortAsc ? "Más antiguos primero" : "Más recientes primero"}
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setSortAsc((prev) => !prev)}
+          className="text-xs font-mono gap-2 text-cyan hover:text-white hover:bg-white/5"
+        >
+          <ArrowUpDown className="h-3.5 w-3.5" />
+          {sortAsc ? "Antiguos → Recientes" : "Recientes → Antiguos"}
+        </Button>
       </div>
 
-      {/* Physical Album Sheet Container (3 cols x 4 rows) */}
-      <div
-        className="bg-white rounded-3xl p-8 border border-border/40 shadow-xl transition-all duration-300 relative"
-        style={{
-          background: "linear-gradient(to bottom right, #ffffff, #faf8f5)",
-        }}
-      >
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/40">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-semibold tracking-wider text-muted-foreground uppercase">
-              ÁLBUM DE COLECCIÓN · PÁGINA {page + 1}
+      {/* Cinematic Physical Sheet Container (3 cols x 4 rows) */}
+      <div className="glass-strong rounded-3xl p-8 relative overflow-hidden border border-white/15 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9)]">
+        {/* Subtle grid watermark */}
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-coral shadow-[0_0_8px_#ff6b6b]" />
+            <span className="font-display font-bold text-xs tracking-wider text-white uppercase">
+              ÁLBUM DE COLECCIÓN · HOJA {page + 1}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">
-            {filteredPins.length} pines en total (12 por página)
+          <span className="text-xs font-mono text-muted-fg">
+            {filteredPins.length} cartulinas catalogadas
           </span>
         </div>
 
         {/* 3 Columns x 4 Rows Grid */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {pageSlots.map((slot, index) =>
             slot ? (
               <FinishedCard
@@ -233,32 +231,34 @@ function CollectionPage() {
             ) : (
               <div
                 key={`empty-${index}`}
-                className="aspect-[55/75] rounded-2xl border-2 border-dashed border-border/30 flex flex-col items-center justify-center p-4 bg-slate-50/40"
+                className="aspect-[55/75] rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-4 bg-white/[0.02] transition-colors hover:border-white/20"
               >
-                <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center mb-2">
-                  <Sparkles className="h-4 w-4 text-slate-300" />
+                <div className="h-9 w-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2">
+                  <Sparkles className="h-4 w-4 text-muted-fg/40" />
                 </div>
-                <span className="text-[10px] text-muted-foreground/40 font-mono">Ranura Vacía</span>
+                <span className="text-[10px] text-muted-fg/50 font-mono tracking-wider uppercase">
+                  Ranura {index + 1}
+                </span>
               </div>
             )
           )}
         </div>
 
-        {/* Pagination Bar */}
-        <div className="flex items-center justify-between mt-8 pt-4 border-t border-border/40">
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/10">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="gap-2 text-xs"
+            className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10"
           >
             <ChevronLeft className="h-4 w-4" />
             Página Anterior
           </Button>
 
-          <span className="text-xs font-medium text-muted-foreground font-mono">
-            {page + 1} / {totalPages}
+          <span className="text-xs font-mono font-semibold text-cyan">
+            Página {page + 1} de {totalPages}
           </span>
 
           <Button
@@ -266,7 +266,7 @@ function CollectionPage() {
             size="sm"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="gap-2 text-xs"
+            className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10"
           >
             Página Siguiente
             <ChevronRight className="h-4 w-4" />
@@ -276,51 +276,50 @@ function CollectionPage() {
 
       {/* Inspection & NFC Linking Modal */}
       <Dialog open={!!inspectPin} onOpenChange={(open) => !open && setInspectPin(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-[#0a0a14] border-white/15 text-white rounded-3xl p-6 shadow-2xl">
           {inspectPin && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <DialogHeader>
-                <DialogTitle className="text-base font-bold flex items-center gap-2">
+                <DialogTitle className="font-display text-lg font-bold flex items-center gap-2.5 text-white">
                   <span>{inspectPin.city}</span>
-                  <Badge variant="outline" className="text-xs font-normal">
+                  <Badge variant="outline" className="text-xs font-mono bg-white/5 border-white/15 text-cyan">
                     {inspectPin.country}
                   </Badge>
                 </DialogTitle>
               </DialogHeader>
 
-              {/* High-res Card Preview */}
-              <div className="w-56 mx-auto">
+              {/* High-res Card Display */}
+              <div className="w-60 mx-auto drop-shadow-2xl">
                 <FinishedCard pin={inspectPin} />
               </div>
 
-              {/* NFC Configuration */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-border/50 space-y-3">
+              {/* NFC Hardware Association */}
+              <div className="glass rounded-2xl p-5 space-y-3 border border-white/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Wifi className="h-4 w-4 text-emerald-600" />
-                    <span className="text-xs font-semibold">Vincular Chip NFC Físico</span>
+                    <Wifi className="h-4 w-4 text-neon" />
+                    <span className="text-xs font-display font-semibold text-white">Vincular Chip NFC</span>
                   </div>
                   {inspectPin.nfc_uid && (
-                    <Badge className="bg-emerald-100 text-emerald-800 text-[10px] border-emerald-200">
+                    <Badge className="bg-neon/15 text-neon border-neon/30 text-[10px] font-mono">
                       Vinculado
                     </Badge>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Introduce el UID de tu chip NFC o acércalo a tu lector para asociarlo a esta cartulina.
+                <p className="text-xs text-muted-fg leading-relaxed">
+                  Asocia el identificador hexadecimal del chip NFC físico pegado detrás de la cartulina.
                 </p>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Ej: 04:A2:4B:91:78..."
                     value={nfcInput}
                     onChange={(e) => setNfcInput(e.target.value)}
-                    className="text-xs font-mono h-9"
+                    className="text-xs font-mono h-10 bg-white/5 border-white/10 text-white placeholder:text-muted-fg focus-visible:ring-violet"
                   />
                   <Button
                     onClick={handleSaveNfc}
                     disabled={savingNfc}
-                    size="sm"
-                    className="h-9 px-4 text-xs"
+                    className="h-10 px-5 text-xs font-semibold bg-violet hover:bg-violet/90 text-white shadow-[0_0_16px_-4px_rgba(108,99,255,0.6)]"
                   >
                     Guardar
                   </Button>

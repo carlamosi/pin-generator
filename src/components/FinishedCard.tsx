@@ -1,5 +1,5 @@
 ﻿import React, { useMemo, useState } from "react";
-import { Wifi, MapPin, Compass, Sparkles } from "lucide-react";
+import { Wifi, Sparkles } from "lucide-react";
 import { type FullPin } from "@/lib/trips/trips-repo";
 import { cn } from "@/lib/utils";
 
@@ -83,7 +83,6 @@ interface FinishedCardProps {
   pin: FullPin;
   className?: string;
   showPinOverlay?: boolean;
-  scale?: number;
   onClick?: () => void;
 }
 
@@ -91,7 +90,6 @@ export function FinishedCard({
   pin,
   className,
   showPinOverlay = true,
-  scale = 1,
   onClick,
 }: FinishedCardProps) {
   const [hovered, setHovered] = useState(false);
@@ -113,8 +111,6 @@ export function FinishedCard({
   const flag = pin.country ? COUNTRY_FLAGS[pin.country] ?? "🌍" : "🌍";
   const zoom = pin.satellite_params?.zoom ?? 14;
 
-  // Static Esri or OpenStreetMap Satellite Tile snapshot URL
-  // Lat/Lon to Slippy tile numbers for background
   const tileUrl = useMemo(() => {
     const n = Math.pow(2, zoom);
     const xtile = Math.floor(((coords[1] + 180) / 360) * n);
@@ -138,9 +134,9 @@ export function FinishedCard({
       style={{
         backgroundColor: "#F4F1E8", // Base museum paper color from config.json
         boxShadow: hovered
-          ? "0 20px 40px -12px rgba(23,23,23,0.18), 0 0 0 1px rgba(23,23,23,0.08)"
-          : "0 4px 16px -4px rgba(23,23,23,0.08), 0 0 0 1px rgba(23,23,23,0.06)",
-        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+          ? "0 24px 48px -12px rgba(0,0,0,0.9), 0 0 24px -4px rgba(108,99,255,0.4)"
+          : "0 8px 24px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1)",
+        transform: hovered ? "translateY(-6px) scale(1.02)" : "translateY(0) scale(1)",
       }}
     >
       {/* 1. LAYER SATELLITE WITH WATERCOLOR FILTER */}
@@ -150,25 +146,24 @@ export function FinishedCard({
           alt={pin.city ?? "Map"}
           className="w-full h-full object-cover"
           style={{
-            opacity: 0.68,
-            filter: "contrast(1.15) saturate(0.9) brightness(1.02) blur(0.3px)",
+            opacity: 0.72,
+            filter: "contrast(1.18) saturate(0.92) brightness(1.02)",
             mixBlendMode: "multiply",
           }}
           onError={(e) => {
-            // Fallback gradient if tile is unavailable
             (e.currentTarget as HTMLElement).style.display = "none";
           }}
         />
-        {/* Watercolor paper gradient fade */}
+        {/* Watercolor paper radial diffusion fade */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at center, transparent 35%, rgba(244, 241, 232, 0.45) 70%, rgba(244, 241, 232, 0.95) 100%)",
+              "radial-gradient(ellipse at center, transparent 30%, rgba(244, 241, 232, 0.45) 65%, rgba(244, 241, 232, 0.96) 100%)",
           }}
         />
-        {/* Soft edge inner border */}
-        <div className="absolute inset-2 rounded-xl border border-[#171717]/10 pointer-events-none" />
+        {/* Refined museum card inner bezel */}
+        <div className="absolute inset-1.5 rounded-xl border border-[#171717]/10 pointer-events-none" />
       </div>
 
       {/* 2. LAYER TYPOGRAPHY: TOP HEADER */}
@@ -176,13 +171,13 @@ export function FinishedCard({
         <div className="space-y-0.5">
           <p
             className="text-[13px] font-bold tracking-tight text-[#171717] leading-tight"
-            style={{ fontFamily: "'Noto Serif Display', Georgia, serif" }}
+            style={{ fontFamily: "'Space Grotesk', serif" }}
           >
             {pin.city ?? "Ciudad"}
           </p>
           <div className="flex items-center gap-1">
             <span className="text-[11px] leading-none">{flag}</span>
-            <span className="text-[10px] font-medium text-[#66635C] tracking-wide uppercase">
+            <span className="text-[10px] font-semibold text-[#66635C] tracking-wider uppercase font-mono">
               {pin.country ?? "Mundo"}
             </span>
           </div>
@@ -192,7 +187,7 @@ export function FinishedCard({
         <div
           className={cn(
             "h-4 w-4 rounded-full flex items-center justify-center transition-colors",
-            pin.nfc_uid ? "bg-emerald-500/15 text-emerald-700" : "bg-[#171717]/5 text-[#66635C]/60"
+            pin.nfc_uid ? "bg-emerald-600 text-white shadow-[0_0_8px_#00ffb2]" : "bg-[#171717]/10 text-[#66635C]/60"
           )}
           title={pin.nfc_uid ? `NFC: ${pin.nfc_uid}` : "NFC no vinculado"}
         >
@@ -206,9 +201,9 @@ export function FinishedCard({
           <img
             src={pin.transparent_image_url}
             alt={pin.city ?? "Pin"}
-            className="max-h-[82%] max-w-[82%] object-contain transition-transform duration-300 group-hover:scale-108"
+            className="max-h-[84%] max-w-[84%] object-contain transition-transform duration-300 group-hover:scale-110"
             style={{
-              filter: "drop-shadow(0 8px 14px rgba(23,23,23,0.22))",
+              filter: "drop-shadow(0 10px 18px rgba(23,23,23,0.3))",
             }}
           />
         ) : (
@@ -219,24 +214,24 @@ export function FinishedCard({
       </div>
 
       {/* 4. LAYER TYPOGRAPHY: BOTTOM FOOTER */}
-      <div className="relative z-10 p-2.5 pt-0 flex items-end justify-between text-[9px] text-[#66635C] font-mono border-t border-[#171717]/5 bg-[#F4F1E8]/60 backdrop-blur-[2px]">
-        {/* Pin Code / Year */}
+      <div className="relative z-10 p-2.5 pt-1 flex items-end justify-between text-[9px] text-[#66635C] font-mono border-t border-[#171717]/10 bg-[#F4F1E8]/75 backdrop-blur-[2px]">
+        {/* Pin Code / Coordinates */}
         <div>
-          <span className="font-semibold text-[#171717] tracking-wider">
+          <span className="font-bold text-[#171717] tracking-wider">
             {pin.pin_id || (pin.acquisition_date ? new Date(pin.acquisition_date).getFullYear() : "PIN")}
           </span>
-          <p className="text-[8px] opacity-70">
+          <p className="text-[8px] opacity-75">
             {coords[0].toFixed(2)}°, {coords[1].toFixed(2)}°
           </p>
         </div>
 
         {/* Bearing & Distance from Terrassa */}
         <div className="text-right">
-          <div className="flex items-center justify-end gap-0.5 text-[#171717] font-semibold">
+          <div className="flex items-center justify-end gap-0.5 text-[#171717] font-bold">
             <span>{nav.cardinal}</span>
             <span className="text-[8px]">↗</span>
           </div>
-          <p className="text-[8px] opacity-70">{nav.distance} km</p>
+          <p className="text-[8px] opacity-75">{nav.distance} km</p>
         </div>
       </div>
     </div>

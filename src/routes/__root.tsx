@@ -125,21 +125,31 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 flex flex-col relative w-full overflow-hidden">
-            <div className="p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 sticky top-0 flex items-center gap-4">
-              <SidebarTrigger />
-              <h1 className="font-semibold text-lg">Pin Collector Premium</h1>
+      <div className="flex min-h-screen w-full bg-[#050508] text-[#f4f5fb]">
+        <AppSidebar />
+        <main className="flex-1 flex flex-col relative w-full overflow-hidden min-h-screen">
+          {/* Top Glass Header */}
+          <header className="h-16 border-b border-white/10 bg-[#050508]/60 backdrop-blur-2xl z-30 sticky top-0 px-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="h-2 w-2 rounded-full bg-cyan shadow-[0_0_8px_#00d4ff]" />
+              <h1 className="font-display font-bold text-sm tracking-tight text-white uppercase">
+                Orbita · Pin Collector Studio
+              </h1>
             </div>
-            <div className="flex-1 overflow-auto bg-slate-50/50">
-              <Outlet />
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] font-mono text-muted-fg bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                v2.4 · Cinematic Engine
+              </span>
             </div>
-          </main>
-        </div>
-      </SidebarProvider>
-      <Toaster />
+          </header>
+
+          {/* Main Body Canvas */}
+          <div className="flex-1 overflow-auto p-6 orbita-grain">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+      <Toaster theme="dark" />
     </QueryClientProvider>
   );
 }
