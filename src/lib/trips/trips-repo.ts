@@ -194,3 +194,104 @@ export interface PhysicalStamp {
   obtained_personally: boolean;
   created_at: string;
 }
+// LEGO Travel Passport Queries & Mutations
+
+export interface FullPhysicalStamp extends PhysicalStamp {
+  design?: StampDesign | null;
+  location?: StampingLocation | null;
+  trip?: Trip | null;
+  represented_city?: City | null;
+}
+
+export interface PassportPageWithStamps extends PassportPage {
+  stamps: FullPhysicalStamp[];
+}
+
+export async function listPassportPages(): Promise<PassportPage[]> {
+  const { data, error } = await supabase
+    .from("passport_pages")
+    .select("*")
+    .order("page_number", { ascending: true });
+  if (error) {
+    console.warn("[lego-passport] listPassportPages fallback/error:", error);
+    return [];
+  }
+  return (data ?? []) as PassportPage[];
+}
+
+export async function listStampDesigns(): Promise<StampDesign[]> {
+  const { data, error } = await supabase
+    .from("stamp_designs")
+    .select("*")
+    .order("name", { ascending: true });
+  if (error) {
+    console.warn("[lego-passport] listStampDesigns fallback/error:", error);
+    return [];
+  }
+  return (data ?? []) as StampDesign[];
+}
+
+export async function listStampingLocations(): Promise<StampingLocation[]> {
+  const { data, error } = await supabase
+    .from("stamping_locations")
+    .select("*")
+    .order("name", { ascending: true });
+  if (error) {
+    console.warn("[lego-passport] listStampingLocations fallback/error:", error);
+    return [];
+  }
+  return (data ?? []) as StampingLocation[];
+}
+
+export async function listPhysicalStamps(): Promise<FullPhysicalStamp[]> {
+  const { data, error } = await supabase
+    .from("physical_stamps")
+    .select(`
+      *,
+      design:stamp_designs(*),
+      location:stamping_locations(*),
+      trip:trips(*)
+    `)
+    .order("stamped_at", { ascending: true });
+
+  if (error) {
+    // If nested relations fail (e.g. schema cache or partial tables), try simple select
+    console.warn("[lego-passport] listPhysicalStamps joined select failed, trying raw select:", error);
+    const { data: rawData, error: rawErr } = await supabase
+      .from("physical_stamps")
+      .select("*")
+      .order("stamped_at", { ascending: true });
+    if (rawErr) {
+      console.warn("[lego-passport] listPhysicalStamps raw select fallback/error:", rawErr);
+      return [];
+    }
+    return (rawData ?? []) as FullPhysicalStamp[];
+  }
+  return (data ?? []) as FullPhysicalStamp[];
+}
+
+export async function upsertPassportPage(page: Partial<PassportPage> & { id?: string; page_number: number }): Promise<PassportPage | null> {
+  const { data, error } = await supabase
+    .from("passport_pages")
+    .upsert(page)
+    .select()
+    .single();
+  if (error) {
+    console.error("[lego-passport] upsertPassportPage failed:", error);
+    throw error;
+  }
+  return data as PassportPage;
+}
+
+export async function upsertPhysicalStamp(stamp: Partial<PhysicalStamp> & { id?: string }): Promise<PhysicalStamp | null> {
+  const { data, error } = await supabase
+    .from("physical_stamps")
+    .upsert(stamp)
+    .select()
+    .single();
+  if (error) {
+    console.error("[lego-passport] upsertPhysicalStamp failed:", error);
+    throw error;
+  }
+  return data as PhysicalStamp;
+}

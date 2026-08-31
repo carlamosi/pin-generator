@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Globe2, Wand2, BookImage, Satellite, Compass, Sparkles, Wifi,
+  Globe2, Wand2, BookImage, Satellite, Compass, Sparkles, Wifi, Stamp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +39,12 @@ const NAV_ITEMS = [
     label: "Mi Álbum",
     icon: BookImage,
     accent: "text-coral",
+  },
+  {
+    to: "/passport",
+    label: "LEGO Passport",
+    icon: Stamp,
+    accent: "text-amber-400",
   },
   {
     to: "/generator",
