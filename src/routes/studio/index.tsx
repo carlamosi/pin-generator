@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import {
   Upload, Wand2, CheckCircle2, Loader2, Camera, FileArchive,
   RotateCcw, Save, Sparkles, Image as ImageIcon, Check,
-  AlertCircle, RefreshCw, X, Layers,
+  AlertCircle, RefreshCw, X, Layers, Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +74,7 @@ function StudioPage() {
   const [singlePoi, setSinglePoi] = useState("");
   const [singleCountry, setCustomCountry] = useState("");
   const [singleTripId, setSingleTripId] = useState("");
+  const [singleDate, setSingleDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
   const [singleSaving, setSingleSaving] = useState(false);
 
   // Batch ZIP states
@@ -118,51 +119,116 @@ function StudioPage() {
     };
   }, []);
 
-  const handleSingleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Reset so the same file can be selected again
-    e.target.value = "";
-    try {
-      const rawDataUrl = await fileToImageDataUrl(file);
+  // Suggestion helpers: If user types "Dinamarca", suggest Copenhagen
+  const SUGGESTED_CAPITALS: Record<string, { city: string; region: string }> = {
+    "dinamarca": { city: "Copenhagen", region: "Hovedstaden" },
+    "denmark": { city: "Copenhagen", region: "Hovedstaden" },
+    "suecia": { city: "Estocolmo", region: "Stockholm" },
+    "sweden": { city: "Stockholm", region: "Stockholm" },
+    "noruega": { city: "Oslo", region: "Østlandet" },
+    "norway": { city: "Oslo", region: "Østlandet" },
+    "finlandia": { city: "Helsinki", region: "Uusimaa" },
+    "finland": { city: "Helsinki", region: "Uusimaa" },
+    "españa": { city: "Madrid", region: "Comunidad de Madrid" },
+    "spain": { city: "Madrid", region: "Comunidad de Madrid" },
+    "francia": { city: "París", region: "Île-de-France" },
+    "france": { city: "Paris", region: "Île-de-France" },
+    "italia": { city: "Roma", region: "Lacio" },
+    "italy": { city: "Rome", region: "Lazio" },
+    "alemania": { city: "Berlín", region: "Berlín" },
+    "germany": { city: "Berlin", region: "Berlin" },
+    "portugal": { city: "Lisboa", region: "Área Metropolitana de Lisboa" },
+    "bélgica": { city: "Bruselas", region: "Región de Bruselas" },
+    "belgica": { city: "Bruselas", region: "Región de Bruselas" },
+    "belgium": { city: "Brussels", region: "Brussels Region" },
+    "reino unido": { city: "Londres", region: "Gran Londres" },
+    "united kingdom": { city: "London", region: "Greater London" },
+    "países bajos": { city: "Ámsterdam", region: "Holanda Septentrional" },
+    "paises bajos": { city: "Amsterdam", region: "Holanda Septentrional" },
+    "netherlands": { city: "Amsterdam", region: "North Holland" },
+    "holanda": { city: "Ámsterdam", region: "Holanda Septentrional" },
+  };
 
-      // Center-crop to 1:1 square at up to 1200px for consistent processing
-      const squareDataUrl = await new Promise<string>((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          const sw = img.naturalWidth;
-          const sh = img.naturalHeight;
-          const size = Math.min(sw, sh);
-          const sx = Math.max(0, Math.floor((sw - size) / 2));
-          const sy = Math.max(0, Math.floor((sh - size) / 2));
-          const dim = Math.min(size, 1200);
-          const cnv = document.createElement("canvas");
-          cnv.width = dim;
-          cnv.height = dim;
-          const ctx = cnv.getContext("2d");
-          if (!ctx) { resolve(rawDataUrl); return; }
-          ctx.drawImage(img, sx, sy, size, size, 0, 0, dim, dim);
-          resolve(cnv.toDataURL("image/jpeg", 0.94));
-        };
-        img.onerror = () => reject(new Error("decode failed"));
-        img.src = rawDataUrl;
-      });
+  const handleCountryChange = (val: string) => {
+    setCustomCountry(val);
+    const key = val.trim().toLowerCase();
+    if (SUGGESTED_CAPITALS[key] && !singleCity) {
+      setSingleCity(SUGGESTED_CAPITALS[key].city);
+    }
+  };
 
-      setSingleImage(squareDataUrl);
-      setSingleName(file.name);
-      setSingleResult(null);
+  const handleFilesSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-      const parsed = parseLocationFromFilename(file.name);
-      if (parsed.city) {
-        setSingleCity(parsed.city);
-        const match = cities.find((c) => c.name.toLowerCase().includes(parsed.city!.toLowerCase()));
-        if (match) {
-          setCustomCountry(match.country);
-          if (match.trip_id) setSingleTripId(match.trip_id);
+    if (files.length === 1) {
+      // Single file workflow
+      const file = files[0];
+      e.target.value = "";
+      try {
+        const rawDataUrl = await fileToImageDataUrl(file);
+        const squareDataUrl = await new Promise<string>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            const sw = img.naturalWidth;
+            const sh = img.naturalHeight;
+            const size = Math.min(sw, sh);
+            const sx = Math.max(0, Math.floor((sw - size) / 2));
+            const sy = Math.max(0, Math.floor((sh - size) / 2));
+            const dim = Math.min(size, 1200);
+            const cnv = document.createElement("canvas");
+            cnv.width = dim;
+            cnv.height = dim;
+            const ctx = cnv.getContext("2d");
+            if (!ctx) { resolve(rawDataUrl); return; }
+            ctx.drawImage(img, sx, sy, size, size, 0, 0, dim, dim);
+            resolve(cnv.toDataURL("image/jpeg", 0.94));
+          };
+          img.onerror = () => reject(new Error("decode failed"));
+          img.src = rawDataUrl;
+        });
+
+        setSingleImage(squareDataUrl);
+        setSingleName(file.name);
+        setSingleResult(null);
+
+        const parsed = parseLocationFromFilename(file.name);
+        if (parsed.city) {
+          setSingleCity(parsed.city);
+          const match = cities.find((c) => c.name.toLowerCase().includes(parsed.city!.toLowerCase()));
+          if (match) {
+            setCustomCountry(match.country);
+            if (match.trip_id) setSingleTripId(match.trip_id);
+          }
         }
+      } catch {
+        toast.error("Error al cargar la imagen");
       }
-    } catch {
-      toast.error("Error al cargar la imagen");
+    } else {
+      // Multiple gallery files selected: convert into batch items and switch to batch mode smoothly
+      const newItems: BatchItem[] = [];
+      const toastId = toast.loading(`Cargando ${files.length} fotos de la galería...`);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const dataUrl = await fileToImageDataUrl(file);
+          const parsed = parseLocationFromFilename(file.name);
+          newItems.push({
+            id: nanoid(),
+            name: file.name,
+            dataUrl,
+            city: parsed.city,
+            status: "pending",
+          });
+        } catch {}
+      }
+      e.target.value = "";
+      toast.dismiss(toastId);
+      if (newItems.length > 0) {
+        setBatchItems(newItems);
+        setStudioMode("zip");
+        toast.success(`${newItems.length} imágenes listas en el lote de procesamiento ✓`);
+      }
     }
   };
 
@@ -185,8 +251,8 @@ function StudioPage() {
           thumbnailDataUrl: res.thumbnailDataUrl,
           city: detectedCity,
           country: detectedCountry,
-          year: parsed.year ? parseInt(parsed.year, 10) : null,
-          month: null,
+          year: singleDate ? new Date(singleDate).getFullYear() : (parsed.year ? parseInt(parsed.year, 10) : null),
+          month: singleDate ? new Date(singleDate).getMonth() + 1 : null,
           shape: res.shape,
           widthMm: res.widthMm,
           heightMm: res.heightMm,
@@ -199,7 +265,13 @@ function StudioPage() {
         };
         setSingleResult(pinRow);
         if (pinRow.city && !singleCity) setSingleCity(pinRow.city);
-        if (pinRow.country && !singleCountry) setCustomCountry(pinRow.country);
+        if (pinRow.country && !singleCountry) {
+          setCustomCountry(pinRow.country);
+          const key = pinRow.country.trim().toLowerCase();
+          if (SUGGESTED_CAPITALS[key] && !singleCity) {
+            setSingleCity(SUGGESTED_CAPITALS[key].city);
+          }
+        }
         if (res.location?.city) {
           toast.success(`Pin procesado. Ubicación detectada por OCR: ${res.location.city} (${res.location.country}) ✓`);
         } else {
@@ -223,21 +295,57 @@ function StudioPage() {
       const cutoutData = singleResult.thumbnailDataUrl ?? singleResult.cutoutImageUrl ?? singleImage!;
       const cutoutUrl = await uploadCutout(pinId, cutoutData);
 
-      const matchedCity = cities.find(
-        (c) => c.name.toLowerCase() === (singleCity || singleResult.city || "").toLowerCase()
+      const cityName = (singleCity || singleResult.city || "Ciudad").trim();
+      const countryName = (singleCountry || singleResult.country || "Desconocido").trim();
+
+      // 1. Check or Auto-Create / Update the City in the database with has_pin = true and dates
+      let matchedCity = cities.find(
+        (c) => c.name.toLowerCase() === cityName.toLowerCase()
       );
 
-      const pinPrefix = singlePoi ? `${singlePoi.slice(0, 4).toUpperCase()}` : (singleCity || singleResult.city || "PIN").slice(0, 3).toUpperCase();
+      let cityId = matchedCity?.id;
+      const pinPrefix = singlePoi ? `${singlePoi.slice(0, 4).toUpperCase()}` : cityName.slice(0, 3).toUpperCase();
       const pinCode = matchedCity?.pin_code && !singlePoi ? matchedCity.pin_code : `${pinPrefix}-${new Date().getFullYear()}`;
 
+      if (!matchedCity) {
+        // Create new city entry in database
+        const newCityId = nanoid();
+        const { error: cityErr } = await supabase.from("cities").insert({
+          id: newCityId,
+          trip_id: singleTripId || null,
+          name: cityName,
+          region: singleResult.shape || null,
+          country: countryName,
+          continent: "Europa",
+          start_date: singleDate || null,
+          end_date: singleDate || null,
+          has_pin: true,
+          pin_code: pinCode,
+        });
+        if (!cityErr) {
+          cityId = newCityId;
+          // Refresh local cities cache
+          listCities().then(setCities).catch(() => {});
+        }
+      } else {
+        // Update existing city: mark has_pin = true and assign trip/date if not set
+        await supabase.from("cities").update({
+          has_pin: true,
+          trip_id: singleTripId || matchedCity.trip_id || null,
+          start_date: matchedCity.start_date || singleDate || null,
+        }).eq("id", matchedCity.id);
+      }
+
+      // 2. Save the Pin in the pins table
       await supabase.from("pins").upsert({
         id: pinId,
         trip_id: singleTripId || matchedCity?.trip_id || null,
-        city_id: matchedCity?.id || null,
+        city_id: cityId || null,
         pin_id: pinCode,
-        city: singlePoi ? `${singleCity || singleResult.city || "Ciudad"} · ${singlePoi}` : (singleCity || singleResult.city),
-        country: singleCountry || singleResult.country,
+        city: singlePoi ? `${cityName} · ${singlePoi}` : cityName,
+        country: countryName,
         region: matchedCity?.region || singleResult.shape,
+        acquisition_date: singleDate || new Date().toISOString().split("T")[0],
         dimensions: {
           width_mm: singleResult.widthMm,
           height_mm: singleResult.heightMm,
@@ -246,10 +354,13 @@ function StudioPage() {
         transparent_image_url: cutoutUrl,
       }, { onConflict: "id" });
 
-      toast.success("Pin guardado y catalogado en la base de datos ✓");
+      toast.success(`Pin y ciudad (${cityName}) guardados en la base de datos ✓`);
       setSingleResult(null);
       setSingleImage(null);
       setSinglePoi("");
+      setSingleCity("");
+      setCustomCountry("");
+      setSingleTripId("");
     } catch {
       toast.error("Error al guardar el pin");
     } finally {
@@ -552,7 +663,7 @@ function StudioPage() {
                           type="file"
                           accept="image/*"
                           capture="environment"
-                          onChange={handleSingleFileChange}
+                          onChange={handleFilesSelected}
                           className="hidden"
                         />
                       </label>
@@ -563,7 +674,7 @@ function StudioPage() {
                         onClick={() => fileInputRef.current?.click()}
                         className="bg-white/5 border-white/15 text-white hover:bg-white/10 text-xs rounded-xl h-8"
                       >
-                        Examinar Archivo
+                        Examinar Fotos (Múltiple)
                       </Button>
                     </div>
                   </div>
@@ -571,8 +682,9 @@ function StudioPage() {
                 <input
                   type="file"
                   ref={fileInputRef}
-                  onChange={handleSingleFileChange}
+                  onChange={handleFilesSelected}
                   accept="image/*"
+                  multiple
                   className="hidden"
                 />
               </div>
@@ -584,7 +696,7 @@ function StudioPage() {
                   className="flex-1 bg-gradient-to-r from-violet to-cyan text-white font-semibold text-xs h-11 rounded-2xl shadow-[0_0_20px_-4px_rgba(108,99,255,0.5)] gap-2 hover:opacity-95"
                 >
                   {singleProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                  {singleProcessing ? "Aislando con OpenCV..." : "Procesar y Aislar Pin"}
+                  {singleProcessing ? "Aislando con IA..." : "Procesar y Aislar Pin"}
                 </Button>
                 {singleImage && (
                   <Button
@@ -608,7 +720,7 @@ function StudioPage() {
                     </span>
                     {singleResult && (
                       <Badge className="bg-neon/15 text-neon border-neon/30 text-[10px] font-mono">
-                        {singleResult.widthMm} × {singleResult.heightMm} mm
+                        ✓ Listo para Colección
                       </Badge>
                     )}
                   </div>
@@ -627,6 +739,15 @@ function StudioPage() {
                       {/* Fields */}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
+                          <Label className="text-[11px] font-semibold text-muted-fg">País</Label>
+                          <Input
+                            value={singleCountry}
+                            onChange={(e) => handleCountryChange(e.target.value)}
+                            placeholder="Ej: Dinamarca"
+                            className="bg-white/5 border-white/10 text-white rounded-xl text-xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
                           <Label className="text-[11px] font-semibold text-muted-fg">Ciudad Base</Label>
                           <Input
                             value={singleCity}
@@ -635,22 +756,27 @@ function StudioPage() {
                             className="bg-white/5 border-white/10 text-white rounded-xl text-xs"
                           />
                         </div>
-                        <div className="space-y-1">
-                          <Label className="text-[11px] font-semibold text-muted-fg">País</Label>
-                          <Input
-                            value={singleCountry}
-                            onChange={(e) => setCustomCountry(e.target.value)}
-                            placeholder="Ej: Dinamarca"
-                            className="bg-white/5 border-white/10 text-white rounded-xl text-xs"
-                          />
-                        </div>
+                      </div>
+
+                      {/* Fecha de Adquisición / Visita */}
+                      <div className="space-y-1">
+                        <Label className="text-[11px] font-semibold text-muted-fg flex items-center gap-1">
+                          <Calendar className="h-3 w-3 text-cyan" />
+                          Fecha del Viaje / Adquisición
+                        </Label>
+                        <Input
+                          type="date"
+                          value={singleDate}
+                          onChange={(e) => setSingleDate(e.target.value)}
+                          className="bg-white/5 border-white/10 text-white rounded-xl text-xs"
+                        />
                       </div>
 
                       {/* Point of Interest / Landmark */}
                       <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/10">
                         <div className="flex items-center justify-between mb-1">
                           <Label className="text-[11px] font-semibold text-cyan">Lugar de Interés / Monumento (Opcional)</Label>
-                          <span className="text-[10px] text-muted-fg font-mono">Ej: Tivoli, Palacio Real...</span>
+                          <span className="text-[10px] text-muted-fg font-mono">Ej: Tivoli</span>
                         </div>
                         <Input
                           value={singlePoi}
@@ -812,7 +938,7 @@ function StudioPage() {
                         type="file"
                         accept="image/*"
                         capture="environment"
-                        onChange={handleSingleFileChange}
+                        onChange={handleFilesSelected}
                         className="hidden"
                       />
                     </label>
