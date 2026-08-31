@@ -68,7 +68,7 @@ export function AppSidebar() {
           {!isCollapsed && (
             <div className="min-w-0 transition-opacity duration-200">
               <h1 className="font-display font-bold text-sm tracking-tight text-white leading-none">
-                ORBITA
+                PIN COLLECTOR
               </h1>
               <p className="text-[11px] font-sans text-muted-fg mt-0.5 tracking-normal">
                 Colección de Pines

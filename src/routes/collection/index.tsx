@@ -241,17 +241,18 @@ function CollectionPage() {
                   </span>
                 </div>
 
-                {/* Middle: Centered Cutout Pin Image */}
-                <div className="my-auto flex items-center justify-center py-2">
+                {/* Middle: Centered Transparent Pin Cutout */}
+                <div className="my-auto flex items-center justify-center py-2 h-32 w-full">
                   {pin.transparent_image_url ? (
                     <img
                       src={pin.transparent_image_url}
                       alt={pin.city || "Pin"}
-                      className="max-h-24 max-w-full object-contain filter drop-shadow-lg group-hover:scale-105 transition-transform"
+                      className="max-h-28 max-w-[85%] object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none"
+                      style={{ transform: "none" }}
                     />
                   ) : (
-                    <div className="h-14 w-14 rounded-full border border-dashed border-white/15 flex items-center justify-center bg-white/[0.02]">
-                      <Tag className="h-5 w-5 text-muted-fg/40" />
+                    <div className="h-16 w-16 rounded-full border border-dashed border-white/15 flex items-center justify-center bg-white/[0.02]">
+                      <Tag className="h-6 w-6 text-muted-fg/40" />
                     </div>
                   )}
                 </div>
