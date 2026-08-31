@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   Info,
   Scan,
+  Edit3,
+  Loader2,
 } from "lucide-react";
 import {
   listPassportPages,
@@ -22,6 +24,9 @@ import {
   listStampingLocations,
   listTrips,
   listCities,
+  insertStampDesign,
+  upsertPhysicalStamp,
+  findOrCreateStampingLocation,
   type PassportPage,
   type FullPhysicalStamp,
   type StampDesign,
@@ -106,6 +111,16 @@ function LegoPassportPage() {
   const [selectedStamp, setSelectedStamp] = useState<EnrichedStamp | null>(
     null
   );
+  const [editingStamp, setEditingStamp] = useState<EnrichedStamp | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    category: "SPECIAL",
+    representedCityId: "",
+    locationName: "",
+    stampedAt: "",
+    tripId: "",
+  });
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -246,6 +261,54 @@ function LegoPassportPage() {
       setActivePageIndex((prev) =>
         typeof prev === "number" ? prev + 1 : 0
       );
+    }
+  };
+
+  const handleSaveStampEdit = async () => {
+    if (!editingStamp) return;
+    setIsSavingEdit(true);
+    try {
+      let locId = editingStamp.stamping_location_id;
+      if (editForm.locationName.trim()) {
+        const loc = await findOrCreateStampingLocation(
+          editForm.locationName,
+          editForm.representedCityId || null
+        );
+        if (loc) locId = loc.id;
+      }
+
+      if (editingStamp.design) {
+        await insertStampDesign({
+          ...editingStamp.design,
+          name: editForm.name.trim() || editingStamp.design.name,
+          category: editForm.category,
+          represented_city_id: editForm.representedCityId || null,
+        });
+      }
+
+      await upsertPhysicalStamp({
+        ...editingStamp,
+        stamped_at: editForm.stampedAt || null,
+        stamping_location_id: locId,
+        trip_id: editForm.tripId || null,
+      });
+
+      const [pagesData, stampsData, designsData, locationsData] = await Promise.all([
+        listPassportPages(),
+        listPhysicalStamps(),
+        listStampDesigns(),
+        listStampingLocations(),
+      ]);
+      setPages(pagesData);
+      setStamps(stampsData);
+      setDesigns(designsData);
+      setLocations(locationsData);
+      setEditingStamp(null);
+      setSelectedStamp(null);
+    } catch (err) {
+      console.error("Error saving stamp edit:", err);
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -685,6 +748,29 @@ function LegoPassportPage() {
                 )}
               </div>
 
+              {/* Edit Stamp Button */}
+              <div className="pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 gap-2 h-9 rounded-xl font-semibold text-xs"
+                  onClick={() => {
+                    setEditingStamp(selectedStamp);
+                    setEditForm({
+                      name: selectedStamp.design?.name ?? "",
+                      category: selectedStamp.design?.category ?? "SPECIAL",
+                      representedCityId: selectedStamp.design?.represented_city_id ?? "",
+                      locationName: selectedStamp.location?.name ?? "",
+                      stampedAt: selectedStamp.stamped_at ?? "",
+                      tripId: selectedStamp.trip_id ?? "",
+                    });
+                  }}
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                  Editar Datos del Sello
+                </Button>
+              </div>
+
               <div className="pt-2 flex items-center justify-between text-[11px] text-muted-fg border-t border-white/10 font-mono">
                 <div className="flex items-center gap-1.5 text-emerald-400">
                   <CheckCircle2 className="h-3.5 w-3.5" />
@@ -704,20 +790,18 @@ function LegoPassportPage() {
               </div>
               <p className="text-xs text-muted-fg leading-relaxed">
                 Haz clic sobre cualquier sello colocado en la pagina de
-                pasaporte para inspeccionar su trazabilidad completa: procedencia
-                fisica en tienda, fecha exacta de tinta y relacion tematica.
+                pasaporte para inspeccionar su trazabilidad completa o editar sus
+                datos y vinculaciones de viaje.
               </p>
               <div className="space-y-3 pt-2">
                 <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                   <p className="text-xs font-semibold text-white flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-amber-400" />
-                    Independencia de Fechas
+                    Edición Directa
                   </p>
                   <p className="text-[11px] text-muted-fg">
-                    La fecha de estampado (
-                    <code className="text-amber-300">stamped_at</code>) es
-                    independiente de las visitas turisticas de ciudad (
-                    <code className="text-amber-300">visited_at</code>).
+                    Puedes modificar el nombre, ciudad, tienda LEGO o viaje
+                    asociado a cualquier sello en cualquier momento.
                   </p>
                 </div>
                 <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
@@ -731,21 +815,148 @@ function LegoPassportPage() {
                     Anuales (2026).
                   </p>
                 </div>
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <p className="text-xs font-semibold text-white flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-purple-400" />
-                    Diseno Unico Coleccionable
-                  </p>
-                  <p className="text-[11px] text-muted-fg">
-                    Cada diseno de sello se posee una unica vez en la
-                    coleccion fisica.
-                  </p>
-                </div>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* ── Edit Stamp Modal Dialog ── */}
+      {editingStamp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#18181b] border border-white/10 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-amber-400" />
+                Editar Datos del Sello
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setEditingStamp(null)}
+                className="h-8 w-8 text-muted-fg hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              {/* Name */}
+              <div>
+                <label className="text-muted-fg block mb-1 font-medium">
+                  Nombre del Sello (ej: Copenhagen, 2026, Everyone is Awesome)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/30"
+                />
+              </div>
+
+              {/* Category & City */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-muted-fg block mb-1 font-medium">Categoría</label>
+                  <select
+                    value={editForm.category}
+                    onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                    className="w-full bg-[#18181b] text-white border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-white/30"
+                  >
+                    {Object.keys(CATEGORY_META).map((catKey) => (
+                      <option key={catKey} value={catKey} className="bg-[#18181b] text-white py-1.5">
+                        {CATEGORY_META[catKey].label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-muted-fg block mb-1 font-medium">Ciudad Representada</label>
+                  <select
+                    value={editForm.representedCityId}
+                    onChange={(e) => setEditForm({ ...editForm, representedCityId: e.target.value })}
+                    className="w-full bg-[#18181b] text-white border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-white/30"
+                  >
+                    <option value="" className="bg-[#18181b] text-white py-1.5">— Sin ciudad (Tema/Año) —</option>
+                    {cities.map((c) => (
+                      <option key={c.id} value={c.id} className="bg-[#18181b] text-white py-1.5">
+                        {c.name}, {c.country}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Location Name */}
+              <div>
+                <label className="text-muted-fg block mb-1 font-medium">
+                  Nombre de la Tienda LEGO / Ubicación física
+                </label>
+                <input
+                  type="text"
+                  value={editForm.locationName}
+                  onChange={(e) => setEditForm({ ...editForm, locationName: e.target.value })}
+                  placeholder="Ej: LEGO Store Strøget, Copenhagen"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/30"
+                />
+              </div>
+
+              {/* Stamped Date & Trip */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-muted-fg block mb-1 font-medium">Fecha de Estampado</label>
+                  <input
+                    type="date"
+                    value={editForm.stampedAt}
+                    onChange={(e) => setEditForm({ ...editForm, stampedAt: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-muted-fg block mb-1 font-medium">Expedición / Viaje</label>
+                  <select
+                    value={editForm.tripId}
+                    onChange={(e) => setEditForm({ ...editForm, tripId: e.target.value })}
+                    className="w-full bg-[#18181b] text-white border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-white/30"
+                  >
+                    <option value="" className="bg-[#18181b] text-white py-1.5">— Sin viaje asociado —</option>
+                    {trips.map((t) => (
+                      <option key={t.id} value={t.id} className="bg-[#18181b] text-white py-1.5">
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
+              <Button
+                variant="outline"
+                className="border-white/10 text-muted-fg hover:text-white"
+                onClick={() => setEditingStamp(null)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+                onClick={handleSaveStampEdit}
+                disabled={isSavingEdit}
+              >
+                {isSavingEdit ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Guardando…
+                  </>
+                ) : (
+                  "Guardar Cambios"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -22,6 +22,7 @@ import {
   detectStamps,
   computeSlotRect,
   rotateImage,
+  transformCrop,
   SLOT_LAYOUT,
   type SlotDetection,
   type SlotState,
@@ -64,6 +65,7 @@ interface IdentifyState {
   /** slot position being identified */
   slot: SlotDetection;
   recognition: StampRecognitionResult;
+  rawCropDataUrl: string;
 
   // Editable fields (user overrides recognition)
   editLocationName: string; // Manual name of LEGO Store or location
@@ -392,6 +394,7 @@ function PassportScanPage() {
         queue.push({
           slot,
           recognition: rec,
+          rawCropDataUrl: slot.cropDataUrl ?? "",
           editName: rec.suggestedName,
           editCategory: rec.suggestedCategory,
           editCityId: rec.matchedCity?.id ?? "",
@@ -842,54 +845,110 @@ function PassportScanPage() {
                   )}
                 </div>
 
-                {/* Live Rotation Controls */}
-                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/5 w-full justify-center">
-                  <span className="text-[10px] font-mono text-muted-fg mr-1">Rotación:</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-[11px] border-white/10 text-white/80 hover:text-white px-2.5"
-                    onClick={async () => {
-                      if (!current.slot.cropDataUrl) return;
-                      const rotated = await rotateImage(current.slot.cropDataUrl, -15);
-                      updateCurrent({
-                        slot: { ...current.slot, cropDataUrl: rotated },
-                      });
-                    }}
-                  >
-                    ↺ -15°
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-[11px] border-white/10 text-white/80 hover:text-white px-2.5"
-                    onClick={async () => {
-                      if (!current.slot.cropDataUrl) return;
-                      const rotated = await rotateImage(current.slot.cropDataUrl, 15);
-                      updateCurrent({
-                        slot: { ...current.slot, cropDataUrl: rotated },
-                      });
-                    }}
-                  >
-                    ↻ +15°
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-[11px] border-white/10 text-white/80 hover:text-white px-2.5"
-                    onClick={async () => {
-                      if (!current.slot.cropDataUrl) return;
-                      const rotated = await rotateImage(current.slot.cropDataUrl, 90);
-                      updateCurrent({
-                        slot: { ...current.slot, cropDataUrl: rotated },
-                      });
-                    }}
-                  >
-                    ⟲ 90°
-                  </Button>
+                {/* Live Rotation & Zoom Controls */}
+                <div className="w-full mt-4 pt-3 border-t border-white/5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-muted-fg">Rotación:</span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] border-white/10 text-white/80 hover:text-white px-2"
+                        onClick={async () => {
+                          if (!current.slot.cropDataUrl) return;
+                          const rotated = await rotateImage(current.slot.cropDataUrl, -90);
+                          updateCurrent({ slot: { ...current.slot, cropDataUrl: rotated } });
+                        }}
+                      >
+                        -90°
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] border-white/10 text-white/80 hover:text-white px-2"
+                        onClick={async () => {
+                          if (!current.slot.cropDataUrl) return;
+                          const rotated = await rotateImage(current.slot.cropDataUrl, -5);
+                          updateCurrent({ slot: { ...current.slot, cropDataUrl: rotated } });
+                        }}
+                      >
+                        ↺ -5°
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] border-white/10 text-white/80 hover:text-white px-2"
+                        onClick={async () => {
+                          if (!current.slot.cropDataUrl) return;
+                          const rotated = await rotateImage(current.slot.cropDataUrl, 5);
+                          updateCurrent({ slot: { ...current.slot, cropDataUrl: rotated } });
+                        }}
+                      >
+                        ↻ +5°
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] border-white/10 text-white/80 hover:text-white px-2"
+                        onClick={async () => {
+                          if (!current.slot.cropDataUrl) return;
+                          const rotated = await rotateImage(current.slot.cropDataUrl, 90);
+                          updateCurrent({ slot: { ...current.slot, cropDataUrl: rotated } });
+                        }}
+                      >
+                        +90°
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[10px] font-mono text-muted-fg">Zoom & Recorte:</span>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] border-white/10 text-white/80 hover:text-white px-2"
+                        onClick={async () => {
+                          if (!current.slot.cropDataUrl) return;
+                          const transformed = await transformCrop(current.slot.cropDataUrl, { rotation: 0, zoom: 0.9, panX: 0, panY: 0 });
+                          updateCurrent({ slot: { ...current.slot, cropDataUrl: transformed } });
+                        }}
+                      >
+                        Zoom -
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] border-white/10 text-white/80 hover:text-white px-2"
+                        onClick={async () => {
+                          if (!current.slot.cropDataUrl) return;
+                          const transformed = await transformCrop(current.slot.cropDataUrl, { rotation: 0, zoom: 1.1, panX: 0, panY: 0 });
+                          updateCurrent({ slot: { ...current.slot, cropDataUrl: transformed } });
+                        }}
+                      >
+                        Zoom +
+                      </Button>
+                      {current.rawCropDataUrl && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 text-[10px] text-amber-400/80 hover:text-amber-300 hover:bg-amber-400/10 px-2"
+                          onClick={() => {
+                            updateCurrent({ slot: { ...current.slot, cropDataUrl: current.rawCropDataUrl } });
+                          }}
+                        >
+                          Restablecer
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 

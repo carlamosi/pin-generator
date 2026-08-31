@@ -174,27 +174,56 @@ function makeCircularCrop(
 }
 
 export function rotateImage(imageDataUrl: string, deltaDegrees: number): Promise<string> {
+  return transformCrop(imageDataUrl, { rotation: deltaDegrees, zoom: 1.0, panX: 0, panY: 0 });
+}
+
+export function transformCrop(
+  imageDataUrl: string,
+  options: { rotation: number; zoom: number; panX: number; panY: number }
+): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      const w = img.naturalWidth || img.width;
-      const h = img.naturalHeight || img.height;
+      const w = img.naturalWidth || img.width || 300;
+      const h = img.naturalHeight || img.height || 300;
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        resolve(imageDataUrl);
-        return;
-      }
+      if (!ctx) return resolve(imageDataUrl);
+
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, w, h);
+
       ctx.save();
-      ctx.translate(w / 2, h / 2);
-      ctx.rotate((deltaDegrees * Math.PI) / 180);
+      // Center and apply pan
+      ctx.translate(w / 2 + (options.panX || 0), h / 2 + (options.panY || 0));
+      // Rotate
+      ctx.rotate(((options.rotation || 0) * Math.PI) / 180);
+      // Zoom
+      const zoom = options.zoom || 1.0;
+      ctx.scale(zoom, zoom);
       ctx.drawImage(img, -w / 2, -h / 2);
       ctx.restore();
-      resolve(canvas.toDataURL("image/png"));
+
+      // Circular clip mask for clean stamp circular boundary
+      const finalCanvas = document.createElement("canvas");
+      finalCanvas.width = w;
+      finalCanvas.height = h;
+      const fCtx = finalCanvas.getContext("2d");
+      if (!fCtx) return resolve(canvas.toDataURL("image/png"));
+
+      fCtx.fillStyle = "#FFFFFF";
+      fCtx.fillRect(0, 0, w, h);
+      fCtx.save();
+      fCtx.beginPath();
+      const radius = Math.min(w, h) / 2 - 2;
+      fCtx.arc(w / 2, h / 2, radius, 0, Math.PI * 2);
+      fCtx.clip();
+      fCtx.drawImage(canvas, 0, 0);
+      fCtx.restore();
+
+      resolve(finalCanvas.toDataURL("image/png"));
     };
     img.onerror = () => resolve(imageDataUrl);
     img.src = imageDataUrl;
