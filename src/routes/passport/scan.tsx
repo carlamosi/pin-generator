@@ -352,9 +352,9 @@ function PassportScanPage() {
       setExistingLocations(locations);
       setExistingCities(cities);
 
-      // Build identify queue from DETECTED slots
-      const detectedSlots = detections.filter((d) => d.state === "DETECTED");
-      if (detectedSlots.length === 0) {
+      // Build identify queue from non-EMPTY slots
+      const activeSlots = detections.filter((d) => d.state !== "EMPTY");
+      if (activeSlots.length === 0) {
         // Nothing to identify – go straight to passport
         navigate({ to: "/passport" });
         return;
@@ -363,7 +363,7 @@ function PassportScanPage() {
       // Run recognition for each slot
       setIsIdentifying(true);
       const queue: IdentifyState[] = [];
-      for (const slot of detectedSlots) {
+      for (const slot of activeSlots) {
         let rec: StampRecognitionResult;
         try {
           rec = await recogniseStamp(slot.cropDataUrl ?? "", designs, cities);

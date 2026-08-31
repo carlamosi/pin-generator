@@ -462,16 +462,16 @@ function LegoPassportPage() {
                             </span>
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center justify-center gap-1 text-[#B0A794]">
+                          <Link to="/passport/scan" className="flex flex-col items-center justify-center gap-1 text-[#B0A794] w-full h-full">
                             <div className="h-5 w-5 rounded-full border border-dashed border-[#C7BEA9] flex items-center justify-center">
                               <span className="text-[9px] font-mono font-semibold">
                                 +
                               </span>
                             </div>
                             <span className="text-[7px] font-mono uppercase tracking-wider">
-                              Vacio
+                              Escanear
                             </span>
-                          </div>
+                          </Link>
                         )}
                       </div>
                     );
