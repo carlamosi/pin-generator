@@ -175,13 +175,16 @@ function StudioPage() {
       if (res.status === "ok") {
         const pinId = nanoid();
         const parsed = parseLocationFromFilename(singleName || "");
+        const detectedCity = singleCity || res.location?.city || parsed.city || null;
+        const detectedCountry = singleCountry || res.location?.country || null;
+
         const pinRow: PinRow = {
           id: pinId,
           originalName: singleName || "pin.jpg",
           status: "ok",
           thumbnailDataUrl: res.thumbnailDataUrl,
-          city: singleCity || parsed.city || null,
-          country: singleCountry || null,
+          city: detectedCity,
+          country: detectedCountry,
           year: parsed.year ? parseInt(parsed.year, 10) : null,
           month: null,
           shape: res.shape,
@@ -197,12 +200,16 @@ function StudioPage() {
         setSingleResult(pinRow);
         if (pinRow.city && !singleCity) setSingleCity(pinRow.city);
         if (pinRow.country && !singleCountry) setCustomCountry(pinRow.country);
-        toast.success("Pin procesado con OpenCV con éxito ✓");
+        if (res.location?.city) {
+          toast.success(`Pin procesado. Ubicación detectada por OCR: ${res.location.city} (${res.location.country}) ✓`);
+        } else {
+          toast.success("Pin procesado y fondo aislado con éxito ✓");
+        }
       } else {
         toast.error("Revisión requerida: " + (res.note || "No se pudo procesar"));
       }
     } catch (e: any) {
-      toast.error("Error en OpenCV: " + (e?.message || "Recorte fallido"));
+      toast.error("Error al procesar pin: " + (e?.message || "Recorte fallido"));
     } finally {
       setSingleProcessing(false);
     }

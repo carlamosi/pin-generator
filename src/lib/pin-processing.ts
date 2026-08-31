@@ -1,7 +1,112 @@
 import { removeBackground } from "@imgly/background-removal";
+import { createWorker } from "tesseract.js";
+import { City, State, Country, ICity, IState, ICountry } from "country-state-city";
 
 // Client-side pin processing pipeline. OpenCV.js is loaded lazily from the local npm package.
 import opencvUmdUrl from "@techstark/opencv-js/dist/opencv.js?url";
+
+export interface PinLocation {
+  city: string;
+  region: string;
+  country: string;
+}
+
+/**
+ * Normalizes text by removing accents, symbols, and excess whitespace.
+ */
+export function cleanOcrText(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) =>
+      line
+        .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑçÇàèòÀÈÒäëïöüÄËÏÖÜ\s-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+    .filter((line) => line.length >= 3);
+}
+
+/**
+ * Strips diacritics for relaxed string comparisons.
+ */
+export function normalizeString(str: string): string {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Matches extracted token lines against country-state-city database.
+ */
+export function matchLocationOffline(candidates: string[]): PinLocation | undefined {
+  const allCities: ICity[] = City.getAllCities();
+
+  for (const candidate of candidates) {
+    const norm = normalizeString(candidate);
+    if (norm.length < 3) continue;
+
+    // 1. Direct city match
+    const matchedCity = allCities.find(
+      (c) => normalizeString(c.name) === norm
+    );
+
+    if (matchedCity) {
+      const stateObj: IState | undefined = State.getStateByCodeAndCountry(
+        matchedCity.stateCode,
+        matchedCity.countryCode
+      );
+      const countryObj: ICountry | undefined = Country.getCountryByCode(
+        matchedCity.countryCode
+      );
+
+      return {
+        city: matchedCity.name,
+        region: stateObj?.name ?? matchedCity.stateCode,
+        country: countryObj?.name ?? matchedCity.countryCode,
+      };
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Queries OpenStreetMap Nominatim API as fallback geolocation lookup.
+ */
+export async function lookupNominatim(query: string): Promise<PinLocation | undefined> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+      query
+    )}&format=json&addressdetails=1&limit=1`;
+    const res = await fetch(url, {
+      headers: {
+        "Accept-Language": "es,ca,en",
+        "User-Agent": "PinCollectorApp/1.0",
+      },
+    });
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return undefined;
+
+    const address = data[0].address ?? {};
+    const city =
+      address.city ||
+      address.town ||
+      address.village ||
+      address.municipality ||
+      data[0].name;
+    const region = address.state || address.province || address.region || "";
+    const country = address.country || "";
+
+    if (city && country) {
+      return { city, region, country };
+    }
+  } catch {
+    // Gracefully handle network/rate-limiting errors
+  }
+  return undefined;
+}
 
 export const COIN_DIAMETER_MM = 23.25;
 
@@ -495,6 +600,8 @@ export type ProcessOutput =
       widthMm: number;
       heightMm: number;
       aspectRatio: number;
+      rawText?: string;
+      location?: PinLocation;
     }
   | { status: "review"; note: string };
 
@@ -581,6 +688,34 @@ export async function processPinImage(
           pinWidthMm = Math.round((35.0 * aspect) * 10) / 10;
         }
 
+        // 2. Multilingual OCR on clean cutout (eng, spa, cat)
+        let rawOcrText = "";
+        let pinLocation: PinLocation | undefined = undefined;
+        try {
+          console.log(`${tag} running OCR recognition...`);
+          const worker = await createWorker(["eng", "spa", "cat"]);
+          try {
+            const ocrResult = await worker.recognize(removedBgBlob);
+            rawOcrText = ocrResult.data.text ?? "";
+          } finally {
+            await worker.terminate();
+          }
+
+          const cleanTokens = cleanOcrText(rawOcrText);
+          pinLocation = matchLocationOffline(cleanTokens);
+          if (!pinLocation && cleanTokens.length > 0) {
+            for (const token of cleanTokens) {
+              pinLocation = await lookupNominatim(token);
+              if (pinLocation) break;
+            }
+          }
+          if (pinLocation) {
+            console.log(`${tag} Geolocation detected via OCR:`, pinLocation);
+          }
+        } catch (ocrErr) {
+          console.warn(`${tag} OCR/Location detection skipped:`, ocrErr);
+        }
+
         console.log(`${tag} AI bg removal SUCCESS! shape=${shape} aspect=${aspect}`);
         return {
           status: "ok",
@@ -589,6 +724,8 @@ export async function processPinImage(
           widthMm: pinWidthMm,
           heightMm: pinHeightMm,
           aspectRatio: aspect,
+          rawText: rawOcrText,
+          location: pinLocation,
         };
       }
     }
@@ -844,3 +981,53 @@ export async function processPinImage(
     try { foreground?.delete(); } catch {}
   }
 }
+
+export interface ProcessPinPipelineResult {
+  transparentImgUrl: string;
+  rawText: string;
+  location?: PinLocation;
+}
+
+/**
+ * Pure client-side background removal, multilingual OCR, and Geo-resolution pipeline.
+ */
+export async function processPinImagePipeline(
+  input: HTMLCanvasElement | Blob | string
+): Promise<ProcessPinPipelineResult> {
+  const transparentBlob = await removeBackground(input, {
+    model: "isnet_fp16",
+    output: {
+      format: "image/png",
+      quality: 1.0,
+    },
+  });
+
+  const transparentImgUrl = URL.createObjectURL(transparentBlob);
+
+  const worker = await createWorker(["eng", "spa", "cat"]);
+  let rawText = "";
+
+  try {
+    const ocrResult = await worker.recognize(transparentBlob);
+    rawText = ocrResult.data.text ?? "";
+  } finally {
+    await worker.terminate();
+  }
+
+  const cleanTokens = cleanOcrText(rawText);
+  let location: PinLocation | undefined = matchLocationOffline(cleanTokens);
+
+  if (!location && cleanTokens.length > 0) {
+    for (const token of cleanTokens) {
+      location = await lookupNominatim(token);
+      if (location) break;
+    }
+  }
+
+  return {
+    transparentImgUrl,
+    rawText,
+    location,
+  };
+}
+
