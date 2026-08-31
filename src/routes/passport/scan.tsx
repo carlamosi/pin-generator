@@ -266,6 +266,9 @@ function PassportScanPage() {
   const [existingCities, setExistingCities] = useState<City[]>([]);
   const [existingTrips, setExistingTrips] = useState<Trip[]>([]);
 
+  // ── Crop editor drag-to-pan state ─────────────────────────────────────────
+  const dragState = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null);
+
   // ── File handling ─────────────────────────────────────────────────────────
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -826,23 +829,49 @@ function PassportScanPage() {
                 </div>
 
                 <div
-                  className="w-full aspect-square max-w-[260px] rounded-2xl p-4 flex items-center justify-center relative overflow-hidden shadow-xl"
+                  className="w-full aspect-square max-w-[260px] rounded-2xl p-4 flex items-center justify-center relative overflow-hidden shadow-xl cursor-grab active:cursor-grabbing select-none"
                   style={{
                     backgroundColor: "#FAF7EE",
                     backgroundImage: "radial-gradient(#D6CEB8 0.75px, transparent 0.75px)",
                     backgroundSize: "12px 12px",
                     boxShadow: "inset 0 0 20px rgba(180,165,130,0.3), 0 10px 30px rgba(0,0,0,0.5)",
                   }}
+                  onMouseDown={(e) => {
+                    dragState.current = { startX: e.clientX, startY: e.clientY, panX: 0, panY: 0 };
+                  }}
+                  onMouseMove={async (e) => {
+                    if (!dragState.current || !current.slot.cropDataUrl) return;
+                    const dx = e.clientX - dragState.current.startX;
+                    const dy = e.clientY - dragState.current.startY;
+                    if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return; // dead zone
+                    dragState.current.startX = e.clientX;
+                    dragState.current.startY = e.clientY;
+                    dragState.current.panX += dx;
+                    dragState.current.panY += dy;
+                    const moved = await transformCrop(current.rawCropDataUrl || current.slot.cropDataUrl, {
+                      rotation: 0,
+                      zoom: 1.0,
+                      panX: dragState.current.panX * 0.5,
+                      panY: dragState.current.panY * 0.5,
+                    });
+                    updateCurrent({ slot: { ...current.slot, cropDataUrl: moved } });
+                  }}
+                  onMouseUp={() => { dragState.current = null; }}
+                  onMouseLeave={() => { dragState.current = null; }}
                 >
                   {current.slot.cropDataUrl ? (
                     <img
                       src={current.slot.cropDataUrl}
                       alt={`Sello 0${current.slot.slot_position}`}
-                      className="max-w-full max-h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
+                      className="max-w-full max-h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)] pointer-events-none"
+                      draggable={false}
                     />
                   ) : (
                     <Stamp className="h-12 w-12 text-[#A8A08C]" />
                   )}
+                  <span className="absolute bottom-2 right-2 text-[9px] font-mono text-[#A8A08C]/60">
+                    Arrastra para mover
+                  </span>
                 </div>
 
                 {/* Live Rotation & Zoom Controls */}
