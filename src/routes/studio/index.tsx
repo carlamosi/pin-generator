@@ -346,39 +346,82 @@ function StudioPage() {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
-      });
-      setCameraStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
       }
+
+      // Constraints with iOS Safari compatibility (avoid rigid 1080p exact constraints)
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { min: 640, ideal: 1280, max: 1920 },
+          height: { min: 480, ideal: 720, max: 1080 },
+        },
+        audio: false,
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setCameraStream(stream);
       setCameraActive(true);
-    } catch {
-      toast.error("No se pudo acceder a la cámara");
+
+      // Give React a tick to mount video element if it wasn't rendered yet
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.setAttribute("playsinline", "true");
+          videoRef.current.setAttribute("muted", "true");
+          videoRef.current.play().catch((err) => {
+            console.warn("Video play interrupted, retrying:", err);
+            videoRef.current?.play();
+          });
+        }
+      }, 50);
+
+      toast.success("Cámara activada");
+    } catch (err: any) {
+      console.error("Camera access error:", err);
+      toast.error(err?.name === "NotAllowedError" ? "Permiso de cámara denegado" : "Error al activar la cámara");
     }
   };
 
-  const capturePhoto = () => {
-    if (!videoRef.current) return;
-    const canvas = document.createElement("canvas");
-    canvas.width = videoRef.current.videoWidth || 1280;
-    canvas.height = videoRef.current.videoHeight || 720;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-
-    setSingleImage(dataUrl);
-    setSingleName(`camara_${Date.now()}.jpg`);
-    setStudioMode("single");
-
+  const stopCamera = () => {
     if (cameraStream) {
       cameraStream.getTracks().forEach((track) => track.stop());
-      setCameraActive(false);
+      setCameraStream(null);
     }
-    toast.success("Fotografía capturada con éxito ✓");
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setCameraActive(false);
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      toast.error("La cámara aún se está inicializando...");
+      return;
+    }
+
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+
+      setSingleImage(dataUrl);
+      setSingleName(`captura_camara_${Date.now()}.jpg`);
+      setSingleResult(null);
+      setStudioMode("single");
+      stopCamera();
+
+      toast.success("Fotografía capturada con éxito ✓");
+    } catch (e: any) {
+      toast.error("Error al capturar la foto: " + (e?.message || ""));
+    }
   };
 
   return (
@@ -430,20 +473,42 @@ function StudioPage() {
                   <img
                     src={singleImage}
                     alt="Pin cargado"
-                    className="max-h-[300px] object-contain rounded-xl drop-shadow-2xl z-10"
+                    className="max-h-[280px] object-contain rounded-xl drop-shadow-2xl z-10"
                   />
                 ) : (
-                  <div className="flex flex-col items-center text-center space-y-3 z-10">
+                  <div className="flex flex-col items-center text-center space-y-3 z-10 p-2">
                     <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-cyan group-hover:scale-110 transition-transform shadow-[0_0_24px_-4px_rgba(0,212,255,0.4)]">
                       <Upload className="h-6 w-6" />
                     </div>
                     <div>
                       <p className="font-display font-semibold text-sm text-white">
-                        Arrastra una foto o haz clic para seleccionarla
+                        Selecciona o haz una foto del pin
                       </p>
                       <p className="text-xs text-muted-fg font-mono mt-1">
-                        Soporta JPG, PNG, WEBP (Fondo verde recomendado)
+                        Soporta cámara directa, JPG, PNG, WEBP
                       </p>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
+                      <label className="bg-cyan/15 border border-cyan/30 text-cyan hover:bg-cyan/25 font-semibold text-xs py-2 px-3 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors">
+                        <Camera className="h-3.5 w-3.5" />
+                        Hacer Foto
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleSingleFileChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-white/5 border-white/15 text-white hover:bg-white/10 text-xs rounded-xl h-8"
+                      >
+                        Examinar Archivo
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -456,7 +521,7 @@ function StudioPage() {
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <Button
                   onClick={processSingle}
                   disabled={!singleImage || singleProcessing || !cvReady}
@@ -664,52 +729,89 @@ function StudioPage() {
         {/* 3. CAMERA DIRECT TAB */}
         <TabsContent value="camera" className="space-y-6">
           <div className="glass-strong rounded-3xl p-6 border border-white/15 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
               <div>
                 <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">
                   Captura Directa con Cámara
                 </h3>
                 <p className="text-xs text-muted-fg mt-0.5">
-                  Sitúa el pin sobre una superficie lisa o verde y pulsa capturar.
+                  Sitúa el pin sobre una superficie lisa y pulsa capturar.
                 </p>
               </div>
 
-              {!cameraActive ? (
-                <Button
-                  onClick={startCamera}
-                  className="bg-cyan hover:bg-cyan/90 text-black font-semibold text-xs rounded-xl shadow-[0_0_16px_-4px_#00d4ff] gap-2"
-                >
-                  <Camera className="h-4 w-4" />
-                  Activar Cámara
-                </Button>
-              ) : (
-                <Button
-                  onClick={capturePhoto}
-                  className="bg-neon hover:bg-neon/90 text-black font-semibold text-xs rounded-xl shadow-[0_0_20px_-4px_#00ffb2] gap-2"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Capturar Pin
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {!cameraActive ? (
+                  <>
+                    <Button
+                      onClick={startCamera}
+                      className="bg-cyan hover:bg-cyan/90 text-black font-semibold text-xs rounded-xl shadow-[0_0_16px_-4px_#00d4ff] gap-2"
+                    >
+                      <Camera className="h-4 w-4" />
+                      Activar Cámara en Vivo
+                    </Button>
+                    <label className="inline-flex items-center justify-center bg-white/5 border border-white/15 hover:bg-white/10 text-white font-semibold text-xs rounded-xl h-9 px-3.5 cursor-pointer gap-2 transition-colors">
+                      <Upload className="h-3.5 w-3.5 text-violet" />
+                      Hacer Foto Nativa
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleSingleFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={stopCamera}
+                      className="bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs"
+                    >
+                      Detener
+                    </Button>
+                    <Button
+                      onClick={capturePhoto}
+                      className="bg-neon hover:bg-neon/90 text-black font-semibold text-xs rounded-xl shadow-[0_0_20px_-4px_#00ffb2] gap-2"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Capturar Pin
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-white/10">
+            <div className="relative rounded-2xl overflow-hidden bg-black aspect-video max-h-[480px] flex items-center justify-center border border-white/10">
               {cameraActive ? (
                 <>
-                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover"
+                  />
                   {/* Viewfinder crosshairs */}
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                    <div className="w-48 h-48 border-2 border-dashed border-cyan/60 rounded-3xl shadow-[0_0_30px_rgba(0,212,255,0.3)] flex items-center justify-center">
-                      <span className="text-[10px] font-mono text-cyan/70 bg-black/60 px-2 py-1 rounded-md">
+                    <div className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-dashed border-cyan/70 rounded-3xl shadow-[0_0_30px_rgba(0,212,255,0.3)] flex items-center justify-center">
+                      <span className="text-[10px] font-mono text-cyan/90 bg-black/70 px-2.5 py-1 rounded-md">
                         Encuadra el pin aquí
                       </span>
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center text-center text-muted-fg space-y-2">
-                  <Camera className="h-10 w-10 opacity-30 text-coral" />
-                  <p className="text-xs">Pulsa &ldquo;Activar Cámara&rdquo; para comenzar.</p>
+                <div className="flex flex-col items-center text-center text-muted-fg space-y-3 py-16 px-4">
+                  <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-coral">
+                    <Camera className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-display font-semibold text-sm text-white">Cámara en Vivo</p>
+                    <p className="text-xs text-muted-fg mt-0.5 max-w-sm">
+                      En dispositivos iOS / iPhone puedes usar tanto la cámara en vivo integrada como la cámara nativa del sistema.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
