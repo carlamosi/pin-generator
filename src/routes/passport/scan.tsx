@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { normalizeString } from "@/lib/pin-processing";
 import {
   normalizePassportPage,
   detectStamps,
@@ -422,7 +423,8 @@ function PassportScanPage() {
     setSaveError(null);
 
     try {
-      for (const item of identifyQueue) {
+      const confirmedItems = identifyQueue.filter((item) => item.confirmed);
+      for (const item of confirmedItems) {
         // Upload crop
         let cropUrl: string | null = null;
         if (item.slot.cropDataUrl) {
@@ -439,12 +441,12 @@ function PassportScanPage() {
           designId = item.selectedDesignId;
         } else {
           // Create new stamp_design
+          const nameSlug = normalizeString(item.editName.trim() || "stamp")
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
           const code =
             item.editCode.trim() ||
-            `${item.editCategory.toLowerCase()}-${item.editName
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")
-              .replace(/^-|-$/g, "")}-${Date.now()}`;
+            `${item.editCategory.toLowerCase()}-${nameSlug || "design"}-${Date.now()}`;
 
           const newDesign = await insertStampDesign({
             code,

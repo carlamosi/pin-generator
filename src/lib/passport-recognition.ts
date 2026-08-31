@@ -131,21 +131,32 @@ export function hammingDistance(a: string, b: string): number {
 // OCR
 // ---------------------------------------------------------------------------
 
+// Singleton shared worker instance to avoid re-initializing Tesseract on every crop
+let sharedWorkerPromise: Promise<any> | null = null;
+
+async function getSharedOcrWorker() {
+  if (typeof window === "undefined") throw new Error("Window undefined");
+  if (!sharedWorkerPromise) {
+    sharedWorkerPromise = (async () => {
+      const worker = await createWorker(["eng", "spa", "cat"]);
+      return worker;
+    })().catch((err) => {
+      sharedWorkerPromise = null;
+      throw err;
+    });
+  }
+  return sharedWorkerPromise;
+}
+
 /**
  * Runs Tesseract OCR on a crop data URL.
- * Targets English, Spanish and Catalan (languages already used by pin-processing.ts).
+ * Uses shared Tesseract worker for maximum speed.
  */
 export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
-  // Pre-process: boost contrast via canvas before handing to Tesseract
   const preprocessed = await preprocessForOcr(cropDataUrl);
-
-  const worker = await createWorker(["eng", "spa", "cat"]);
-  try {
-    const result = await worker.recognize(preprocessed);
-    return result.data.text ?? "";
-  } finally {
-    await worker.terminate();
-  }
+  const worker = await getSharedOcrWorker();
+  const result = await worker.recognize(preprocessed);
+  return result.data.text ?? "";
 }
 
 /**

@@ -1,15 +1,12 @@
 /**
  * passport-cv.ts — Phase 4 CV Pipeline (Full-Page Global Stamp Detection)
  *
- * Core Concept:
- *  - Physical stamps on a real passport page can be placed anywhere, rotated,
- *    or shifted. They are NOT restricted to hardcoded sub-rectangles.
- *  - We perform contour & blob detection across the FULL PAGE canvas to find
- *    the actual physical stamp objects wherever they are located.
- *  - Each detected stamp object gets its actual boundary (center, radius, shape),
- *    ink coverage, confidence, and clean masked crop.
- *  - Detected stamps are spatially mapped to the 6 logical passport slot positions
- *    (1..6: top-left to bottom-right) required by the database model.
+ * Fixed Root Issues:
+ *  1. Lowered minStampArea to 0.0008 so smaller/medium physical stamps (30-60px) are not ignored.
+ *  2. Clustered nearby ink contours using morphological dilated components BEFORE area filtering,
+ *     so multi-part stamps (text + outer ring + logo) are detected as one complete object.
+ *  3. Implemented 1-to-1 spatial matching (bipartite nearest unassigned candidate) so two slot
+ *     anchors NEVER double-book the same physical stamp.
  */
 
 import { loadOpenCV } from "./pin-processing";
@@ -51,7 +48,7 @@ export interface SlotDetection {
 }
 
 // ---------------------------------------------------------------------------
-// 6 Logical Slot Layout (Top-Left to Bottom-Right Grid Mapping)
+// 6 Logical Slot Layout
 // ---------------------------------------------------------------------------
 
 export interface SlotGeometry {
@@ -71,7 +68,6 @@ export const SLOT_LAYOUT: SlotGeometry[] = [
 
 /**
  * Returns default anchor coordinates for slot 1..6 on a page of (pageW × pageH).
- * Used to map detected page stamps to logical slot slots (1..6).
  */
 export function computeSlotRect(
   slot: SlotGeometry,
@@ -141,7 +137,7 @@ function makeCircularCrop(
   cy: number,
   radius: number
 ): string {
-  const pad  = Math.max(12, Math.round(radius * 0.15));
+  const pad  = Math.max(10, Math.round(radius * 0.15));
   const size = Math.round((radius + pad) * 2);
 
   const cropCanvas = document.createElement("canvas");
@@ -150,14 +146,14 @@ function makeCircularCrop(
   const ctx = cropCanvas.getContext("2d");
   if (!ctx) return "";
 
-  // White paper background
+  // Pure white paper background
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, size, size);
 
-  // Circular clip
+  // Circular clip mask
   ctx.save();
   ctx.beginPath();
-  ctx.arc(size / 2, size / 2, radius + pad * 0.4, 0, Math.PI * 2);
+  ctx.arc(size / 2, size / 2, radius + pad * 0.3, 0, Math.PI * 2);
   ctx.clip();
 
   // Draw source image region centered
@@ -170,10 +166,11 @@ function makeCircularCrop(
 }
 
 // ---------------------------------------------------------------------------
-// Internal Detected Stamp Candidate
+// Internal Candidate Interface
 // ---------------------------------------------------------------------------
 
 interface StampCandidate {
+  id: number;
   cx: number;
   cy: number;
   radius: number;
@@ -218,7 +215,7 @@ export async function detectStamps(
 
         // 1. Contrast Normalization across the whole page (CLAHE)
         pageEq = new cv.Mat();
-        const clahe = new cv.CLAHE(2.5, new cv.Size(8, 8));
+        const clahe = new cv.CLAHE(2.2, new cv.Size(8, 8));
         clahe.apply(pageGray, pageEq);
         clahe.delete();
 
@@ -228,12 +225,12 @@ export async function detectStamps(
           pageEq, pageThresh, 255,
           cv.ADAPTIVE_THRESH_GAUSSIAN_C,
           cv.THRESH_BINARY_INV,
-          19, 8
+          17, 7
         );
 
-        // 3. Morphological close to fuse ink fragments of stamps
+        // 3. Morphological close (fuse stamp ink components: text + outer ring)
         pageMorph = new cv.Mat();
-        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(5, 5));
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(7, 7));
         cv.morphologyEx(pageThresh, pageMorph, cv.MORPH_CLOSE, kernel);
 
         const pageArea = img.width * img.height;
@@ -246,37 +243,32 @@ export async function detectStamps(
           cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
         );
 
-        // Filter parameters for physical stamp candidates
-        const minStampArea = pageArea * 0.005;  // ~0.5% of page
-        const maxStampArea = pageArea * 0.25;   // ~25% of page
+        // Filter parameters: allow stamps down to 0.08% of page (~30x30px) up to 30% of page
+        const minStampArea = pageArea * 0.0008;
+        const maxStampArea = pageArea * 0.30;
 
-        const rawCandidates: { points: number[][]; area: number; rect: BoundingBox }[] = [];
+        const rawCandidates: { points: number[][]; area: number }[] = [];
 
         for (let i = 0; i < (contours as any).size(); i++) {
           const contour = (contours as any).get(i);
           const area    = cv.contourArea(contour);
 
           if (area >= minStampArea && area <= maxStampArea) {
-            const br = cv.boundingRect(contour);
             const data = contour.data32S as Int32Array;
             const pts: number[][] = [];
             for (let p = 0; p < data.length; p += 2) {
               pts.push([data[p], data[p + 1]]);
             }
-            rawCandidates.push({
-              points: pts,
-              area,
-              rect: { x: br.x, y: br.y, width: br.width, height: br.height },
-            });
+            rawCandidates.push({ points: pts, area });
           }
           contour.delete();
         }
 
-        // 5. Merge overlapping/adjacent contours that belong to the same physical stamp
+        // 5. Group overlapping / nearby contours into cohesive physical stamps
         const mergedCandidates: StampCandidate[] = [];
-
-        // Sort candidates by area descending
         rawCandidates.sort((a, b) => b.area - a.area);
+
+        let candidateIdCounter = 1;
 
         for (const cand of rawCandidates) {
           const ptsMat = cv.matFromArray(
@@ -290,26 +282,25 @@ export async function detectStamps(
           const cy = Math.round(br.y + br.height / 2);
           const radius = Math.round(Math.max(br.width, br.height) / 2);
 
-          // Check if this overlaps significantly with an already merged candidate
+          // Check for overlap with an already accepted candidate
           const isOverlap = mergedCandidates.some((existing) => {
             const dist = Math.hypot(existing.cx - cx, existing.cy - cy);
-            return dist < (existing.radius + radius) * 0.6;
+            return dist < (existing.radius + radius) * 0.65;
           });
 
-          if (!isOverlap && radius > 15) {
+          if (!isOverlap && radius >= 12) {
             const cropUrl = makeCircularCrop(pageCanvas, cx, cy, radius);
 
-            // Compute ink density inside candidate region
             const cropW = Math.min(img.width - br.x, br.width);
             const cropH = Math.min(img.height - br.y, br.height);
-            const inkCoverage = Math.min(1.0, (cand.area / (cropW * cropH || 1)));
+            const inkCoverage = Math.min(1.0, cand.area / (cropW * cropH || 1));
 
-            // Structural confidence: stamp shape compactness & size ratio
             const aspect = br.width / (br.height || 1);
-            const isRegularShape = aspect >= 0.7 && aspect <= 1.4;
-            const confidence = isRegularShape ? 0.88 : 0.65;
+            const isRegularShape = aspect >= 0.65 && aspect <= 1.5;
+            const confidence = isRegularShape ? 0.90 : 0.65;
 
             mergedCandidates.push({
+              id: candidateIdCounter++,
               cx,
               cy,
               radius,
@@ -321,21 +312,24 @@ export async function detectStamps(
           }
         }
 
-        // 6. Map the detected stamp candidates to the 6 logical slot positions (1..6)
-        // We define the 6 slot anchor points on the page
+        // 6. 1-to-1 Spatial Matching: Map candidate stamps to slot 1..6 anchors
+        // Prevents double-booking a single candidate to multiple slots!
+        const assignedCandidateIds = new Set<number>();
+
         const slotDetections: SlotDetection[] = SLOT_LAYOUT.map((slotDef) => {
           const anchorRect = computeSlotRect(slotDef, img.width, img.height);
           const anchorCx = anchorRect.x + anchorRect.width / 2;
           const anchorCy = anchorRect.y + anchorRect.height / 2;
 
-          // Find closest detected stamp candidate to this slot anchor
           let bestCandidate: StampCandidate | null = null;
           let minDistance = Infinity;
 
           for (const cand of mergedCandidates) {
+            if (assignedCandidateIds.has(cand.id)) continue; // 1-to-1 enforcement
+
             const dist = Math.hypot(cand.cx - anchorCx, cand.cy - anchorCy);
-            // Must be within reasonable distance of the slot region (e.g. 1.2x slot radius)
-            const maxAllowedDist = Math.max(anchorRect.width, anchorRect.height) * 0.95;
+            const maxAllowedDist = Math.max(anchorRect.width, anchorRect.height) * 1.1;
+
             if (dist < maxAllowedDist && dist < minDistance) {
               minDistance = dist;
               bestCandidate = cand;
@@ -343,6 +337,7 @@ export async function detectStamps(
           }
 
           if (bestCandidate) {
+            assignedCandidateIds.add(bestCandidate.id); // Mark claimed
             return {
               slot_position: slotDef.id,
               state: "DETECTED" as SlotState,
