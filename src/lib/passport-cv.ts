@@ -1,14 +1,15 @@
 /**
- * passport-cv.ts — Phase 4 CV pipeline
+ * passport-cv.ts — Phase 4 CV Pipeline (Full-Page Global Stamp Detection)
  *
- * Slot → contour detection → minimum enclosing circle → circular crop
- *
- * Most physical LEGO passport stamps are circular. Instead of a generic
- * bounding rectangle we:
- *  1. Find stamp contours inside the slot
- *  2. Compute the minimum enclosing circle of all filtered contour points
- *  3. Crop using that circle (square canvas + circular mask on white bg)
- *  4. Report the circle in page coordinates for the SVG overlay
+ * Core Concept:
+ *  - Physical stamps on a real passport page can be placed anywhere, rotated,
+ *    or shifted. They are NOT restricted to hardcoded sub-rectangles.
+ *  - We perform contour & blob detection across the FULL PAGE canvas to find
+ *    the actual physical stamp objects wherever they are located.
+ *  - Each detected stamp object gets its actual boundary (center, radius, shape),
+ *    ink coverage, confidence, and clean masked crop.
+ *  - Detected stamps are spatially mapped to the 6 logical passport slot positions
+ *    (1..6: top-left to bottom-right) required by the database model.
  */
 
 import { loadOpenCV } from "./pin-processing";
@@ -37,20 +38,20 @@ export interface StampCircle {
 export interface SlotDetection {
   slot_position: number;
   state: SlotState;
-  /** 0–1: confidence in the detected shape — NOT ink coverage */
+  /** 0–1: confidence in the detected stamp shape */
   confidence: number;
-  /** 0–1: fraction of thresholded ink pixels inside the slot */
+  /** 0–1: ink density inside the detected stamp region */
   inkCoverage: number;
   /** Bounding rect of the detected stamp in page coordinates */
   boundingBox: BoundingBox | null;
-  /** Minimum enclosing circle of the stamp in page coordinates */
+  /** Minimum enclosing circle of the detected stamp in page coordinates */
   stampCircle: StampCircle | null;
-  /** Circular-masked crop on white background */
+  /** Masked crop of the actual stamp on white paper background */
   cropDataUrl: string | undefined;
 }
 
 // ---------------------------------------------------------------------------
-// Deterministic slot geometry — shared between CV and UI
+// 6 Logical Slot Layout (Top-Left to Bottom-Right Grid Mapping)
 // ---------------------------------------------------------------------------
 
 export interface SlotGeometry {
@@ -69,8 +70,8 @@ export const SLOT_LAYOUT: SlotGeometry[] = [
 ];
 
 /**
- * Pixel rectangle for a given slot inside a page of (pageW × pageH).
- * Calibrated for the LEGO passport layout (10% top, 8% bottom, 5% sides, 2% gaps).
+ * Returns default anchor coordinates for slot 1..6 on a page of (pageW × pageH).
+ * Used to map detected page stamps to logical slot slots (1..6).
  */
 export function computeSlotRect(
   slot: SlotGeometry,
@@ -78,7 +79,7 @@ export function computeSlotRect(
   pageH: number
 ): BoundingBox {
   const marginX   = pageW * 0.05;
-  const marginTop = pageH * 0.10;
+  const marginTop = pageH * 0.08;
   const marginBot = pageH * 0.08;
   const gapX      = pageW * 0.02;
   const gapY      = pageH * 0.02;
@@ -131,36 +132,16 @@ export async function normalizePassportPage(file: File): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
-// Detection thresholds
+// Circular Crop Helper
 // ---------------------------------------------------------------------------
 
-/** Minimum contour area as fraction of slot — filters noise dots */
-const MIN_CONTOUR_FRACTION = 0.003;
-/** Maximum — filters printed passport artwork covering the full slot */
-const MAX_CONTOUR_FRACTION = 0.80;
-/** Ink coverage below this → EMPTY */
-const INK_EMPTY_MAX  = 0.003;
-/** Ink coverage above this + good circle → DETECTED */
-const INK_DETECT_MIN = 0.012;
-/** Padding around circle radius for crop */
-const CROP_PADDING_FRACTION = 0.12;
-
-// ---------------------------------------------------------------------------
-// Circular crop helper
-// ---------------------------------------------------------------------------
-
-/**
- * Renders a circular-masked crop of the stamp onto a white background canvas.
- * Pixels outside the circle are white (paper) so Phase 5 OCR / hashing sees
- * the stamp cleanly without surrounding slot content.
- */
 function makeCircularCrop(
   pageCanvas: HTMLCanvasElement,
-  cx: number,     // page coords
+  cx: number,
   cy: number,
   radius: number
 ): string {
-  const pad  = Math.round(radius * CROP_PADDING_FRACTION) + 8;
+  const pad  = Math.max(12, Math.round(radius * 0.15));
   const size = Math.round((radius + pad) * 2);
 
   const cropCanvas = document.createElement("canvas");
@@ -169,17 +150,17 @@ function makeCircularCrop(
   const ctx = cropCanvas.getContext("2d");
   if (!ctx) return "";
 
-  // White background (passport paper)
+  // White paper background
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, size, size);
 
   // Circular clip
   ctx.save();
   ctx.beginPath();
-  ctx.arc(size / 2, size / 2, radius + pad * 0.5, 0, Math.PI * 2);
+  ctx.arc(size / 2, size / 2, radius + pad * 0.4, 0, Math.PI * 2);
   ctx.clip();
 
-  // Draw the source region centered
+  // Draw source image region centered
   const srcX = cx - size / 2;
   const srcY = cy - size / 2;
   ctx.drawImage(pageCanvas, srcX, srcY, size, size, 0, 0, size, size);
@@ -189,7 +170,21 @@ function makeCircularCrop(
 }
 
 // ---------------------------------------------------------------------------
-// Main detection
+// Internal Detected Stamp Candidate
+// ---------------------------------------------------------------------------
+
+interface StampCandidate {
+  cx: number;
+  cy: number;
+  radius: number;
+  boundingBox: BoundingBox;
+  inkCoverage: number;
+  confidence: number;
+  cropDataUrl: string;
+}
+
+// ---------------------------------------------------------------------------
+// Main Full-Page Detection Pipeline
 // ---------------------------------------------------------------------------
 
 export async function detectStamps(
@@ -207,217 +202,185 @@ export async function detectStamps(
       if (!pageCtx) return reject(new Error("No 2d context"));
       pageCtx.drawImage(img, 0, 0);
 
-      let pageSrc:  InstanceType<typeof cv.Mat> | null = null;
-      let pageGray: InstanceType<typeof cv.Mat> | null = null;
+      let pageSrc:    InstanceType<typeof cv.Mat> | null = null;
+      let pageGray:   InstanceType<typeof cv.Mat> | null = null;
+      let pageEq:     InstanceType<typeof cv.Mat> | null = null;
+      let pageThresh: InstanceType<typeof cv.Mat> | null = null;
+      let pageMorph:  InstanceType<typeof cv.Mat> | null = null;
+      let kernel:     InstanceType<typeof cv.Mat> | null = null;
+      let contours:   InstanceType<typeof cv.MatVector> | null = null;
+      let hierarchy:  InstanceType<typeof cv.Mat> | null = null;
 
       try {
         pageSrc  = cv.imread(pageCanvas);
         pageGray = new cv.Mat();
         cv.cvtColor(pageSrc, pageGray, cv.COLOR_RGBA2GRAY, 0);
 
-        const results: SlotDetection[] = [];
+        // 1. Contrast Normalization across the whole page (CLAHE)
+        pageEq = new cv.Mat();
+        const clahe = new cv.CLAHE(2.5, new cv.Size(8, 8));
+        clahe.apply(pageGray, pageEq);
+        clahe.delete();
 
-        for (const slotDef of SLOT_LAYOUT) {
-          const slotRect = computeSlotRect(slotDef, img.width, img.height);
-          const slotArea = slotRect.width * slotRect.height;
+        // 2. Full-page Adaptive Thresholding (Ink = 255)
+        pageThresh = new cv.Mat();
+        cv.adaptiveThreshold(
+          pageEq, pageThresh, 255,
+          cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+          cv.THRESH_BINARY_INV,
+          19, 8
+        );
 
-          const cvRect = new cv.Rect(
-            slotRect.x, slotRect.y,
-            slotRect.width, slotRect.height
-          );
+        // 3. Morphological close to fuse ink fragments of stamps
+        pageMorph = new cv.Mat();
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(5, 5));
+        cv.morphologyEx(pageThresh, pageMorph, cv.MORPH_CLOSE, kernel);
 
-          let slotGray:   InstanceType<typeof cv.Mat> | null = null;
-          let slotEq:     InstanceType<typeof cv.Mat> | null = null;
-          let slotThresh: InstanceType<typeof cv.Mat> | null = null;
-          let slotMorph:  InstanceType<typeof cv.Mat> | null = null;
-          let kernel:     InstanceType<typeof cv.Mat> | null = null;
-          let contours:   InstanceType<typeof cv.MatVector> | null = null;
-          let hierarchy:  InstanceType<typeof cv.Mat> | null = null;
+        const pageArea = img.width * img.height;
 
-          try {
-            slotGray = pageGray.roi(cvRect);
+        // 4. Find all external contours across the FULL PAGE
+        contours  = new cv.MatVector();
+        hierarchy = new cv.Mat();
+        cv.findContours(
+          pageMorph, contours, hierarchy,
+          cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
+        );
 
-            // ── CLAHE local contrast normalization ─────────────────────────
-            slotEq = new cv.Mat();
-            const clahe = new cv.CLAHE(2.0, new cv.Size(8, 8));
-            clahe.apply(slotGray, slotEq);
-            clahe.delete();
+        // Filter parameters for physical stamp candidates
+        const minStampArea = pageArea * 0.005;  // ~0.5% of page
+        const maxStampArea = pageArea * 0.25;   // ~25% of page
 
-            // ── Adaptive threshold → ink mask (ink = 255) ─────────────────
-            slotThresh = new cv.Mat();
-            cv.adaptiveThreshold(
-              slotEq, slotThresh, 255,
-              cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-              cv.THRESH_BINARY_INV,
-              15, 8
-            );
+        const rawCandidates: { points: number[][]; area: number; rect: BoundingBox }[] = [];
 
-            // ── Morphological close → fuse nearby ink fragments ───────────
-            slotMorph = new cv.Mat();
-            kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(5, 5));
-            cv.morphologyEx(slotThresh, slotMorph, cv.MORPH_CLOSE, kernel);
+        for (let i = 0; i < (contours as any).size(); i++) {
+          const contour = (contours as any).get(i);
+          const area    = cv.contourArea(contour);
 
-            // ── Ink coverage ──────────────────────────────────────────────
-            const nonZero   = cv.countNonZero(slotMorph);
-            const inkCoverage = nonZero / slotArea;
-
-            // ── Find contours ─────────────────────────────────────────────
-            contours  = new cv.MatVector();
-            hierarchy = new cv.Mat();
-            cv.findContours(
-              slotMorph, contours, hierarchy,
-              cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
-            );
-
-            // ── Filter contours by area and collect points ────────────────
-            const minArea = slotArea * MIN_CONTOUR_FRACTION;
-            const maxArea = slotArea * MAX_CONTOUR_FRACTION;
-
-            // Collect all points from qualifying contours into one big Mat
-            const allPoints: number[][] = [];
-
-            for (let i = 0; i < (contours as any).size(); i++) {
-              const contour = (contours as any).get(i);
-              const area    = cv.contourArea(contour);
-              contour.delete();
-
-              if (area < minArea || area > maxArea) continue;
-
-              // Re-get contour to extract point data
-              const c = (contours as any).get(i);
-              const data = c.data32S as Int32Array; // x0,y0,x1,y1,...
-              for (let p = 0; p < data.length; p += 2) {
-                allPoints.push([data[p], data[p + 1]]);
-              }
-              c.delete();
+          if (area >= minStampArea && area <= maxStampArea) {
+            const br = cv.boundingRect(contour);
+            const data = contour.data32S as Int32Array;
+            const pts: number[][] = [];
+            for (let p = 0; p < data.length; p += 2) {
+              pts.push([data[p], data[p + 1]]);
             }
-
-            // ── Minimum enclosing circle ──────────────────────────────────
-            let stampCircle: StampCircle | null = null;
-            let boundingBox: BoundingBox | null = null;
-            let confidence  = 0;
-
-            if (allPoints.length >= 5) {
-              // Build a temporary Mat of the collected points
-              const ptsMat = cv.matFromArray(
-                allPoints.length, 1, cv.CV_32SC2,
-                allPoints.flat()
-              );
-
-              const circleOut = { x: 0, y: 0, radius: 0 };
-              cv.minEnclosingCircle(ptsMat, circleOut as any, circleOut as any);
-
-              // minEnclosingCircle returns center as {x,y} and radius separately
-              // The JS binding exposes it differently — use the point output:
-              const centerMat = new cv.Point(0, 0);
-              let radius = 0;
-
-              try {
-                // Try the standard binding
-                cv.minEnclosingCircle(ptsMat, centerMat as any, { value: 0 } as any);
-              } catch {
-                // Fallback: compute manually from bounding rect of points
-              }
-
-              // Reliable cross-binding approach: use boundingRect on point mat
-              const br = cv.boundingRect(ptsMat);
-              const localCx = br.x + br.width  / 2;
-              const localCy = br.y + br.height / 2;
-              radius = Math.max(br.width, br.height) / 2;
-
-              ptsMat.delete();
-
-              // Convert from slot-local to page coordinates
-              const pageCx = slotRect.x + localCx;
-              const pageCy = slotRect.y + localCy;
-
-              stampCircle = { cx: pageCx, cy: pageCy, radius };
-
-              boundingBox = {
-                x:      Math.round(pageCx - radius),
-                y:      Math.round(pageCy - radius),
-                width:  Math.round(radius * 2),
-                height: Math.round(radius * 2),
-              };
-
-              // Confidence: how well the circle is bounded vs. slot size
-              const circleArea  = Math.PI * radius * radius;
-              const coverRatio  = circleArea / slotArea;
-              if (coverRatio < 0.30)      confidence = 0.90; // tight circle
-              else if (coverRatio < 0.60) confidence = 0.70;
-              else if (coverRatio < 0.85) confidence = 0.50;
-              else                        confidence = 0.30; // spans too much
-            }
-
-            // ── Classify ──────────────────────────────────────────────────
-            let state: SlotState;
-
-            if (inkCoverage < INK_EMPTY_MAX) {
-              state      = "EMPTY";
-              confidence = 1 - inkCoverage / INK_EMPTY_MAX;
-            } else if (stampCircle && inkCoverage >= INK_DETECT_MIN) {
-              state = "DETECTED";
-              // confidence already set above
-            } else if (inkCoverage >= INK_EMPTY_MAX || stampCircle) {
-              state      = "UNCERTAIN";
-              confidence = stampCircle ? 0.45 : 0.30;
-            } else {
-              state      = "EMPTY";
-              confidence = 0.60;
-            }
-
-            // ── Circular crop ─────────────────────────────────────────────
-            let cropDataUrl: string | undefined;
-
-            if (state !== "EMPTY" && stampCircle && stampCircle.radius > 4) {
-              cropDataUrl = makeCircularCrop(
-                pageCanvas,
-                stampCircle.cx, stampCircle.cy, stampCircle.radius
-              );
-            } else if (state === "UNCERTAIN" && !stampCircle) {
-              // No circle detected — fall back to slot crop
-              const c2 = document.createElement("canvas");
-              c2.width  = slotRect.width;
-              c2.height = slotRect.height;
-              const ctx2 = c2.getContext("2d");
-              if (ctx2) {
-                ctx2.fillStyle = "#FFFFFF";
-                ctx2.fillRect(0, 0, c2.width, c2.height);
-                ctx2.drawImage(
-                  pageCanvas,
-                  slotRect.x, slotRect.y, slotRect.width, slotRect.height,
-                  0, 0, slotRect.width, slotRect.height
-                );
-                cropDataUrl = c2.toDataURL("image/png");
-              }
-            }
-
-            results.push({
-              slot_position: slotDef.id,
-              state,
-              confidence,
-              inkCoverage,
-              boundingBox,
-              stampCircle,
-              cropDataUrl,
+            rawCandidates.push({
+              points: pts,
+              area,
+              rect: { x: br.x, y: br.y, width: br.width, height: br.height },
             });
-          } finally {
-            slotGray?.delete();
-            slotEq?.delete();
-            slotThresh?.delete();
-            slotMorph?.delete();
-            kernel?.delete();
-            contours?.delete();
-            hierarchy?.delete();
+          }
+          contour.delete();
+        }
+
+        // 5. Merge overlapping/adjacent contours that belong to the same physical stamp
+        const mergedCandidates: StampCandidate[] = [];
+
+        // Sort candidates by area descending
+        rawCandidates.sort((a, b) => b.area - a.area);
+
+        for (const cand of rawCandidates) {
+          const ptsMat = cv.matFromArray(
+            cand.points.length, 1, cv.CV_32SC2,
+            cand.points.flat()
+          );
+          const br = cv.boundingRect(ptsMat);
+          ptsMat.delete();
+
+          const cx = Math.round(br.x + br.width / 2);
+          const cy = Math.round(br.y + br.height / 2);
+          const radius = Math.round(Math.max(br.width, br.height) / 2);
+
+          // Check if this overlaps significantly with an already merged candidate
+          const isOverlap = mergedCandidates.some((existing) => {
+            const dist = Math.hypot(existing.cx - cx, existing.cy - cy);
+            return dist < (existing.radius + radius) * 0.6;
+          });
+
+          if (!isOverlap && radius > 15) {
+            const cropUrl = makeCircularCrop(pageCanvas, cx, cy, radius);
+
+            // Compute ink density inside candidate region
+            const cropW = Math.min(img.width - br.x, br.width);
+            const cropH = Math.min(img.height - br.y, br.height);
+            const inkCoverage = Math.min(1.0, (cand.area / (cropW * cropH || 1)));
+
+            // Structural confidence: stamp shape compactness & size ratio
+            const aspect = br.width / (br.height || 1);
+            const isRegularShape = aspect >= 0.7 && aspect <= 1.4;
+            const confidence = isRegularShape ? 0.88 : 0.65;
+
+            mergedCandidates.push({
+              cx,
+              cy,
+              radius,
+              boundingBox: { x: br.x, y: br.y, width: br.width, height: br.height },
+              inkCoverage,
+              confidence,
+              cropDataUrl: cropUrl,
+            });
           }
         }
 
-        resolve(results);
+        // 6. Map the detected stamp candidates to the 6 logical slot positions (1..6)
+        // We define the 6 slot anchor points on the page
+        const slotDetections: SlotDetection[] = SLOT_LAYOUT.map((slotDef) => {
+          const anchorRect = computeSlotRect(slotDef, img.width, img.height);
+          const anchorCx = anchorRect.x + anchorRect.width / 2;
+          const anchorCy = anchorRect.y + anchorRect.height / 2;
+
+          // Find closest detected stamp candidate to this slot anchor
+          let bestCandidate: StampCandidate | null = null;
+          let minDistance = Infinity;
+
+          for (const cand of mergedCandidates) {
+            const dist = Math.hypot(cand.cx - anchorCx, cand.cy - anchorCy);
+            // Must be within reasonable distance of the slot region (e.g. 1.2x slot radius)
+            const maxAllowedDist = Math.max(anchorRect.width, anchorRect.height) * 0.95;
+            if (dist < maxAllowedDist && dist < minDistance) {
+              minDistance = dist;
+              bestCandidate = cand;
+            }
+          }
+
+          if (bestCandidate) {
+            return {
+              slot_position: slotDef.id,
+              state: "DETECTED" as SlotState,
+              confidence: bestCandidate.confidence,
+              inkCoverage: bestCandidate.inkCoverage,
+              boundingBox: bestCandidate.boundingBox,
+              stampCircle: {
+                cx: bestCandidate.cx,
+                cy: bestCandidate.cy,
+                radius: bestCandidate.radius,
+              },
+              cropDataUrl: bestCandidate.cropDataUrl,
+            };
+          } else {
+            return {
+              slot_position: slotDef.id,
+              state: "EMPTY" as SlotState,
+              confidence: 1.0,
+              inkCoverage: 0,
+              boundingBox: null,
+              stampCircle: null,
+              cropDataUrl: undefined,
+            };
+          }
+        });
+
+        resolve(slotDetections);
       } catch (err) {
         reject(err);
       } finally {
         pageSrc?.delete();
         pageGray?.delete();
+        pageEq?.delete();
+        pageThresh?.delete();
+        pageMorph?.delete();
+        kernel?.delete();
+        contours?.delete();
+        hierarchy?.delete();
       }
     };
     img.onerror = reject;
