@@ -191,8 +191,19 @@ function PageWithOverlays({
           );
         })}
 
-        {/* Layer 2: detected bounding box for selected slot */}
-        {selectedDet?.boundingBox && (
+        {/* Layer 2: detected stamp contour for selected slot */}
+        {selectedDet?.stampCircle ? (
+          <circle
+            cx={selectedDet.stampCircle.cx}
+            cy={selectedDet.stampCircle.cy}
+            r={selectedDet.stampCircle.radius}
+            fill="none"
+            stroke="white"
+            strokeWidth={2}
+            strokeDasharray="4 2"
+            opacity={0.85}
+          />
+        ) : selectedDet?.boundingBox ? (
           <rect
             x={selectedDet.boundingBox.x}
             y={selectedDet.boundingBox.y}
@@ -205,7 +216,7 @@ function PageWithOverlays({
             rx={2}
             opacity={0.85}
           />
-        )}
+        ) : null}
       </svg>
     </div>
   );
