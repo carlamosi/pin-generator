@@ -1,12 +1,11 @@
 /**
- * passport-cv.ts — Phase 4 CV Pipeline (Full-Page Global Stamp Detection)
+ * passport-cv.ts — Phase 4 CV Pipeline (Full-Page Global Stamp Detection + Deskewing)
  *
- * Fixed Root Issues:
- *  1. Lowered minStampArea to 0.0008 so smaller/medium physical stamps (30-60px) are not ignored.
- *  2. Clustered nearby ink contours using morphological dilated components BEFORE area filtering,
- *     so multi-part stamps (text + outer ring + logo) are detected as one complete object.
- *  3. Implemented 1-to-1 spatial matching (bipartite nearest unassigned candidate) so two slot
- *     anchors NEVER double-book the same physical stamp.
+ * Core Features:
+ *  - Full-page global contour detection.
+ *  - Paper fold / light gray shadow filtering (mean grayscale intensity thresholding).
+ *  - Automatic deskewing / upright rotation correction using minAreaRect orientation.
+ *  - 1-to-1 spatial candidate mapping to passport slot positions 1..6.
  */
 
 import { loadOpenCV } from "./pin-processing";
@@ -128,14 +127,15 @@ export async function normalizePassportPage(file: File): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
-// Circular Crop Helper
+// Circular Crop Helper with Deskewing Rotation
 // ---------------------------------------------------------------------------
 
 function makeCircularCrop(
   pageCanvas: HTMLCanvasElement,
   cx: number,
   cy: number,
-  radius: number
+  radius: number,
+  angleDeg: number = 0
 ): string {
   const pad  = Math.max(10, Math.round(radius * 0.15));
   const size = Math.round((radius + pad) * 2);
@@ -150,16 +150,24 @@ function makeCircularCrop(
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, size, size);
 
-  // Circular clip mask
   ctx.save();
+  // Translate to center of crop canvas for rotation
+  ctx.translate(size / 2, size / 2);
+
+  // Apply deskewing rotation if stamp is slightly tilted (-45 deg to +45 deg)
+  if (Math.abs(angleDeg) > 1 && Math.abs(angleDeg) < 45) {
+    ctx.rotate((-angleDeg * Math.PI) / 180);
+  }
+
+  // Circular clip mask
   ctx.beginPath();
-  ctx.arc(size / 2, size / 2, radius + pad * 0.3, 0, Math.PI * 2);
+  ctx.arc(0, 0, radius + pad * 0.3, 0, Math.PI * 2);
   ctx.clip();
 
   // Draw source image region centered
   const srcX = cx - size / 2;
   const srcY = cy - size / 2;
-  ctx.drawImage(pageCanvas, srcX, srcY, size, size, 0, 0, size, size);
+  ctx.drawImage(pageCanvas, srcX, srcY, size, size, -size / 2, -size / 2, size, size);
   ctx.restore();
 
   return cropCanvas.toDataURL("image/png");
@@ -228,7 +236,7 @@ export async function detectStamps(
           17, 7
         );
 
-        // 3. Morphological close (fuse stamp ink components: text + outer ring)
+        // 3. Morphological close (fuse stamp ink components)
         pageMorph = new cv.Mat();
         kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(7, 7));
         cv.morphologyEx(pageThresh, pageMorph, cv.MORPH_CLOSE, kernel);
@@ -243,7 +251,6 @@ export async function detectStamps(
           cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
         );
 
-        // Filter parameters: allow stamps down to 0.08% of page (~30x30px) up to 30% of page
         const minStampArea = pageArea * 0.0008;
         const maxStampArea = pageArea * 0.30;
 
@@ -276,11 +283,37 @@ export async function detectStamps(
             cand.points.flat()
           );
           const br = cv.boundingRect(ptsMat);
-          ptsMat.delete();
 
           const cx = Math.round(br.x + br.width / 2);
           const cy = Math.round(br.y + br.height / 2);
           const radius = Math.round(Math.max(br.width, br.height) / 2);
+
+          // Calculate mean grayscale intensity to filter paper crease shadows (light gray false positives)
+          const cvRect = new cv.Rect(
+            Math.max(0, br.x), Math.max(0, br.y),
+            Math.min(img.width - br.x, br.width),
+            Math.min(img.height - br.y, br.height)
+          );
+          const cropGrayMat = pageGray.roi(cvRect);
+          const meanVal = cv.mean(cropGrayMat)[0]; // 0 (black) .. 255 (white)
+          cropGrayMat.delete();
+
+          // Compute deskew angle using minAreaRect
+          let angleDeg = 0;
+          try {
+            const minRect = cv.minAreaRect(ptsMat);
+            angleDeg = minRect.angle;
+            if (angleDeg < -45) angleDeg += 90;
+            if (angleDeg > 45) angleDeg -= 90;
+          } catch {
+            angleDeg = 0;
+          }
+          ptsMat.delete();
+
+          // Reject paper crease shadows (light gray background, mean brightness > 210)
+          if (meanVal > 210) {
+            continue;
+          }
 
           // Check for overlap with an already accepted candidate
           const isOverlap = mergedCandidates.some((existing) => {
@@ -289,7 +322,7 @@ export async function detectStamps(
           });
 
           if (!isOverlap && radius >= 12) {
-            const cropUrl = makeCircularCrop(pageCanvas, cx, cy, radius);
+            const cropUrl = makeCircularCrop(pageCanvas, cx, cy, radius, angleDeg);
 
             const cropW = Math.min(img.width - br.x, br.width);
             const cropH = Math.min(img.height - br.y, br.height);
@@ -297,7 +330,7 @@ export async function detectStamps(
 
             const aspect = br.width / (br.height || 1);
             const isRegularShape = aspect >= 0.65 && aspect <= 1.5;
-            const confidence = isRegularShape ? 0.90 : 0.65;
+            const confidence = isRegularShape ? 0.92 : 0.70;
 
             mergedCandidates.push({
               id: candidateIdCounter++,
@@ -313,7 +346,6 @@ export async function detectStamps(
         }
 
         // 6. 1-to-1 Spatial Matching: Map candidate stamps to slot 1..6 anchors
-        // Prevents double-booking a single candidate to multiple slots!
         const assignedCandidateIds = new Set<number>();
 
         const slotDetections: SlotDetection[] = SLOT_LAYOUT.map((slotDef) => {
@@ -325,7 +357,7 @@ export async function detectStamps(
           let minDistance = Infinity;
 
           for (const cand of mergedCandidates) {
-            if (assignedCandidateIds.has(cand.id)) continue; // 1-to-1 enforcement
+            if (assignedCandidateIds.has(cand.id)) continue;
 
             const dist = Math.hypot(cand.cx - anchorCx, cand.cy - anchorCy);
             const maxAllowedDist = Math.max(anchorRect.width, anchorRect.height) * 1.1;
@@ -337,7 +369,7 @@ export async function detectStamps(
           }
 
           if (bestCandidate) {
-            assignedCandidateIds.add(bestCandidate.id); // Mark claimed
+            assignedCandidateIds.add(bestCandidate.id);
             return {
               slot_position: slotDef.id,
               state: "DETECTED" as SlotState,

@@ -37,9 +37,12 @@ import {
   insertStampDesign,
   listStampDesigns,
   listStampingLocations,
+  findOrCreateStampingLocation,
+  listTrips,
   listCities,
   type StampDesign,
   type StampingLocation,
+  type Trip,
   type City,
 } from "@/lib/trips/trips-repo";
 
@@ -59,10 +62,8 @@ interface IdentifyState {
   recognition: StampRecognitionResult;
 
   // Editable fields (user overrides recognition)
-  editName: string;
-  editCategory: string;
-  editCityId: string;
-  editLocationId: string;
+  editLocationName: string; // Manual name of LEGO Store or location
+  editTripId: string;       // Associated trip
   editStampedAt: string;
   editCode: string;
 
@@ -254,10 +255,10 @@ function PassportScanPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Reference data loaded once
   const [existingDesigns, setExistingDesigns] = useState<StampDesign[]>([]);
   const [existingLocations, setExistingLocations] = useState<StampingLocation[]>([]);
   const [existingCities, setExistingCities] = useState<City[]>([]);
+  const [existingTrips, setExistingTrips] = useState<Trip[]>([]);
 
   // ── File handling ─────────────────────────────────────────────────────────
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -343,14 +344,16 @@ function PassportScanPage() {
       setSavedPageId(pageRecord.id);
 
       // Load reference data for recognition
-      const [designs, locations, cities] = await Promise.all([
+      const [designs, locations, cities, trips] = await Promise.all([
         listStampDesigns(),
         listStampingLocations(),
         listCities(),
+        listTrips().catch(() => [] as Trip[]),
       ]);
       setExistingDesigns(designs);
       setExistingLocations(locations);
       setExistingCities(cities);
+      setExistingTrips(trips);
 
       // Build identify queue from non-EMPTY slots
       const activeSlots = detections.filter((d) => d.state !== "EMPTY");
@@ -388,12 +391,13 @@ function PassportScanPage() {
           editName: rec.suggestedName,
           editCategory: rec.suggestedCategory,
           editCityId: rec.matchedCity?.id ?? "",
-          editLocationId: "",
+          editLocationName: rec.matchedCity ? `LEGO Store ${rec.matchedCity.name}` : "",
+          editTripId: rec.matchedCity?.trip_id ?? "",
           editStampedAt: "",        // ALWAYS left empty by default
           editCode: "",
           designMode: useExisting ? "existing" : "new",
           selectedDesignId: rec.existingDesign?.id ?? null,
-          confirmed: rec.confidence === "HIGH",  // HIGH is preselected but user must still confirm
+          confirmed: rec.confidence === "HIGH",  // HIGH is preselected but user still confirms
         });
       }
       setIdentifyQueue(queue);
@@ -458,6 +462,13 @@ function PassportScanPage() {
             visual_hash: item.recognition.visualHash || null,
           });
           designId = newDesign.id;
+        }
+
+        // Find or create manual stamping location if entered
+        let locationId: string | null = null;
+        if (item.editLocationName && item.editLocationName.trim()) {
+          const createdLoc = await findOrCreateStampingLocation(item.editLocationName, item.editCityId);
+          locationId = createdLoc?.id ?? null;
         }
 
         // Create physical_stamp record
@@ -891,22 +902,35 @@ function PassportScanPage() {
               <p className="text-xs font-mono text-muted-fg uppercase tracking-wider">
                 Sello Fisico
               </p>
-              {/* Location */}
+              {/* Location Name */}
               <div>
                 <label className="text-xs text-muted-fg block mb-1">
-                  Lugar de estampado{" "}
-                  <span className="text-muted-fg/50">(opcional)</span>
+                  Nombre de la Tienda LEGO / Ubicación{" "}
+                  <span className="text-muted-fg/50">(manual, ej: LEGO Store Strøget)</span>
+                </label>
+                <input
+                  type="text"
+                  value={current.editLocationName}
+                  onChange={(e) => updateCurrent({ editLocationName: e.target.value })}
+                  placeholder="Ej: LEGO Store Copenhagen, Strøget…"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
+                />
+              </div>
+
+              {/* Trip Link */}
+              <div>
+                <label className="text-xs text-muted-fg block mb-1">
+                  Vincular con viaje <span className="text-muted-fg/50">(opcional)</span>
                 </label>
                 <select
-                  value={current.editLocationId}
-                  onChange={(e) => updateCurrent({ editLocationId: e.target.value })}
+                  value={current.editTripId}
+                  onChange={(e) => updateCurrent({ editTripId: e.target.value })}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
                 >
-                  <option value="">— Sin ubicacion registrada —</option>
-                  {existingLocations.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name}
-                      {l.city_name ? `, ${l.city_name}` : ""}
+                  <option value="">— Sin viaje asociado —</option>
+                  {existingTrips.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.description})
                     </option>
                   ))}
                 </select>

@@ -341,16 +341,15 @@ export async function recogniseStamp(
     existingDesign = bestVisualDesign;
   }
 
-  // 7. Confidence
+  // 7. Confidence Calculation
   let confidence: RecognitionConfidence;
 
-  const hasStrongText = bestTextScore >= TEXT_HIGH_THRESHOLD;
-  const hasMediumText = bestTextScore >= TEXT_MEDIUM_THRESHOLD;
+  const hasStrongText = bestTextScore >= TEXT_HIGH_THRESHOLD || (bestCityScore >= 0.65);
+  const hasMediumText = bestTextScore >= TEXT_MEDIUM_THRESHOLD || (bestCityScore >= 0.50);
 
-  if (isDuplicate && (hasStrongText || bestTextScore > 0.5)) {
-    // Combined strong visual + text
+  if ((isDuplicate && (hasStrongText || bestTextScore > 0.5)) || (matchedCity && bestCityScore >= 0.65) || (hasStrongText && existingDesign)) {
     confidence = "HIGH";
-  } else if (hasStrongText && existingDesign) {
+  } else if (hasStrongText || (matchedCity && bestCityScore >= 0.50)) {
     confidence = "HIGH";
   } else if ((isVisuallySimilar && hasMediumText) || (hasStrongText && !existingDesign)) {
     confidence = "MEDIUM";
@@ -360,25 +359,23 @@ export async function recogniseStamp(
     confidence = "LOW";
   }
 
-  // If we have no existing design, confidence can't be HIGH
-  if (!existingDesign && confidence === "HIGH") {
-    confidence = "MEDIUM";
+  // 8. Suggested name for design (prefers matched city entity)
+  let suggestedName = matchedCity ? matchedCity.name : "";
+  if (!suggestedName && existingDesign) {
+    suggestedName = existingDesign.name;
+  }
+  if (!suggestedName && ocrTokens.length > 0) {
+    const rawBest = ocrTokens.reduce((a, b) => (a.length >= b.length ? a : b), "");
+    suggestedName = rawBest ? rawBest.charAt(0).toUpperCase() + rawBest.slice(1) : "";
   }
 
-  // 8. Suggested name for new design (best OCR token)
-  const suggestedName = ocrTokens.length > 0
-    ? ocrTokens.reduce((a, b) => (a.length >= b.length ? a : b), "") // longest token
-    : "";
-
   // 9. Suggest category based on OCR/matching
-  let suggestedCategory = existingDesign?.category ?? "SPECIAL";
-  if (!existingDesign) {
-    // Simple heuristics from OCR tokens
+  let suggestedCategory = existingDesign?.category ?? (matchedCity ? "CITY" : "SPECIAL");
+  if (!existingDesign && !matchedCity) {
     const allText = ocrTokens.join(" ");
     if (/^\d{4}$/.test(suggestedName)) suggestedCategory = "YEAR";
     else if (/airport|aeropuerto|terminal/i.test(allText)) suggestedCategory = "AIRPORT";
     else if (/store|tienda/i.test(allText)) suggestedCategory = "STORE";
-    else if (matchedCity) suggestedCategory = "CITY";
   }
 
   return {
@@ -388,10 +385,7 @@ export async function recogniseStamp(
     confidence,
     existingDesign,
     isDuplicate,
-    suggestedName:
-      existingDesign?.name ?? (suggestedName
-        ? suggestedName.charAt(0).toUpperCase() + suggestedName.slice(1)
-        : ""),
+    suggestedName,
     suggestedCategory,
     matchedCity,
   };

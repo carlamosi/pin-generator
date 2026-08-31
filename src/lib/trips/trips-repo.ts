@@ -271,6 +271,41 @@ export async function listStampingLocations(): Promise<StampingLocation[]> {
   return (data ?? []) as StampingLocation[];
 }
 
+export async function findOrCreateStampingLocation(name: string, cityId?: string | null): Promise<StampingLocation | null> {
+  if (!name || !name.trim()) return null;
+  const trimmed = name.trim();
+
+  const { data: existing } = await supabase
+    .from("stamping_locations")
+    .select("*")
+    .ilike("name", trimmed)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    return existing[0] as StampingLocation;
+  }
+
+  const locId = `loc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const recordToSave = {
+    id: locId,
+    name: trimmed,
+    location_type: "LEGO Store",
+    city_id: cityId || null,
+  };
+
+  const { data, error } = await supabase
+    .from("stamping_locations")
+    .insert(recordToSave)
+    .select()
+    .single();
+
+  if (error) {
+    console.warn("[lego-passport] findOrCreateStampingLocation fallback:", error);
+    return recordToSave as unknown as StampingLocation;
+  }
+  return data as StampingLocation;
+}
+
 export async function listPhysicalStamps(): Promise<FullPhysicalStamp[]> {
   const { data, error } = await supabase
     .from("physical_stamps")
