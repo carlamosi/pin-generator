@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -11,26 +11,24 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <div className="flex min-h-screen items-center justify-center bg-[#050508] text-white px-4 orbita-grain">
+      <div className="max-w-md text-center glass-strong p-8 rounded-3xl border border-white/15 shadow-2xl space-y-4">
+        <h1 className="text-7xl font-bold font-display text-cyan">404</h1>
+        <h2 className="text-xl font-semibold text-white">Página no encontrada</h2>
+        <p className="text-sm text-muted-fg">
+          La ruta solicitada no existe o ha sido reubicada.
         </p>
-        <div className="mt-6">
+        <div className="pt-2">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-xl bg-violet px-5 py-2.5 text-xs font-semibold text-white transition-all hover:bg-violet/90 shadow-[0_0_16px_rgba(108,99,255,0.4)]"
           >
-            Go home
+            Ir al Dashboard
           </Link>
         </div>
       </div>
@@ -39,36 +37,45 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  console.error("Root caught error:", error);
   const router = useRouter();
+
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+    <div className="flex min-h-screen items-center justify-center bg-[#050508] text-white p-6 orbita-grain">
+      <div className="max-w-lg w-full glass-strong rounded-3xl p-8 border border-white/15 shadow-2xl text-center space-y-4">
+        <div className="h-12 w-12 rounded-2xl bg-coral/15 border border-coral/30 text-coral flex items-center justify-center mx-auto text-xl shadow-[0_0_20px_rgba(255,107,107,0.3)]">
+          ⚠️
+        </div>
+        <h1 className="font-display text-xl font-bold tracking-tight text-white">
+          Aviso de Ejecución
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+        <p className="text-xs text-muted-fg leading-relaxed">
+          {error?.message || "Se produjo una inconsistencia temporal al renderizar los datos."}
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        {error?.stack && (
+          <pre className="text-[10px] font-mono text-left bg-black/60 p-3 rounded-xl overflow-auto max-h-36 text-white/60 border border-white/10">
+            {error.stack}
+          </pre>
+        )}
+        <div className="pt-2 flex gap-3 justify-center">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="px-5 py-2.5 rounded-xl bg-violet hover:bg-violet/90 text-white font-semibold text-xs transition-all shadow-[0_0_16px_rgba(108,99,255,0.4)]"
           >
-            Try again
+            Reintentar Carga
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/15 transition-all"
           >
-            Go home
+            Volver al Inicio
           </a>
         </div>
       </div>
@@ -89,8 +96,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Pin Collector — Premium Dashboard & Álbum de Viajes" },
       { name: "twitter:description", content: "Dashboard premium para coleccionar pines de viaje, cartulinas satelitales con acuarela y rutas por el mundo." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/38b16a27-74df-428d-a726-fc305bcb81d3/id-preview-0310eaf1--f874af7a-eccd-4b89-a140-2842ebcdb8c9.lovable.app-1784488350268.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/38b16a27-74df-428d-a726-fc305bcb81d3/id-preview-0310eaf1--f874af7a-eccd-4b89-a140-2842ebcdb8c9.lovable.app-1784488350268.png" },
     ],
     links: [
       {
@@ -108,11 +113,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es" className="dark">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-[#050508] text-[#f4f5fb] min-h-screen">
         {children}
         <Scripts />
       </body>
@@ -153,4 +158,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

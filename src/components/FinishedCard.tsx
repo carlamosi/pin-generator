@@ -8,24 +8,29 @@ const ORIGIN_LAT = 41.5632;
 const ORIGIN_LON = 2.0089;
 
 function calculateDistanceAndBearing(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const safeLat1 = Number(lat1) || ORIGIN_LAT;
+  const safeLon1 = Number(lon1) || ORIGIN_LON;
+  const safeLat2 = Number(lat2) || ORIGIN_LAT;
+  const safeLon2 = Number(lon2) || ORIGIN_LON;
+
   const R = 6371; // Earth radius in km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const dLat = ((safeLat2 - safeLat1) * Math.PI) / 180;
+  const dLon = ((safeLon2 - safeLon1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
+    Math.cos((safeLat1 * Math.PI) / 180) *
+      Math.cos((safeLat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
   const d = Math.round(R * c);
 
   // Bearing
-  const y = Math.sin(dLon) * Math.cos((lat2 * Math.PI) / 180);
+  const y = Math.sin(dLon) * Math.cos((safeLat2 * Math.PI) / 180);
   const x =
-    Math.cos((lat1 * Math.PI) / 180) * Math.sin((lat2 * Math.PI) / 180) -
-    Math.sin((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
+    Math.cos((safeLat1 * Math.PI) / 180) * Math.sin((safeLat2 * Math.PI) / 180) -
+    Math.sin((safeLat1 * Math.PI) / 180) *
+      Math.cos((safeLat2 * Math.PI) / 180) *
       Math.cos(dLon);
   let brng = (Math.atan2(y, x) * 180) / Math.PI;
   brng = (brng + 360) % 360;
@@ -94,22 +99,27 @@ export function FinishedCard({
 }: FinishedCardProps) {
   const [hovered, setHovered] = useState(false);
 
-  const coords = useMemo(() => {
-    if (pin.satellite_params?.lat && pin.satellite_params?.lon) {
-      return [pin.satellite_params.lat, pin.satellite_params.lon] as [number, number];
+  const coords = useMemo<[number, number]>(() => {
+    if (!pin) return [ORIGIN_LAT, ORIGIN_LON];
+    if (pin.satellite_params?.lat != null && pin.satellite_params?.lon != null) {
+      const parsedLat = Number(pin.satellite_params.lat);
+      const parsedLon = Number(pin.satellite_params.lon);
+      if (!isNaN(parsedLat) && !isNaN(parsedLon)) {
+        return [parsedLat, parsedLon];
+      }
     }
     if (pin.city && CITY_COORDS[pin.city]) {
       return CITY_COORDS[pin.city];
     }
-    return [ORIGIN_LAT, ORIGIN_LON] as [number, number];
+    return [ORIGIN_LAT, ORIGIN_LON];
   }, [pin]);
 
   const nav = useMemo(() => {
     return calculateDistanceAndBearing(ORIGIN_LAT, ORIGIN_LON, coords[0], coords[1]);
   }, [coords]);
 
-  const flag = pin.country ? COUNTRY_FLAGS[pin.country] ?? "🌍" : "🌍";
-  const zoom = pin.satellite_params?.zoom ?? 14;
+  const flag = pin?.country ? COUNTRY_FLAGS[pin.country] ?? "🌍" : "🌍";
+  const zoom = Number(pin?.satellite_params?.zoom) || 14;
 
   const tileUrl = useMemo(() => {
     const n = Math.pow(2, zoom);
@@ -120,6 +130,18 @@ export function FinishedCard({
     );
     return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${ytile}/${xtile}`;
   }, [coords, zoom]);
+
+  const pinCodeDisplay = useMemo(() => {
+    if (!pin) return "PIN";
+    if (pin.pin_id) return pin.pin_id;
+    if (pin.acquisition_date) {
+      try {
+        const year = new Date(pin.acquisition_date).getFullYear();
+        if (!isNaN(year)) return year.toString();
+      } catch {}
+    }
+    return "PIN";
+  }, [pin]);
 
   return (
     <div
@@ -132,7 +154,7 @@ export function FinishedCard({
         className
       )}
       style={{
-        backgroundColor: "#F4F1E8", // Base museum paper color from config.json
+        backgroundColor: "#F4F1E8",
         boxShadow: hovered
           ? "0 24px 48px -12px rgba(0,0,0,0.9), 0 0 24px -4px rgba(108,99,255,0.4)"
           : "0 8px 24px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1)",
@@ -143,7 +165,7 @@ export function FinishedCard({
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img
           src={tileUrl}
-          alt={pin.city ?? "Map"}
+          alt={pin?.city ?? "Map"}
           className="w-full h-full object-cover"
           style={{
             opacity: 0.72,
@@ -154,7 +176,6 @@ export function FinishedCard({
             (e.currentTarget as HTMLElement).style.display = "none";
           }}
         />
-        {/* Watercolor paper radial diffusion fade */}
         <div
           className="absolute inset-0"
           style={{
@@ -162,7 +183,6 @@ export function FinishedCard({
               "radial-gradient(ellipse at center, transparent 30%, rgba(244, 241, 232, 0.45) 65%, rgba(244, 241, 232, 0.96) 100%)",
           }}
         />
-        {/* Refined museum card inner bezel */}
         <div className="absolute inset-1.5 rounded-xl border border-[#171717]/10 pointer-events-none" />
       </div>
 
@@ -173,12 +193,12 @@ export function FinishedCard({
             className="text-[13px] font-bold tracking-tight text-[#171717] leading-tight"
             style={{ fontFamily: "'Space Grotesk', serif" }}
           >
-            {pin.city ?? "Ciudad"}
+            {pin?.city ?? "Ciudad"}
           </p>
           <div className="flex items-center gap-1">
             <span className="text-[11px] leading-none">{flag}</span>
             <span className="text-[10px] font-semibold text-[#66635C] tracking-wider uppercase font-mono">
-              {pin.country ?? "Mundo"}
+              {pin?.country ?? "Mundo"}
             </span>
           </div>
         </div>
@@ -187,9 +207,9 @@ export function FinishedCard({
         <div
           className={cn(
             "h-4 w-4 rounded-full flex items-center justify-center transition-colors",
-            pin.nfc_uid ? "bg-emerald-600 text-white shadow-[0_0_8px_#00ffb2]" : "bg-[#171717]/10 text-[#66635C]/60"
+            pin?.nfc_uid ? "bg-emerald-600 text-white shadow-[0_0_8px_#00ffb2]" : "bg-[#171717]/10 text-[#66635C]/60"
           )}
-          title={pin.nfc_uid ? `NFC: ${pin.nfc_uid}` : "NFC no vinculado"}
+          title={pin?.nfc_uid ? `NFC: ${pin.nfc_uid}` : "NFC no vinculado"}
         >
           <Wifi className="h-2.5 w-2.5" />
         </div>
@@ -197,7 +217,7 @@ export function FinishedCard({
 
       {/* 3. LAYER PIN CUTOUT (CENTERED) */}
       <div className="relative z-20 flex-1 flex items-center justify-center p-2 min-h-0">
-        {showPinOverlay && pin.transparent_image_url ? (
+        {showPinOverlay && pin?.transparent_image_url ? (
           <img
             src={pin.transparent_image_url}
             alt={pin.city ?? "Pin"}
@@ -218,10 +238,10 @@ export function FinishedCard({
         {/* Pin Code / Coordinates */}
         <div>
           <span className="font-bold text-[#171717] tracking-wider">
-            {pin.pin_id || (pin.acquisition_date ? new Date(pin.acquisition_date).getFullYear() : "PIN")}
+            {pinCodeDisplay}
           </span>
           <p className="text-[8px] opacity-75">
-            {coords[0].toFixed(2)}°, {coords[1].toFixed(2)}°
+            {Number(coords[0]).toFixed(2)}°, {Number(coords[1]).toFixed(2)}°
           </p>
         </div>
 

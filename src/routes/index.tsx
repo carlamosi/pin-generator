@@ -113,15 +113,15 @@ function DashboardPage() {
       setLoading(true);
       try {
         const [tripsData, citiesData, countriesData, pinsData] = await Promise.all([
-          listTrips(),
-          listCities(),
-          listCountries(),
-          listAllPins(),
+          listTrips().catch(() => []),
+          listCities().catch(() => []),
+          listCountries().catch(() => []),
+          listAllPins().catch(() => []),
         ]);
-        setTrips(tripsData);
-        setCities(citiesData);
-        setCountries(countriesData);
-        setPins(pinsData);
+        setTrips(tripsData ?? []);
+        setCities(citiesData ?? []);
+        setCountries(countriesData ?? []);
+        setPins(pinsData ?? []);
       } catch (e) {
         console.error(e);
       } finally {
@@ -131,8 +131,8 @@ function DashboardPage() {
     load();
   }, []);
 
-  const nfcCount = useMemo(() => pins.filter((p) => p.nfc_uid).length, [pins]);
-  const featuredPins = useMemo(() => pins.slice(0, 3), [pins]);
+  const nfcCount = useMemo(() => (pins ?? []).filter((p) => p?.nfc_uid).length, [pins]);
+  const featuredPins = useMemo(() => (pins ?? []).slice(0, 3), [pins]);
 
   return (
     <div className="space-y-8 animate-float-in max-w-7xl mx-auto pb-12">
@@ -246,27 +246,34 @@ function DashboardPage() {
             </div>
 
             <div className="divide-y divide-white/[0.06]">
-              {trips.slice(0, 5).map((trip) => (
-                <div
-                  key={trip.id}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.03] transition-colors"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 text-base">
-                      {trip.transport === "Avión" ? "✈️" : trip.transport === "AVE/Tren" ? "🚆" : "🚗"}
+              {trips.slice(0, 5).map((trip) => {
+                let yearStr = "—";
+                if (trip.start_date) {
+                  try {
+                    const y = new Date(trip.start_date).getFullYear();
+                    if (!isNaN(y)) yearStr = y.toString();
+                  } catch {}
+                }
+                return (
+                  <div
+                    key={trip.id}
+                    className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.03] transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 text-base">
+                        {trip.transport === "Avión" ? "✈️" : trip.transport === "AVE/Tren" ? "🚆" : "🚗"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-white truncate">{trip.name}</p>
+                        <p className="text-xs text-muted-fg truncate mt-0.5">{trip.description}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm text-white truncate">{trip.name}</p>
-                      <p className="text-xs text-muted-fg truncate mt-0.5">{trip.description}</p>
-                    </div>
-                  </div>
-                  {trip.start_date && (
                     <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-muted-fg flex-shrink-0 ml-3">
-                      {new Date(trip.start_date).getFullYear()}
+                      {yearStr}
                     </span>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -280,12 +287,12 @@ function DashboardPage() {
             </h3>
             <div className="space-y-2.5 pt-1">
               <QuickAction
-                icon={Wand2}
-                label="El Estudio"
-                description="Subir fotos sueltas, lote ZIP o cámara"
-                to="/studio"
-                glowColor="shadow-[0_0_20px_-4px_rgba(0,212,255,0.5)]"
-                iconColor="text-cyan"
+                icon={Compass}
+                label="Mis Viajes"
+                description="Gestión integral de rutas y ciudades"
+                to="/trips"
+                glowColor="shadow-[0_0_20px_-4px_rgba(108,99,255,0.5)]"
+                iconColor="text-violet"
               />
               <QuickAction
                 icon={BookImage}
@@ -302,14 +309,6 @@ function DashboardPage() {
                 to="/generator"
                 glowColor="shadow-[0_0_20px_-4px_rgba(0,255,178,0.5)]"
                 iconColor="text-neon"
-              />
-              <QuickAction
-                icon={Compass}
-                label="Mis Viajes"
-                description="Gestión integral de rutas y ciudades"
-                to="/trips"
-                glowColor="shadow-[0_0_20px_-4px_rgba(108,99,255,0.5)]"
-                iconColor="text-violet"
               />
             </div>
           </div>

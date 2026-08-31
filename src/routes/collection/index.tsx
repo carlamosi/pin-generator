@@ -2,8 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  BookImage, Wifi, ChevronLeft, ChevronRight, Filter,
-  Calendar, Layers, Sparkles, MapPin, Search, ArrowUpDown,
+  BookImage, Wifi, ChevronLeft, ChevronRight,
+  Sparkles, Search, ArrowUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +16,12 @@ import {
 } from "@/components/ui/dialog";
 import { FinishedCard } from "@/components/FinishedCard";
 import { listAllPins, listCountries, type FullPin, type Country, upsertFullPin } from "@/lib/trips/trips-repo";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/collection/")({
   component: CollectionPage,
 });
 
-const PINS_PER_PAGE = 12; // 3 columns x 4 rows per physical page
+const PINS_PER_PAGE = 12;
 
 function CollectionPage() {
   const [pins, setPins] = useState<FullPin[]>([]);
@@ -34,7 +33,7 @@ function CollectionPage() {
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [search, setSearch] = useState("");
-  const [sortAsc, setSortAsc] = useState(true); // Chronological
+  const [sortAsc, setSortAsc] = useState(true);
 
   // Inspection Modal
   const [inspectPin, setInspectPin] = useState<FullPin | null>(null);
@@ -44,11 +43,14 @@ function CollectionPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [pinsData, countriesData] = await Promise.all([listAllPins(), listCountries()]);
-      setPins(pinsData);
-      setCountries(countriesData);
+      const [pinsData, countriesData] = await Promise.all([
+        listAllPins().catch(() => []),
+        listCountries().catch(() => []),
+      ]);
+      setPins(pinsData ?? []);
+      setCountries(countriesData ?? []);
     } catch {
-      toast.error("Error al cargar la colección");
+      toast.error("Aviso al consultar la base de datos");
     } finally {
       setLoading(false);
     }
@@ -62,19 +64,27 @@ function CollectionPage() {
     const years = new Set<string>();
     pins.forEach((p) => {
       if (p.acquisition_date) {
-        years.add(new Date(p.acquisition_date).getFullYear().toString());
+        try {
+          const y = new Date(p.acquisition_date).getFullYear();
+          if (!isNaN(y)) years.add(y.toString());
+        } catch {}
       }
     });
     return Array.from(years).sort();
   }, [pins]);
 
   const filteredPins = useMemo(() => {
-    return pins
+    return (pins ?? [])
       .filter((p) => {
+        if (!p) return false;
         if (selectedCountry !== "all" && p.country !== selectedCountry) return false;
         if (selectedYear !== "all") {
-          const year = p.acquisition_date ? new Date(p.acquisition_date).getFullYear().toString() : "";
-          if (year !== selectedYear) return false;
+          try {
+            const year = p.acquisition_date ? new Date(p.acquisition_date).getFullYear().toString() : "";
+            if (year !== selectedYear) return false;
+          } catch {
+            return false;
+          }
         }
         if (search) {
           const s = search.toLowerCase();
@@ -203,7 +213,6 @@ function CollectionPage() {
 
       {/* Cinematic Physical Sheet Container (3 cols x 4 rows) */}
       <div className="glass-strong rounded-3xl p-8 relative overflow-hidden border border-white/15 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9)]">
-        {/* Subtle grid watermark */}
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-coral shadow-[0_0_8px_#ff6b6b]" />
@@ -288,12 +297,10 @@ function CollectionPage() {
                 </DialogTitle>
               </DialogHeader>
 
-              {/* High-res Card Display */}
               <div className="w-60 mx-auto drop-shadow-2xl">
                 <FinishedCard pin={inspectPin} />
               </div>
 
-              {/* NFC Hardware Association */}
               <div className="glass rounded-2xl p-5 space-y-3 border border-white/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
