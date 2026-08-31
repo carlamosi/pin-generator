@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Globe2, Wand2, BookImage, Satellite, Compass, Sparkles, Wifi,
@@ -62,8 +62,8 @@ export function AppSidebar() {
       {/* Brand Header */}
       <SidebarHeader className="p-4 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet to-cyan flex items-center justify-center shadow-[0_0_16px_-4px_rgba(99,102,241,0.5)] flex-shrink-0">
-            <Sparkles className="h-4 w-4 text-white" />
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet to-cyan flex items-center justify-center flex-shrink-0">
+            <Globe2 className="h-4 w-4 text-white" />
           </div>
           {!isCollapsed && (
             <div className="min-w-0 transition-opacity duration-200">

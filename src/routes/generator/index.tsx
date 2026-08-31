@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { toast } from "sonner";
 import {
@@ -152,11 +152,6 @@ function GeneratorPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] font-mono tracking-widest text-neon uppercase bg-neon/10 px-2.5 py-1 rounded-full border border-neon/20">
-              
-            </span>
-          </div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
             Centro Satelital
           </h2>

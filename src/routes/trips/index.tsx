@@ -28,29 +28,78 @@ export const Route = createFileRoute("/trips/")({
 
 const KNOWN_CITIES_GEO: Record<string, { country: string; region: string; continent: string }> = {
   "copenhague": { country: "Dinamarca", region: "Hovedstaden", continent: "Europa" },
+  "copenhagen": { country: "Dinamarca", region: "Hovedstaden", continent: "Europa" },
   "hillerod": { country: "Dinamarca", region: "Hillerød", continent: "Europa" },
-  "malmo": { country: "Suecia", region: "Skåne", continent: "Europa" },
+  "helsingor": { country: "Dinamarca", region: "Hovedstaden", continent: "Europa" },
+  "roskilde": { country: "Dinamarca", region: "Sjælland", continent: "Europa" },
   "christiania": { country: "Dinamarca", region: "Hovedstaden", continent: "Europa" },
-  "madrid": { country: "España", region: "Madrid", continent: "Europa" },
-  "barcelona": { country: "España", region: "Catalunya", continent: "Europa" },
-  "gante": { country: "Bélgica", region: "Flandes", continent: "Europa" },
-  "brujas": { country: "Bélgica", region: "Flandes", continent: "Europa" },
-  "bruselas": { country: "Bélgica", region: "Bruselas", continent: "Europa" },
-  "amberes": { country: "Bélgica", region: "Flandes", continent: "Europa" },
-  "lisboa": { country: "Portugal", region: "Lisboa", continent: "Europa" },
-  "sintra": { country: "Portugal", region: "Lisboa", continent: "Europa" },
-  "coimbra": { country: "Portugal", region: "Centro", continent: "Europa" },
+  "malmo": { country: "Suecia", region: "Skåne", continent: "Europa" },
+  "estocolmo": { country: "Suecia", region: "Stockholm", continent: "Europa" },
+  "gotemburgo": { country: "Suecia", region: "Västra Götaland", continent: "Europa" },
+  "oslo": { country: "Noruega", region: "Østlandet", continent: "Europa" },
+  "bergen": { country: "Noruega", region: "Vestland", continent: "Europa" },
+  "helsinki": { country: "Finlandia", region: "Uusimaa", continent: "Europa" },
+  "madrid": { country: "España", region: "Comunidad de Madrid", continent: "Europa" },
+  "barcelona": { country: "España", region: "Cataluña", continent: "Europa" },
+  "sevilla": { country: "España", region: "Andalucía", continent: "Europa" },
+  "valencia": { country: "España", region: "Comunidad Valenciana", continent: "Europa" },
+  "bilbao": { country: "España", region: "País Vasco", continent: "Europa" },
+  "san sebastian": { country: "España", region: "País Vasco", continent: "Europa" },
+  "donostia": { country: "España", region: "País Vasco", continent: "Europa" },
+  "salamanca": { country: "España", region: "Castilla y León", continent: "Europa" },
+  "alicante": { country: "España", region: "Comunidad Valenciana", continent: "Europa" },
+  "granada": { country: "España", region: "Andalucía", continent: "Europa" },
+  "cordoba": { country: "España", region: "Andalucía", continent: "Europa" },
+  "malaga": { country: "España", region: "Andalucía", continent: "Europa" },
+  "toledo": { country: "España", region: "Castilla-La Mancha", continent: "Europa" },
+  "zaragoza": { country: "España", region: "Aragón", continent: "Europa" },
+  "santiago de compostela": { country: "España", region: "Galicia", continent: "Europa" },
+  "a coruna": { country: "España", region: "Galicia", continent: "Europa" },
+  "pontevedra": { country: "España", region: "Galicia", continent: "Europa" },
+  "vigo": { country: "España", region: "Galicia", continent: "Europa" },
+  "pamplona": { country: "España", region: "Navarra", continent: "Europa" },
+  "oviedo": { country: "España", region: "Asturias", continent: "Europa" },
+  "gijon": { country: "España", region: "Asturias", continent: "Europa" },
+  "santander": { country: "España", region: "Cantabria", continent: "Europa" },
+  "palma": { country: "España", region: "Islas Baleares", continent: "Europa" },
+  "palma de mallorca": { country: "España", region: "Islas Baleares", continent: "Europa" },
+  "ibiza": { country: "España", region: "Islas Baleares", continent: "Europa" },
+  "bruselas": { country: "Bélgica", region: "Región de Bruselas", continent: "Europa" },
+  "gante": { country: "Bélgica", region: "Flandes Oriental", continent: "Europa" },
+  "brujas": { country: "Bélgica", region: "Flandes Occidental", continent: "Europa" },
+  "amberes": { country: "Bélgica", region: "Provincia de Amberes", continent: "Europa" },
+  "lovaina": { country: "Bélgica", region: "Brabante Flamenco", continent: "Europa" },
+  "amsterdam": { country: "Países Bajos", region: "Holanda Septentrional", continent: "Europa" },
+  "roterdam": { country: "Países Bajos", region: "Holanda Meridional", continent: "Europa" },
+  "rotterdam": { country: "Países Bajos", region: "Holanda Meridional", continent: "Europa" },
+  "la haya": { country: "Países Bajos", region: "Holanda Meridional", continent: "Europa" },
+  "utrecht": { country: "Países Bajos", region: "Provincia de Utrecht", continent: "Europa" },
+  "lisboa": { country: "Portugal", region: "Área Metropolitana de Lisboa", continent: "Europa" },
+  "porto": { country: "Portugal", region: "Norte", continent: "Europa" },
+  "oporto": { country: "Portugal", region: "Norte", continent: "Europa" },
+  "sintra": { country: "Portugal", region: "Gran Lisboa", continent: "Europa" },
+  "coimbra": { country: "Portugal", region: "Região Centro", continent: "Europa" },
   "nazare": { country: "Portugal", region: "Leiria", continent: "Europa" },
   "fatima": { country: "Portugal", region: "Santarém", continent: "Europa" },
-  "salamanca": { country: "España", region: "Castilla y León", continent: "Europa" },
-  "alicante": { country: "España", region: "Valencia", continent: "Europa" },
-  "roterdam": { country: "Países Bajos", region: "Holanda Meridional", continent: "Europa" },
-  "ciudad del cabo": { country: "Sudáfrica", region: "Western Cape", continent: "África" },
-  "andorra la vella": { country: "Andorra", region: "Andorra", continent: "Europa" },
+  "paris": { country: "Francia", region: "Île-de-France", continent: "Europa" },
+  "londres": { country: "Reino Unido", region: "Gran Londres", continent: "Europa" },
+  "roma": { country: "Italia", region: "Lacio", continent: "Europa" },
+  "berlin": { country: "Alemania", region: "Berlín", continent: "Europa" },
+  "ciudad del cabo": { country: "Sudáfrica", region: "Cabo Occidental", continent: "África" },
+  "andorra la vella": { country: "Andorra", region: "Andorra la Vella", continent: "Europa" },
 };
 
 function normalizeName(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+interface TempCityEntry {
+  id?: string;
+  name: string;
+  country: string;
+  region: string;
+  date: string;
+  hasPin: boolean;
 }
 
 function TripsPage() {
@@ -64,7 +113,6 @@ function TripsPage() {
   const [activeTab, setActiveTab] = useState<"trips" | "cities">("trips");
   const [showPinCode, setShowPinCode] = useState(false);
 
-  // Trip modal
   const [tripModalOpen, setTripModalOpen] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [tripName, setTripName] = useState("");
@@ -73,14 +121,14 @@ function TripsPage() {
   const [tripEndDate, setTripEndDate] = useState("");
   const [tripTransport, setTripTransport] = useState("Avión");
   const [tripPurpose, setTripPurpose] = useState("Vacaciones familiares");
-  const [tripNotes, setTripNotes] = useState("");
+  const [tripCitiesList, setTripCitiesList] = useState<TempCityEntry[]>([]);
+  const [tempCityInput, setTempCityInput] = useState("");
+  const [tempCityDateInput, setTempCityDateInput] = useState("");
+  const [tempCityPinInput, setTempCityPinInput] = useState(true);
   const [tripSaving, setTripSaving] = useState(false);
-  const [tripNewCityName, setTripNewCityName] = useState("");
-  const [tripNewCityHasPin, setTripNewCityHasPin] = useState(true);
-  const [tripNewCityDate, setTripNewCityDate] = useState("");
 
-  // City modal
   const [cityModalOpen, setCityModalOpen] = useState(false);
+  const [editingCity, setEditingCity] = useState<City | null>(null);
   const [cityName, setCityName] = useState("");
   const [cityCountry, setCityCountry] = useState("España");
   const [cityRegion, setCityRegion] = useState("");
@@ -115,14 +163,41 @@ function TripsPage() {
     setCityName(val);
     const norm = normalizeName(val);
     const geo = KNOWN_CITIES_GEO[norm];
-    if (geo) { setCityCountry(geo.country); setCityRegion(geo.region); setCityContinent(geo.continent); }
+    if (geo) {
+      setCityCountry(geo.country);
+      setCityRegion(geo.region);
+      setCityContinent(geo.continent);
+    }
+  };
+
+  const addCityToTripList = () => {
+    if (!tempCityInput.trim()) return;
+    const norm = normalizeName(tempCityInput);
+    const geo = KNOWN_CITIES_GEO[norm] ?? { country: "España", region: "", continent: "Europa" };
+    setTripCitiesList((prev) => [
+      ...prev,
+      {
+        name: tempCityInput.trim(),
+        country: geo.country,
+        region: geo.region,
+        date: tempCityDateInput || tripStartDate || "",
+        hasPin: tempCityPinInput,
+      },
+    ]);
+    setTempCityInput("");
+    setTempCityDateInput("");
+  };
+
+  const removeCityFromTripList = (idx: number) => {
+    setTripCitiesList((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const openCreateTrip = () => {
     setEditingTrip(null);
     setTripName(""); setTripDescription(""); setTripStartDate(""); setTripEndDate("");
-    setTripTransport("Avión"); setTripPurpose("Vacaciones familiares"); setTripNotes("");
-    setTripNewCityName(""); setTripNewCityHasPin(true); setTripNewCityDate("");
+    setTripTransport("Avión"); setTripPurpose("Vacaciones familiares");
+    setTripCitiesList([]);
+    setTempCityInput(""); setTempCityDateInput(""); setTempCityPinInput(true);
     setTripModalOpen(true);
   };
 
@@ -131,7 +206,17 @@ function TripsPage() {
     setTripName(t.name); setTripDescription(t.notes ?? "");
     setTripStartDate(t.start_date ?? ""); setTripEndDate(t.end_date ?? "");
     setTripTransport(t.transport ?? "Avión"); setTripPurpose(t.description ?? "Vacaciones familiares");
-    setTripNotes(t.notes ?? ""); setTripNewCityName(""); setTripNewCityHasPin(true); setTripNewCityDate("");
+    
+    const existing = cities.filter((c) => c.trip_id === t.id).map((c) => ({
+      id: c.id,
+      name: c.name,
+      country: c.country,
+      region: c.region ?? "",
+      date: c.start_date ?? "",
+      hasPin: c.has_pin,
+    }));
+    setTripCitiesList(existing);
+    setTempCityInput(""); setTempCityDateInput(""); setTempCityPinInput(true);
     setTripModalOpen(true);
   };
 
@@ -141,47 +226,154 @@ function TripsPage() {
     try {
       let savedTripId = editingTrip?.id;
       if (editingTrip) {
-        await updateTrip(editingTrip.id, { name: tripName, description: tripPurpose, start_date: tripStartDate || null, end_date: tripEndDate || null, transport: tripTransport, notes: tripDescription });
+        await updateTrip(editingTrip.id, {
+          name: tripName,
+          description: tripPurpose,
+          start_date: tripStartDate || null,
+          end_date: tripEndDate || null,
+          transport: tripTransport,
+          notes: tripDescription,
+        });
         toast.success("Viaje actualizado");
       } else {
-        const created = await insertTrip({ name: tripName, description: tripPurpose, start_date: tripStartDate || null, end_date: tripEndDate || null, transport: tripTransport, notes: tripDescription });
+        const created = await insertTrip({
+          name: tripName,
+          description: tripPurpose,
+          start_date: tripStartDate || null,
+          end_date: tripEndDate || null,
+          transport: tripTransport,
+          notes: tripDescription,
+        });
         savedTripId = created.id;
         toast.success("Viaje creado con éxito");
       }
-      if (tripNewCityName.trim() && savedTripId) {
-        const norm = normalizeName(tripNewCityName);
-        const geo = KNOWN_CITIES_GEO[norm] ?? { country: "España", region: "", continent: "Europa" };
-        await supabase.from("cities").insert({ trip_id: savedTripId, name: tripNewCityName.trim(), country: geo.country, region: geo.region || null, continent: geo.continent, start_date: tripNewCityDate || tripStartDate || null, end_date: tripNewCityDate || tripEndDate || null, has_pin: tripNewCityHasPin, pin_code: `${tripNewCityName.slice(0,3).toUpperCase()}-${new Date().getFullYear()}` });
-        toast.success(`Ciudad ${tripNewCityName} añadida ✓`);
+
+      if (savedTripId && tripCitiesList.length > 0) {
+        for (const c of tripCitiesList) {
+          if (!c.id) {
+            const norm = normalizeName(c.name);
+            const geo = KNOWN_CITIES_GEO[norm] ?? { country: c.country || "España", region: c.region || "", continent: "Europa" };
+            await supabase.from("cities").insert({
+              trip_id: savedTripId,
+              name: c.name,
+              country: geo.country,
+              region: geo.region || null,
+              continent: geo.continent,
+              start_date: c.date || tripStartDate || null,
+              end_date: c.date || tripEndDate || null,
+              has_pin: c.hasPin,
+              pin_code: `${c.name.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`,
+            });
+          }
+        }
       }
+
       setTripModalOpen(false);
       loadData();
-    } catch { toast.error("Error al guardar el viaje"); }
-    finally { setTripSaving(false); }
+    } catch {
+      toast.error("Error al guardar el viaje");
+    } finally {
+      setTripSaving(false);
+    }
   };
 
   const handleDeleteTrip = async (id: string) => {
-    if (!confirm("¿Eliminar este viaje?")) return;
-    try { await deleteTrip(id); toast.success("Viaje eliminado"); loadData(); }
-    catch { toast.error("Error al eliminar"); }
+    if (!confirm("¿Eliminar este viaje y desvincular sus ciudades?")) return;
+    try {
+      await deleteTrip(id);
+      toast.success("Viaje eliminado");
+      loadData();
+    } catch {
+      toast.error("Error al eliminar");
+    }
+  };
+
+  const openCreateCity = () => {
+    setEditingCity(null);
+    setCityName(""); setCityCountry("España"); setCityRegion(""); setCityContinent("Europa");
+    setCityStartDate(""); setCityEndDate(""); setCityHasPin(true); setCityTripId("none");
+    setCityModalOpen(true);
+  };
+
+  const openEditCity = (c: City) => {
+    setEditingCity(c);
+    setCityName(c.name);
+    setCityCountry(c.country);
+    setCityRegion(c.region ?? "");
+    setCityContinent(c.continent ?? "Europa");
+    setCityStartDate(c.start_date ?? "");
+    setCityEndDate(c.end_date ?? "");
+    setCityHasPin(c.has_pin);
+    setCityTripId(c.trip_id ?? "none");
+    setCityModalOpen(true);
   };
 
   const handleSaveCity = async () => {
     if (!cityName.trim()) { toast.error("El nombre de la ciudad es obligatorio"); return; }
     setCitySaving(true);
     try {
-      const { error } = await supabase.from("cities").insert({ trip_id: cityTripId === "none" ? null : cityTripId, name: cityName.trim(), country: cityCountry.trim() || "España", region: cityRegion.trim() || null, continent: cityContinent.trim() || "Europa", start_date: cityStartDate || null, end_date: cityEndDate || null, has_pin: cityHasPin, pin_code: `${cityName.slice(0,3).toUpperCase()}-${new Date().getFullYear()}` });
-      if (error) throw error;
-      toast.success("Ciudad registrada ✓");
-      setCityModalOpen(false); setCityName(""); setCityRegion(""); setCityStartDate(""); setCityEndDate("");
+      const norm = normalizeName(cityName);
+      const geo = KNOWN_CITIES_GEO[norm];
+      const finalRegion = cityRegion.trim() || geo?.region || null;
+      const finalCountry = cityCountry.trim() || geo?.country || "España";
+      const finalContinent = cityContinent.trim() || geo?.continent || "Europa";
+
+      if (editingCity) {
+        const { error } = await supabase.from("cities").update({
+          trip_id: cityTripId === "none" ? null : cityTripId,
+          name: cityName.trim(),
+          country: finalCountry,
+          region: finalRegion,
+          continent: finalContinent,
+          start_date: cityStartDate || null,
+          end_date: cityEndDate || null,
+          has_pin: cityHasPin,
+        }).eq("id", editingCity.id);
+        if (error) throw error;
+        toast.success("Ciudad modificada ✓");
+      } else {
+        const { error } = await supabase.from("cities").insert({
+          trip_id: cityTripId === "none" ? null : cityTripId,
+          name: cityName.trim(),
+          country: finalCountry,
+          region: finalRegion,
+          continent: finalContinent,
+          start_date: cityStartDate || null,
+          end_date: cityEndDate || null,
+          has_pin: cityHasPin,
+          pin_code: `${cityName.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`,
+        });
+        if (error) throw error;
+        toast.success("Ciudad registrada ✓");
+      }
+
+      setCityModalOpen(false);
       loadData();
-    } catch { toast.error("Error al guardar la ciudad"); }
-    finally { setCitySaving(false); }
+    } catch {
+      toast.error("Error al guardar la ciudad");
+    } finally {
+      setCitySaving(false);
+    }
+  };
+
+  const handleDeleteCity = async (id: string) => {
+    if (!confirm("¿Eliminar esta ciudad del registro?")) return;
+    try {
+      const { error } = await supabase.from("cities").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Ciudad eliminada");
+      loadData();
+    } catch {
+      toast.error("Error al eliminar la ciudad");
+    }
   };
 
   const filteredTrips = useMemo(() => trips.filter((t) => {
     if (filterTransport !== "all" && t.transport !== filterTransport) return false;
-    if (search) { const s = search.toLowerCase(); return t.name.toLowerCase().includes(s) || !!t.description?.toLowerCase().includes(s); }
+    if (search) {
+      const s = search.toLowerCase();
+      return t.name.toLowerCase().includes(s) || !!t.description?.toLowerCase().includes(s);
+    }
     return true;
   }), [trips, filterTransport, search]);
 
@@ -196,10 +388,10 @@ function TripsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">Mis Viajes</h2>
-          <p className="text-muted-fg text-xs mt-1 leading-relaxed">Historial de rutas, transportes, ciudades y registro de pines.</p>
+          <p className="text-muted-fg text-xs mt-1 leading-relaxed">Historial de expediciones, transportes, múltiples ciudades y registro de pines.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button onClick={() => setCityModalOpen(true)} variant="outline" className="border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs h-10 px-4 rounded-xl gap-2">
+          <Button onClick={openCreateCity} variant="outline" className="border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs h-10 px-4 rounded-xl gap-2">
             <Building2 className="h-4 w-4 text-cyan" /> Añadir Ciudad
           </Button>
           <Button onClick={openCreateTrip} className="bg-gradient-to-r from-violet to-cyan text-white font-semibold text-xs px-5 h-10 rounded-xl shadow-[0_0_20px_-4px_rgba(108,99,255,0.5)] gap-2 hover:opacity-95">
@@ -252,42 +444,60 @@ function TripsPage() {
               <thead className="bg-white/[0.03] text-muted-fg font-medium text-[11px] border-b border-white/10">
                 <tr>
                   <th className="py-3.5 px-5">Transporte</th>
-                  <th className="py-3.5 px-5">Viaje</th>
+                  <th className="py-3.5 px-5">Nombre del Viaje</th>
+                  <th className="py-3.5 px-5">Ciudades</th>
                   <th className="py-3.5 px-5">Motivo</th>
                   <th className="py-3.5 px-5">Fechas</th>
                   <th className="py-3.5 px-5 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.05]">
-                {filteredTrips.map((t) => (
-                  <tr key={t.id} className="hover:bg-white/[0.025] transition-colors">
-                    <td className="py-3.5 px-5">
-                      <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium",
-                        t.transport === "Avión" && "bg-gradient-to-r from-cyan/20 to-cyan/5 text-cyan border border-cyan/20",
-                        t.transport === "AVE/Tren" && "bg-gradient-to-r from-violet/20 to-violet/5 text-violet border border-violet/20",
-                        t.transport === "Coche" && "bg-gradient-to-r from-coral/20 to-coral/5 text-coral border border-coral/20"
-                      )}>
-                        {t.transport === "Avión" && <Plane className="h-3 w-3" />}
-                        {t.transport === "AVE/Tren" && <Train className="h-3 w-3" />}
-                        {t.transport === "Coche" && <Car className="h-3 w-3" />}
-                        {t.transport || "Avión"}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-5 min-w-[200px]">
-                      <p className="font-semibold text-white">{t.name}</p>
-                      {t.notes && <p className="text-muted-fg text-[11px] truncate max-w-xs mt-0.5">{t.notes}</p>}
-                    </td>
-                    <td className="py-3.5 px-5 text-muted-fg">{t.description || "—"}</td>
-                    <td className="py-3.5 px-5 text-muted-fg whitespace-nowrap">
-                      {t.start_date ? new Date(t.start_date).toLocaleDateString("es") : "—"}
-                      {t.end_date && ` → ${new Date(t.end_date).toLocaleDateString("es")}`}
-                    </td>
-                    <td className="py-3.5 px-5 text-right space-x-1.5">
-                      <Button variant="ghost" size="sm" onClick={() => openEditTrip(t)} className="h-7 w-7 p-0 text-muted-fg hover:text-white hover:bg-white/10 rounded-md"><Edit3 className="h-3.5 w-3.5" /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteTrip(t.id)} className="h-7 w-7 p-0 text-coral/70 hover:text-coral hover:bg-coral/10 rounded-md"><Trash2 className="h-3.5 w-3.5" /></Button>
-                    </td>
-                  </tr>
-                ))}
+                {filteredTrips.map((t) => {
+                  const tripCities = cities.filter((c) => c.trip_id === t.id);
+
+                  return (
+                    <tr key={t.id} className="hover:bg-white/[0.025] transition-colors">
+                      <td className="py-3.5 px-5">
+                        <span className="inline-flex items-center gap-1.5 font-medium text-[11px] text-cyan">
+                          {t.transport === "Avión" && <Plane className="h-3.5 w-3.5" />}
+                          {t.transport === "AVE/Tren" && <Train className="h-3.5 w-3.5 text-violet" />}
+                          {t.transport === "Coche" && <Car className="h-3.5 w-3.5 text-coral" />}
+                          {t.transport}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-5 min-w-[180px]">
+                        <p className="font-semibold text-white">{t.name}</p>
+                        {t.notes && <p className="text-muted-fg text-[11px] truncate max-w-xs mt-0.5">{t.notes}</p>}
+                      </td>
+                      <td className="py-3.5 px-5">
+                        {tripCities.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {tripCities.map((tc) => (
+                              <span key={tc.id} className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white/80">
+                                {tc.name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-muted-fg text-[11px]">—</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-5 text-muted-fg">{t.description || "—"}</td>
+                      <td className="py-3.5 px-5 text-muted-fg whitespace-nowrap">
+                        {t.start_date ? new Date(t.start_date).toLocaleDateString("es") : "—"}
+                        {t.end_date && ` → ${new Date(t.end_date).toLocaleDateString("es")}`}
+                      </td>
+                      <td className="py-3.5 px-5 text-right whitespace-nowrap space-x-1">
+                        <Button variant="ghost" size="sm" onClick={() => openEditTrip(t)} className="h-7 w-7 p-0 text-muted-fg hover:text-white rounded-lg">
+                          <Edit3 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteTrip(t.id)} className="h-7 w-7 p-0 text-coral hover:text-white hover:bg-coral/20 rounded-lg">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -303,6 +513,7 @@ function TripsPage() {
                   <th className="py-3.5 px-5">Fecha Inicio / Fin</th>
                   <th className="py-3.5 px-5">Pin Físico</th>
                   {showPinCode && <th className="py-3.5 px-5 font-mono">Código</th>}
+                  <th className="py-3.5 px-5 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.05]">
@@ -324,6 +535,14 @@ function TripsPage() {
                       }
                     </td>
                     {showPinCode && <td className="py-3.5 px-5 font-mono text-cyan text-[11px]">{c.pin_code ?? "—"}</td>}
+                    <td className="py-3.5 px-5 text-right whitespace-nowrap space-x-1">
+                      <Button variant="ghost" size="sm" onClick={() => openEditCity(c)} className="h-7 w-7 p-0 text-muted-fg hover:text-white rounded-lg">
+                        <Edit3 className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteCity(c.id)} className="h-7 w-7 p-0 text-coral hover:text-white hover:bg-coral/20 rounded-lg">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -332,7 +551,7 @@ function TripsPage() {
         </div>
       )}
 
-      {/* Trip Modal */}
+      {/* Trip Modal (Create / Edit with MULTI-CITY Support) */}
       <Dialog open={tripModalOpen} onOpenChange={setTripModalOpen}>
         <DialogContent className="max-w-xl bg-[#09090e] border-white/15 text-white rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
@@ -341,7 +560,7 @@ function TripsPage() {
           <div className="space-y-4 pt-2">
             <div>
               <label className="text-xs font-medium text-muted-fg mb-1 block">Nombre del Viaje</label>
-              <Input placeholder="Ej: Copenhague y Malmö" value={tripName} onChange={(e) => setTripName(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
+              <Input placeholder="Ej: Dinamarca y Suecia 2024" value={tripName} onChange={(e) => setTripName(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -380,17 +599,62 @@ function TripsPage() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-fg mb-1 block">Descripción de Ruta</label>
+              <label className="text-xs font-medium text-muted-fg mb-1 block">Descripción de Ruta / Notas</label>
               <Input placeholder="Ej: Copenhague, Hillerød, Christiania, Malmö" value={tripDescription} onChange={(e) => setTripDescription(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
             </div>
-            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2">
-              <span className="text-xs font-medium text-cyan block">+ Ciudad visitada en este viaje (opcional)</span>
+
+            {/* MULTI-CITY BUILDER IN TRIP */}
+            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-cyan block">Ciudades añadidas a este viaje ({tripCitiesList.length})</span>
+              </div>
+
+              {tripCitiesList.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tripCitiesList.map((c, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg text-xs">
+                      <span className="text-white font-medium">{c.name}</span>
+                      {c.region && <span className="text-[10px] text-muted-fg">({c.region})</span>}
+                      {c.hasPin && <span className="text-[10px] text-emerald-400">✓ Pin</span>}
+                      {!c.id && (
+                        <button type="button" onClick={() => removeCityFromTripList(idx)} className="text-coral hover:text-white ml-1">
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="flex gap-2">
-                <Input placeholder="Ciudad (ej: Malmö)" value={tripNewCityName} onChange={(e) => setTripNewCityName(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs h-8 rounded-lg flex-1" />
-                <Input type="date" value={tripNewCityDate} onChange={(e) => setTripNewCityDate(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs h-8 rounded-lg w-36" />
-                <button type="button" onClick={() => setTripNewCityHasPin(!tripNewCityHasPin)} className={cn("text-[11px] font-medium h-8 px-3 rounded-lg border transition-colors whitespace-nowrap", tripNewCityHasPin ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-white/5 text-muted-fg border-white/10")}>
-                  {tripNewCityHasPin ? "✓ Pin" : "Sin pin"}
+                <Input
+                  placeholder="Añadir ciudad (ej: Copenhagen, Malmö...)"
+                  value={tempCityInput}
+                  onChange={(e) => setTempCityInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCityToTripList(); } }}
+                  className="bg-white/5 border-white/10 text-white text-xs h-8 rounded-lg flex-1"
+                />
+                <Input
+                  type="date"
+                  value={tempCityDateInput}
+                  onChange={(e) => setTempCityDateInput(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white text-xs h-8 rounded-lg w-32"
+                />
+                <button
+                  type="button"
+                  onClick={() => setTempCityPinInput(!tempCityPinInput)}
+                  className={cn("text-[11px] font-medium h-8 px-2.5 rounded-lg border transition-colors whitespace-nowrap", tempCityPinInput ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-white/5 text-muted-fg border-white/10")}
+                >
+                  {tempCityPinInput ? "✓ Pin" : "Sin pin"}
                 </button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={addCityToTripList}
+                  className="h-8 text-xs bg-white/10 hover:bg-white/15 text-white rounded-lg px-3"
+                >
+                  Añadir
+                </Button>
               </div>
             </div>
           </div>
@@ -403,17 +667,17 @@ function TripsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* City Modal */}
+      {/* City Modal (Add / Edit) */}
       <Dialog open={cityModalOpen} onOpenChange={setCityModalOpen}>
         <DialogContent className="max-w-lg bg-[#09090e] border-white/15 text-white rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="font-display text-base font-bold">Añadir Ciudad</DialogTitle>
+            <DialogTitle className="font-display text-base font-bold">{editingCity ? "Editar Ciudad" : "Añadir Ciudad"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
               <label className="text-xs font-medium text-muted-fg mb-1 block">Nombre de la Ciudad</label>
-              <Input placeholder="Escribe la ciudad (ej: Malmö, Copenhague...)" value={cityName} onChange={(e) => handleCityNameChange(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
-              <span className="text-[10px] text-muted-fg mt-1 block">Autodetecta país y región para ciudades comunes.</span>
+              <Input placeholder="Escribe la ciudad (ej: Malmö, Copenhagen...)" value={cityName} onChange={(e) => handleCityNameChange(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
+              <span className="text-[10px] text-muted-fg mt-1 block">Determina automáticamente región y país si no los introduces.</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -421,8 +685,8 @@ function TripsPage() {
                 <Input value={cityCountry} onChange={(e) => setCityCountry(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-fg mb-1 block">Región (opcional)</label>
-                <Input value={cityRegion} onChange={(e) => setCityRegion(e.target.value)} placeholder="Ej: Skåne, Catalunya..." className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
+                <label className="text-xs font-medium text-muted-fg mb-1 block">Región</label>
+                <Input value={cityRegion} onChange={(e) => setCityRegion(e.target.value)} placeholder="Ej: Skåne, Hovedstaden, Madrid..." className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -464,5 +728,3 @@ function TripsPage() {
     </div>
   );
 }
-
-

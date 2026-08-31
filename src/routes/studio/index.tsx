@@ -71,6 +71,7 @@ function StudioPage() {
   const [singleProcessing, setSingleProcessing] = useState(false);
   const [singleResult, setSingleResult] = useState<PinRow | null>(null);
   const [singleCity, setSingleCity] = useState("");
+  const [singlePoi, setSinglePoi] = useState("");
   const [singleCountry, setCustomCountry] = useState("");
   const [singleTripId, setSingleTripId] = useState("");
   const [singleSaving, setSingleSaving] = useState(false);
@@ -194,12 +195,15 @@ function StudioPage() {
         (c) => c.name.toLowerCase() === (singleCity || singleResult.city || "").toLowerCase()
       );
 
+      const pinPrefix = singlePoi ? `${singlePoi.slice(0, 4).toUpperCase()}` : (singleCity || singleResult.city || "PIN").slice(0, 3).toUpperCase();
+      const pinCode = matchedCity?.pin_code && !singlePoi ? matchedCity.pin_code : `${pinPrefix}-${new Date().getFullYear()}`;
+
       await supabase.from("pins").upsert({
         id: pinId,
         trip_id: singleTripId || matchedCity?.trip_id || null,
         city_id: matchedCity?.id || null,
-        pin_id: matchedCity?.pin_code || `${(singleCity || singleResult.city || "PIN").slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`,
-        city: singleCity || singleResult.city,
+        pin_id: pinCode,
+        city: singlePoi ? `${singleCity || singleResult.city || "Ciudad"} · ${singlePoi}` : (singleCity || singleResult.city),
         country: singleCountry || singleResult.country,
         region: matchedCity?.region || singleResult.shape,
         dimensions: {
@@ -213,6 +217,7 @@ function StudioPage() {
       toast.success("Pin guardado y catalogado en la base de datos ✓");
       setSingleResult(null);
       setSingleImage(null);
+      setSinglePoi("");
     } catch {
       toast.error("Error al guardar el pin");
     } finally {
@@ -381,24 +386,12 @@ function StudioPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] font-mono tracking-widest text-cyan uppercase bg-cyan/10 px-2.5 py-1 rounded-full border border-cyan/20">
-              
-            </span>
-          </div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
             El Estudio de Digitalización
           </h2>
           <p className="text-muted-fg text-sm mt-1 max-w-2xl">
             Sube imágenes individuales, paquetes masivos en formato ZIP o utiliza la cámara en vivo para calibrar el recorte y aislar tus pines físicos.
           </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Badge className={cn("gap-2 py-1.5 px-3.5 font-mono text-xs", cvReady ? "bg-neon/15 text-neon border-neon/30 shadow-[0_0_16px_-4px_#00ffb2]" : "bg-amber-500/15 text-amber-300 border-amber-500/30")}>
-            <span className={cn("h-2 w-2 rounded-full", cvReady ? "bg-neon animate-pulse" : "bg-amber-400")} />
-            <span>{cvReady ? "OpenCV Listo" : "Cargando OpenCV..."}</span>
-          </Badge>
         </div>
       </div>
 
@@ -513,11 +506,11 @@ function StudioPage() {
                       {/* Fields */}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <Label className="text-[11px] font-semibold text-muted-fg">Ciudad</Label>
+                          <Label className="text-[11px] font-semibold text-muted-fg">Ciudad Base</Label>
                           <Input
                             value={singleCity}
                             onChange={(e) => setSingleCity(e.target.value)}
-                            placeholder="Ej: Madrid"
+                            placeholder="Ej: Copenhagen"
                             className="bg-white/5 border-white/10 text-white rounded-xl text-xs"
                           />
                         </div>
@@ -526,10 +519,27 @@ function StudioPage() {
                           <Input
                             value={singleCountry}
                             onChange={(e) => setCustomCountry(e.target.value)}
-                            placeholder="Ej: España"
+                            placeholder="Ej: Dinamarca"
                             className="bg-white/5 border-white/10 text-white rounded-xl text-xs"
                           />
                         </div>
+                      </div>
+
+                      {/* Point of Interest / Landmark */}
+                      <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/10">
+                        <div className="flex items-center justify-between mb-1">
+                          <Label className="text-[11px] font-semibold text-cyan">Lugar de Interés / Monumento (Opcional)</Label>
+                          <span className="text-[10px] text-muted-fg font-mono">Ej: Tivoli, Palacio Real...</span>
+                        </div>
+                        <Input
+                          value={singlePoi}
+                          onChange={(e) => setSinglePoi(e.target.value)}
+                          placeholder="Ej: Jardines Tivoli / Palacio de Amalienborg"
+                          className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9"
+                        />
+                        <p className="text-[10px] text-muted-fg mt-1">
+                          Permite tener múltiples pines en la misma ciudad vinculados a atracciones específicas.
+                        </p>
                       </div>
 
                       <div className="space-y-1">
