@@ -12,6 +12,7 @@ import {
   ChevronRight,
   AlertCircle,
   Check,
+  Globe2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ import {
   normalizePassportPage,
   detectStamps,
   computeSlotRect,
+  rotateImage,
   SLOT_LAYOUT,
   type SlotDetection,
   type SlotState,
@@ -38,6 +40,8 @@ import {
   listStampDesigns,
   listStampingLocations,
   findOrCreateStampingLocation,
+  resolveGeoForCity,
+  findOrCreateCityFromGeo,
   listTrips,
   listCities,
   type StampDesign,
@@ -439,35 +443,35 @@ function PassportScanPage() {
           );
         }
 
-        let designId: string;
-
-        if (item.designMode === "existing" && item.selectedDesignId) {
-          designId = item.selectedDesignId;
-        } else {
-          // Create new stamp_design
-          const nameSlug = normalizeString(item.editName.trim() || "stamp")
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-|-$/g, "");
-          const code =
-            item.editCode.trim() ||
-            `${item.editCategory.toLowerCase()}-${nameSlug || "design"}-${Date.now()}`;
-
-          const newDesign = await insertStampDesign({
-            code,
-            name: item.editName.trim() || "Sello sin identificar",
-            category: item.editCategory,
-            description: null,
-            preview_image_url: cropUrl,
-            represented_city_id: item.editCityId || null,
-            visual_hash: item.recognition.visualHash || null,
-          });
-          designId = newDesign.id;
+        let finalCityId = item.editCityId || null;
+        if (!finalCityId && item.editName) {
+          const autoCity = await findOrCreateCityFromGeo(item.editName);
+          if (autoCity) finalCityId = autoCity.id;
         }
+
+        // Create new stamp_design
+        const nameSlug = normalizeString(item.editName.trim() || "stamp")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+        const code =
+          item.editCode.trim() ||
+          `${item.editCategory.toLowerCase()}-${nameSlug || "design"}-${Date.now()}`;
+
+        const newDesign = await insertStampDesign({
+          code,
+          name: item.editName.trim() || "Sello sin identificar",
+          category: item.editCategory,
+          description: null,
+          preview_image_url: cropUrl,
+          represented_city_id: finalCityId,
+          visual_hash: item.recognition.visualHash || null,
+        });
+        const designId = newDesign.id;
 
         // Find or create manual stamping location if entered
         let locationId: string | null = null;
         if (item.editLocationName && item.editLocationName.trim()) {
-          const createdLoc = await findOrCreateStampingLocation(item.editLocationName, item.editCityId);
+          const createdLoc = await findOrCreateStampingLocation(item.editLocationName, finalCityId);
           locationId = createdLoc?.id ?? null;
         }
 
@@ -477,7 +481,8 @@ function PassportScanPage() {
           passport_page_id: savedPageId,
           slot_position: item.slot.slot_position,
           stamped_at: item.editStampedAt || new Date().toISOString().slice(0, 10),
-          stamping_location_id: item.editLocationId || null,
+          stamping_location_id: locationId,
+          trip_id: item.editTripId || null,
           cutout_image_url: cropUrl,
           raw_image_url: item.slot.cropDataUrl ?? null,
           obtained_personally: true,
@@ -801,12 +806,12 @@ function PassportScanPage() {
 
           {/* Main 2-Column Inspector */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Visual Crop, OCR & Comparison */}
+            {/* Left Column: Visual Crop, Rotation Controls & OCR */}
             <div className="lg:col-span-5 space-y-4">
               {/* Main Stamp Crop with Paper Texture */}
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col items-center">
                 <div className="flex w-full items-center justify-between text-xs font-mono text-muted-fg mb-3">
-                  <span>Recorte Extraído &bull; Posición 0{current.slot.slot_position}</span>
+                  <span>Recorte &bull; Posición 0{current.slot.slot_position}</span>
                   <span
                     className={cn(
                       "px-2 py-0.5 rounded text-[10px] font-bold border",
@@ -836,41 +841,64 @@ function PassportScanPage() {
                     <Stamp className="h-12 w-12 text-[#A8A08C]" />
                   )}
                 </div>
-              </div>
 
-              {/* Side-by-Side Comparison if Existing Design Matched */}
-              {current.recognition.existingDesign && (
-                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
-                  <div className="flex items-center gap-2 text-amber-300 text-xs font-semibold">
-                    <HelpCircle className="h-4 w-4" />
-                    <span>Diseño Existente Detectado en Colección</span>
-                  </div>
-                  <div className="flex items-center gap-3 bg-black/20 rounded-xl p-3">
-                    {current.recognition.existingDesign.preview_image_url && (
-                      <img
-                        src={current.recognition.existingDesign.preview_image_url}
-                        alt="Existing design"
-                        className="h-12 w-12 rounded-lg object-contain bg-white/10 p-1 border border-white/10"
-                      />
-                    )}
-                    <div className="text-xs">
-                      <p className="font-bold text-white">{current.recognition.existingDesign.name}</p>
-                      <p className="text-muted-fg text-[11px]">
-                        Categoría: {current.recognition.existingDesign.category} &bull; Código: {current.recognition.existingDesign.code}
-                      </p>
-                    </div>
-                  </div>
+                {/* Live Rotation Controls */}
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/5 w-full justify-center">
+                  <span className="text-[10px] font-mono text-muted-fg mr-1">Rotación:</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px] border-white/10 text-white/80 hover:text-white px-2.5"
+                    onClick={async () => {
+                      if (!current.slot.cropDataUrl) return;
+                      const rotated = await rotateImage(current.slot.cropDataUrl, -15);
+                      updateCurrent({
+                        slot: { ...current.slot, cropDataUrl: rotated },
+                      });
+                    }}
+                  >
+                    ↺ -15°
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px] border-white/10 text-white/80 hover:text-white px-2.5"
+                    onClick={async () => {
+                      if (!current.slot.cropDataUrl) return;
+                      const rotated = await rotateImage(current.slot.cropDataUrl, 15);
+                      updateCurrent({
+                        slot: { ...current.slot, cropDataUrl: rotated },
+                      });
+                    }}
+                  >
+                    ↻ +15°
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px] border-white/10 text-white/80 hover:text-white px-2.5"
+                    onClick={async () => {
+                      if (!current.slot.cropDataUrl) return;
+                      const rotated = await rotateImage(current.slot.cropDataUrl, 90);
+                      updateCurrent({
+                        slot: { ...current.slot, cropDataUrl: rotated },
+                      });
+                    }}
+                  >
+                    ⟲ 90°
+                  </Button>
                 </div>
-              )}
+              </div>
 
               {/* Interactive Clickable OCR Chips */}
               {current.recognition.ocrTokens.length > 0 && (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-mono text-muted-fg uppercase tracking-wider">
-                      Texto Detectado por OCR (Clic para autocompletar)
-                    </p>
-                  </div>
+                  <p className="text-[10px] font-mono text-muted-fg uppercase tracking-wider">
+                    Texto Detectado por OCR (Clic para autocompletar)
+                  </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {current.recognition.ocrTokens.map((tok, i) => (
                       <button
@@ -891,128 +919,134 @@ function PassportScanPage() {
               )}
             </div>
 
-            {/* Right Column: Identification Form & Meta */}
+            {/* Right Column: Clean Unified Form & Geo Tracking */}
             <div className="lg:col-span-7 space-y-5">
-              {/* Design mode selector */}
+              {/* Form card */}
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
                 <p className="text-xs font-mono text-muted-fg uppercase tracking-wider">
-                  1. Definición del Diseño
+                  Detalles del Sello
                 </p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => updateCurrent({ designMode: "existing" })}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-xl text-xs font-medium border transition-all",
-                      current.designMode === "existing"
-                        ? "bg-white/15 border-white/30 text-white shadow-sm"
-                        : "bg-transparent border-white/5 text-muted-fg hover:border-white/15"
-                    )}
-                  >
-                    Reutilizar Diseño Existente
-                  </button>
-                  <button
-                    onClick={() => updateCurrent({ designMode: "new" })}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-xl text-xs font-medium border transition-all",
-                      current.designMode === "new"
-                        ? "bg-white/15 border-white/30 text-white shadow-sm"
-                        : "bg-transparent border-white/5 text-muted-fg hover:border-white/15"
-                    )}
-                  >
-                    Nuevo Diseño
-                  </button>
-                </div>
 
-                {current.designMode === "existing" ? (
-                  <div className="space-y-2">
-                    <label className="text-xs text-muted-fg">Seleccionar diseño de tu catálogo</label>
-                    <select
-                      value={current.selectedDesignId ?? ""}
-                      onChange={(e) =>
-                        updateCurrent({ selectedDesignId: e.target.value || null })
-                      }
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
-                    >
-                      <option value="">— Seleccionar —</option>
-                      {existingDesigns.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          [{d.category}] {d.name}
-                        </option>
-                      ))}
-                    </select>
+                <div className="space-y-4">
+                  {/* Stamp Design Name */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs text-muted-fg font-medium">
+                        Nombre del Sello / Ciudad
+                      </label>
+                      {current.recognition.matchedCity && (
+                        <span className="text-[10px] text-emerald-400 font-mono">
+                          Auto-detectado: {current.recognition.matchedCity.name}
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={current.editName}
+                      onChange={(e) => updateCurrent({ editName: e.target.value })}
+                      placeholder="Ej: Copenhagen, 2026, Billund, Everyone is Awesome…"
+                      className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                    />
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Name with quick-apply suggestion */}
+
+                  {/* Category & City Selector */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Category */}
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs text-muted-fg">
-                          Nombre del diseño
-                        </label>
-                        {current.recognition.matchedCity && (
-                          <span className="text-[10px] text-emerald-400 font-mono">
-                            Ciudad sugerida: {current.recognition.matchedCity.name}
-                          </span>
-                        )}
-                      </div>
-                      <input
-                        type="text"
-                        value={current.editName}
-                        onChange={(e) => updateCurrent({ editName: e.target.value })}
-                        placeholder="Ej: Copenhagen, 2026, Everyone is Awesome…"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
-                      />
+                      <label className="text-xs text-muted-fg block mb-1.5 font-medium">Categoría</label>
+                      <select
+                        value={current.editCategory}
+                        onChange={(e) => updateCurrent({ editCategory: e.target.value })}
+                        className="w-full bg-[#18181b] text-white border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-white/25"
+                      >
+                        {CATEGORIES.map((c) => (
+                          <option key={c} value={c} className="bg-[#18181b] text-white py-1.5">
+                            {c}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Category */}
-                      <div>
-                        <label className="text-xs text-muted-fg block mb-1.5">Categoría</label>
-                        <select
-                          value={current.editCategory}
-                          onChange={(e) => updateCurrent({ editCategory: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
-                        >
-                          {CATEGORIES.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Represented city */}
-                      <div>
-                        <label className="text-xs text-muted-fg block mb-1.5">
-                          Ciudad Representada
-                        </label>
-                        <select
-                          value={current.editCityId}
-                          onChange={(e) => updateCurrent({ editCityId: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
-                        >
-                          <option value="">— Sin ciudad específica —</option>
-                          {existingCities.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}, {c.country}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    {/* Represented city */}
+                    <div>
+                      <label className="text-xs text-muted-fg block mb-1.5 font-medium">
+                        Ciudad Representada
+                      </label>
+                      <select
+                        value={current.editCityId}
+                        onChange={(e) => updateCurrent({ editCityId: e.target.value })}
+                        className="w-full bg-[#18181b] text-white border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-white/25"
+                      >
+                        <option value="" className="bg-[#18181b] text-white py-1.5">— Sin ciudad específica —</option>
+                        {existingCities.map((c) => (
+                          <option key={c.id} value={c.id} className="bg-[#18181b] text-white py-1.5">
+                            {c.name}, {c.country}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
-                )}
+
+                  {/* Auto-resolved Geo Tracker Card */}
+                  {(() => {
+                    const candidateCity = current.editName || current.recognition.matchedCity?.name || "";
+                    const geo = resolveGeoForCity(candidateCity);
+                    return (
+                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold flex items-center gap-1.5">
+                            <Globe2 className="h-3.5 w-3.5" /> Ubicación Geográfica Detectada
+                          </span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 text-[10px] text-emerald-300 hover:bg-emerald-500/20 px-2"
+                            onClick={async () => {
+                              if (candidateCity) {
+                                const created = await findOrCreateCityFromGeo(candidateCity);
+                                if (created) {
+                                  setExistingCities((prev) => {
+                                    if (prev.some((c) => c.id === created.id)) return prev;
+                                    return [...prev, created];
+                                  });
+                                  updateCurrent({ editCityId: created.id });
+                                }
+                              }
+                            }}
+                          >
+                            Vincular País y Región
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="bg-black/30 rounded-lg p-2">
+                            <span className="text-[10px] text-muted-fg block">País</span>
+                            <span className="font-semibold text-white truncate block">{geo.country}</span>
+                          </div>
+                          <div className="bg-black/30 rounded-lg p-2">
+                            <span className="text-[10px] text-muted-fg block">Región</span>
+                            <span className="font-semibold text-white truncate block">{geo.region}</span>
+                          </div>
+                          <div className="bg-black/30 rounded-lg p-2">
+                            <span className="text-[10px] text-muted-fg block">Continente</span>
+                            <span className="font-semibold text-white truncate block">{geo.continent}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
 
               {/* Physical stamp details */}
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
                 <p className="text-xs font-mono text-muted-fg uppercase tracking-wider">
-                  2. Datos del Estampado Físico
+                  Datos del Estampado Físico
                 </p>
 
                 {/* Location Name */}
                 <div>
-                  <label className="text-xs text-muted-fg block mb-1.5">
+                  <label className="text-xs text-muted-fg block mb-1.5 font-medium">
                     Nombre de la Tienda LEGO / Ubicación <span className="text-muted-fg/50">(manual)</span>
                   </label>
                   <input
@@ -1020,24 +1054,24 @@ function PassportScanPage() {
                     value={current.editLocationName}
                     onChange={(e) => updateCurrent({ editLocationName: e.target.value })}
                     placeholder="Ej: LEGO Store Copenhagen, Strøget…"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                    className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Trip Link */}
                   <div>
-                    <label className="text-xs text-muted-fg block mb-1.5">
+                    <label className="text-xs text-muted-fg block mb-1.5 font-medium">
                       Vincular con viaje <span className="text-muted-fg/50">(opcional)</span>
                     </label>
                     <select
                       value={current.editTripId}
                       onChange={(e) => updateCurrent({ editTripId: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                      className="w-full bg-[#18181b] text-white border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-white/25"
                     >
-                      <option value="">— Sin viaje asociado —</option>
+                      <option value="" className="bg-[#18181b] text-white py-1.5">— Sin viaje asociado —</option>
                       {existingTrips.map((t) => (
-                        <option key={t.id} value={t.id}>
+                        <option key={t.id} value={t.id} className="bg-[#18181b] text-white py-1.5">
                           {t.name} ({t.description})
                         </option>
                       ))}
@@ -1046,14 +1080,14 @@ function PassportScanPage() {
 
                   {/* stamped_at */}
                   <div>
-                    <label className="text-xs text-muted-fg block mb-1.5">
+                    <label className="text-xs text-muted-fg block mb-1.5 font-medium">
                       Fecha de estampado <span className="text-muted-fg/50">(opcional)</span>
                     </label>
                     <input
                       type="date"
                       value={current.editStampedAt}
                       onChange={(e) => updateCurrent({ editStampedAt: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                      className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
                     />
                   </div>
                 </div>

@@ -173,6 +173,34 @@ function makeCircularCrop(
   return cropCanvas.toDataURL("image/png");
 }
 
+export function rotateImage(imageDataUrl: string, deltaDegrees: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(imageDataUrl);
+        return;
+      }
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, w, h);
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      ctx.rotate((deltaDegrees * Math.PI) / 180);
+      ctx.drawImage(img, -w / 2, -h / 2);
+      ctx.restore();
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(imageDataUrl);
+    img.src = imageDataUrl;
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Internal Candidate Interface
 // ---------------------------------------------------------------------------
@@ -288,31 +316,20 @@ export async function detectStamps(
           const cy = Math.round(br.y + br.height / 2);
           const radius = Math.round(Math.max(br.width, br.height) / 2);
 
-          // Calculate mean grayscale intensity to filter paper crease shadows (light gray false positives)
+          // Check if candidate contains actual dark stamp ink (filters light paper folds without dark ink)
           const cvRect = new cv.Rect(
             Math.max(0, br.x), Math.max(0, br.y),
             Math.min(img.width - br.x, br.width),
             Math.min(img.height - br.y, br.height)
           );
           const cropGrayMat = pageGray.roi(cvRect);
-          const meanVal = cv.mean(cropGrayMat)[0]; // 0 (black) .. 255 (white)
+          const minMax = cv.minMaxLoc(cropGrayMat);
+          const hasDarkInk = minMax.minVal < 145; // Real ink is dark (luminance < 145)
           cropGrayMat.delete();
-
-          // Compute deskew angle using minAreaRect
-          let angleDeg = 0;
-          try {
-            const minRect = cv.minAreaRect(ptsMat);
-            angleDeg = minRect.angle;
-            if (angleDeg < -45) angleDeg += 90;
-            if (angleDeg > 45) angleDeg -= 90;
-          } catch {
-            angleDeg = 0;
-          }
           ptsMat.delete();
 
-          // Reject paper crease shadows (light gray background, mean brightness > 210)
-          if (meanVal > 210) {
-            continue;
+          if (!hasDarkInk) {
+            continue; // Drop pure light gray paper folds without real stamp ink!
           }
 
           // Check for overlap with an already accepted candidate

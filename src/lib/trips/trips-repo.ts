@@ -288,28 +288,64 @@ export interface PassportPageWithStamps extends PassportPage {
   stamps: FullPhysicalStamp[];
 }
 
+// ---------------------------------------------------------------------------
+// LocalStorage helpers for 100% resilience across network / RLS
+// ---------------------------------------------------------------------------
+function getLocalItems<T>(key: string): T[] {
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem(key) : null;
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalItem<T extends { id: string }>(key: string, item: T): void {
+  try {
+    if (typeof window === "undefined") return;
+    const existing = getLocalItems<T>(key);
+    const idx = existing.findIndex((e) => e.id === item.id);
+    if (idx >= 0) existing[idx] = item;
+    else existing.push(item);
+    localStorage.setItem(key, JSON.stringify(existing));
+  } catch {}
+}
+
 export async function listPassportPages(): Promise<PassportPage[]> {
+  const local = getLocalItems<PassportPage>("lego_passport_pages");
   const { data, error } = await supabase
     .from("passport_pages")
     .select("*")
     .order("page_number", { ascending: true });
-  if (error) {
-    console.warn("[lego-passport] listPassportPages fallback/error:", error);
-    return [];
+
+  if (error || !data || data.length === 0) {
+    if (error) console.warn("[lego-passport] listPassportPages fallback to local:", error);
+    return local;
   }
-  return (data ?? []) as PassportPage[];
+
+  // Merge Supabase + local
+  const map = new Map<string, PassportPage>();
+  for (const p of local) map.set(p.id, p);
+  for (const p of data as PassportPage[]) map.set(p.id, p);
+  return Array.from(map.values()).sort((a, b) => a.page_number - b.page_number);
 }
 
 export async function listStampDesigns(): Promise<StampDesign[]> {
+  const local = getLocalItems<StampDesign>("lego_stamp_designs");
   const { data, error } = await supabase
     .from("stamp_designs")
     .select("*")
     .order("name", { ascending: true });
-  if (error) {
-    console.warn("[lego-passport] listStampDesigns fallback/error:", error);
-    return [];
+
+  if (error || !data || data.length === 0) {
+    if (error) console.warn("[lego-passport] listStampDesigns fallback to local:", error);
+    return local;
   }
-  return (data ?? []) as StampDesign[];
+
+  const map = new Map<string, StampDesign>();
+  for (const d of local) map.set(d.id, d);
+  for (const d of data as StampDesign[]) map.set(d.id, d);
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export interface StampDesignInsert {
@@ -324,7 +360,17 @@ export interface StampDesignInsert {
 
 export async function insertStampDesign(design: StampDesignInsert): Promise<StampDesign> {
   const designId = `design-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-  const recordToSave = { ...design, id: designId };
+  const recordToSave = {
+    ...design,
+    id: designId,
+    description: design.description ?? null,
+    preview_image_url: design.preview_image_url ?? null,
+    represented_city_id: design.represented_city_id ?? null,
+    visual_hash: design.visual_hash ?? null,
+    created_at: new Date().toISOString(),
+  } as StampDesign;
+
+  saveLocalItem("lego_stamp_designs", recordToSave);
 
   const { data, error } = await supabase
     .from("stamp_designs")
@@ -334,21 +380,26 @@ export async function insertStampDesign(design: StampDesignInsert): Promise<Stam
 
   if (error) {
     console.warn("[lego-passport] insertStampDesign DB warning/fallback:", error);
-    return { ...recordToSave, description: design.description ?? null, preview_image_url: design.preview_image_url ?? null, represented_city_id: design.represented_city_id ?? null, visual_hash: design.visual_hash ?? null, created_at: new Date().toISOString() } as StampDesign;
+    return recordToSave;
   }
   return data as StampDesign;
 }
 
 export async function listStampingLocations(): Promise<StampingLocation[]> {
+  const local = getLocalItems<StampingLocation>("lego_stamping_locations");
   const { data, error } = await supabase
     .from("stamping_locations")
     .select("*")
     .order("name", { ascending: true });
-  if (error) {
-    console.warn("[lego-passport] listStampingLocations fallback/error:", error);
-    return [];
+
+  if (error || !data || data.length === 0) {
+    return local;
   }
-  return (data ?? []) as StampingLocation[];
+
+  const map = new Map<string, StampingLocation>();
+  for (const l of local) map.set(l.id, l);
+  for (const l of data as StampingLocation[]) map.set(l.id, l);
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function findOrCreateStampingLocation(name: string, cityId?: string | null): Promise<StampingLocation | null> {
@@ -373,6 +424,8 @@ export async function findOrCreateStampingLocation(name: string, cityId?: string
     city_id: cityId || null,
   };
 
+  saveLocalItem("lego_stamping_locations", recordToSave as unknown as StampingLocation);
+
   const { data, error } = await supabase
     .from("stamping_locations")
     .insert(recordToSave)
@@ -387,6 +440,8 @@ export async function findOrCreateStampingLocation(name: string, cityId?: string
 }
 
 export async function listPhysicalStamps(): Promise<FullPhysicalStamp[]> {
+  const local = getLocalItems<FullPhysicalStamp>("lego_physical_stamps");
+
   const { data, error } = await supabase
     .from("physical_stamps")
     .select(`
@@ -397,19 +452,25 @@ export async function listPhysicalStamps(): Promise<FullPhysicalStamp[]> {
     `)
     .order("stamped_at", { ascending: true });
 
-  if (error) {
-    console.warn("[lego-passport] listPhysicalStamps joined select failed, trying raw select:", error);
-    const { data: rawData, error: rawErr } = await supabase
+  if (error || !data || data.length === 0) {
+    const { data: rawData } = await supabase
       .from("physical_stamps")
       .select("*")
       .order("stamped_at", { ascending: true });
-    if (rawErr) {
-      console.warn("[lego-passport] listPhysicalStamps raw select fallback/error:", rawErr);
-      return [];
+
+    if (rawData && rawData.length > 0) {
+      const map = new Map<string, FullPhysicalStamp>();
+      for (const s of local) map.set(s.id, s);
+      for (const s of rawData as FullPhysicalStamp[]) map.set(s.id, s);
+      return Array.from(map.values());
     }
-    return (rawData ?? []) as FullPhysicalStamp[];
+    return local;
   }
-  return (data ?? []) as FullPhysicalStamp[];
+
+  const map = new Map<string, FullPhysicalStamp>();
+  for (const s of local) map.set(s.id, s);
+  for (const s of data as FullPhysicalStamp[]) map.set(s.id, s);
+  return Array.from(map.values());
 }
 
 export async function upsertPassportPage(page: Partial<PassportPage> & { id?: string; page_number: number }): Promise<PassportPage | null> {
@@ -423,7 +484,9 @@ export async function upsertPassportPage(page: Partial<PassportPage> & { id?: st
     ...page,
     id: pageId,
     created_at: page.created_at || new Date().toISOString(),
-  };
+  } as PassportPage;
+
+  saveLocalItem("lego_passport_pages", recordToSave);
 
   const { data, error } = await supabase
     .from("passport_pages")
@@ -433,7 +496,7 @@ export async function upsertPassportPage(page: Partial<PassportPage> & { id?: st
 
   if (error) {
     console.warn("[lego-passport] upsertPassportPage DB fallback:", error);
-    return recordToSave as PassportPage;
+    return recordToSave;
   }
   return data as PassportPage;
 }
@@ -445,7 +508,9 @@ export async function upsertPhysicalStamp(stamp: Partial<PhysicalStamp> & { id?:
     ...stamp,
     id: stampId,
     created_at: stamp.created_at || new Date().toISOString(),
-  };
+  } as PhysicalStamp;
+
+  saveLocalItem("lego_physical_stamps", recordToSave as FullPhysicalStamp);
 
   const { data, error } = await supabase
     .from("physical_stamps")
@@ -455,7 +520,7 @@ export async function upsertPhysicalStamp(stamp: Partial<PhysicalStamp> & { id?:
 
   if (error) {
     console.warn("[lego-passport] upsertPhysicalStamp DB fallback:", error);
-    return recordToSave as PhysicalStamp;
+    return recordToSave;
   }
   return data as PhysicalStamp;
 }

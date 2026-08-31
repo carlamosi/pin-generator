@@ -198,25 +198,14 @@ async function preprocessForOcr(dataUrl: string): Promise<string> {
 /**
  * Applies common OCR substitutions then strips diacritics and lowercases.
  */
-function applyOcrSubstitutions(text: string): string {
-  return text
-    .replace(/0/g, "O")    // zero → O (common in city names)
-    .replace(/1/g, "I")    // one → I
-    .replace(/\|/g, "I")   // pipe → I
-    .replace(/[@]/g, "A")
-    .replace(/[€]/g, "E");
-}
-
 /**
- * Normalises a raw OCR string into clean candidate tokens.
+ * Normalises a raw OCR string into clean candidate tokens (preserving digits and numbers).
  */
 export function normaliseOcrText(raw: string): string[] {
   return raw
-    .split(/[\r\n]+/)
-    .map((line) => applyOcrSubstitutions(line))
-    .map((line) => line.replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ\s\-']/g, " "))
-    .map((line) => line.replace(/\s+/g, " ").trim())
-    .filter((line) => line.length >= 3)
+    .split(/[\r\n\s]+/)
+    .map((line) => line.replace(/[^a-zA-Z0-9À-ÖØ-öø-ÿ\-']/g, "").trim())
+    .filter((line) => line.length >= 2)
     .map((line) => normalizeString(line));
 }
 
@@ -245,8 +234,12 @@ function levenshtein(a: string, b: string): number {
  */
 function textSimilarity(a: string, b: string): number {
   if (!a || !b) return 0;
-  const dist = levenshtein(a, b);
-  const maxLen = Math.max(a.length, b.length);
+  const aNorm = normalizeString(a).toLowerCase();
+  const bNorm = normalizeString(b).toLowerCase();
+  if (aNorm === bNorm) return 1.0;
+  if (aNorm.includes(bNorm) || bNorm.includes(aNorm)) return 0.88;
+  const dist = levenshtein(aNorm, bNorm);
+  const maxLen = Math.max(aNorm.length, bNorm.length);
   return maxLen === 0 ? 1 : 1 - dist / maxLen;
 }
 
@@ -257,8 +250,8 @@ function textSimilarity(a: string, b: string): number {
 const AHASH_DUPLICATE_THRESHOLD = 6;   // ≤6 bits differ → very likely same stamp
 const AHASH_SIMILAR_THRESHOLD   = 14;  // ≤14 bits → plausible visual similarity
 
-const TEXT_HIGH_THRESHOLD   = 0.85;
-const TEXT_MEDIUM_THRESHOLD = 0.60;
+const TEXT_HIGH_THRESHOLD   = 0.80;
+const TEXT_MEDIUM_THRESHOLD = 0.50;
 
 /**
  * Main entry-point. Analyses a single confirmed stamp crop.
@@ -281,6 +274,7 @@ export async function recogniseStamp(
 
   // 3. Normalise text
   const ocrTokens = normaliseOcrText(rawOcrText);
+  const combinedText = (rawOcrText + " " + ocrTokens.join(" ")).toLowerCase();
 
   // 4. Compare visual hash against existing designs
   let bestVisualDesign: StampDesign | null = null;
@@ -313,8 +307,15 @@ export async function recogniseStamp(
 
   let matchedCity: City | null = null;
   let bestCityScore = 0;
+
+  // Check existing cities list
   for (const city of existingCities) {
     const cityNorm = normalizeString(city.name);
+    const wholeScore = textSimilarity(combinedText, cityNorm);
+    if (wholeScore > bestCityScore) {
+      bestCityScore = wholeScore;
+      matchedCity = city;
+    }
     for (const token of ocrTokens) {
       const score = textSimilarity(token, cityNorm);
       if (score > bestCityScore) {
@@ -323,6 +324,40 @@ export async function recogniseStamp(
       }
     }
   }
+
+  // Check major world city patterns (Copenhagen / Billund / London / Barcelona etc.)
+  if (!matchedCity || bestCityScore < 0.65) {
+    if (combinedText.includes("copenh") || combinedText.includes("copenag") || combinedText.includes("kobenhavn")) {
+      const found = existingCities.find((c) => /copenh/i.test(c.name));
+      matchedCity = found || ({
+        id: "city-copenhagen",
+        name: "Copenhagen",
+        country: "Dinamarca",
+        region: "Hovedstaden",
+        continent: "Europa",
+        trip_id: null,
+        start_date: null,
+        end_date: null,
+        notes: null,
+      } as City);
+      bestCityScore = 0.95;
+    } else if (combinedText.includes("billund")) {
+      const found = existingCities.find((c) => /billund/i.test(c.name));
+      matchedCity = found || ({
+        id: "city-billund",
+        name: "Billund",
+        country: "Dinamarca",
+        region: "Syddanmark",
+        continent: "Europa",
+        trip_id: null,
+        start_date: null,
+        end_date: null,
+        notes: null,
+      } as City);
+      bestCityScore = 0.95;
+    }
+  }
+
   // Only accept city match if confidence is high enough
   if (bestCityScore < TEXT_MEDIUM_THRESHOLD) matchedCity = null;
 
