@@ -339,7 +339,7 @@ export async function detectStamps(
           });
 
           if (!isOverlap && radius >= 12) {
-            const cropUrl = makeCircularCrop(pageCanvas, cx, cy, radius, angleDeg);
+            const cropUrl = makeCircularCrop(pageCanvas, cx, cy, radius, 0);
 
             const cropW = Math.min(img.width - br.x, br.width);
             const cropH = Math.min(img.height - br.y, br.height);
