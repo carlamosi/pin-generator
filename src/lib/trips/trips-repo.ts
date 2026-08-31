@@ -1,4 +1,4 @@
-import { supabase } from "../supabase";
+import { PIN_CUTOUTS_BUCKET, supabase } from "../supabase";
 
 export interface Trip {
   id: string;
@@ -372,8 +372,9 @@ export async function uploadPassportImage(fileOrDataUrl: File | string, path: st
     const isBucketNotFound = errMsg.includes("bucket not found") || (error as any).statusCode === "404" || (error as any).status === 404;
 
     if (isBucketNotFound) {
-      console.warn(`[lego-passport] Storage bucket '${targetBucket}' not found. Falling back to '${PIN_CUTOUTS_BUCKET}'.`);
-      targetBucket = PIN_CUTOUTS_BUCKET;
+      const fallbackBucket = (typeof PIN_CUTOUTS_BUCKET !== "undefined" && PIN_CUTOUTS_BUCKET) ? PIN_CUTOUTS_BUCKET : "pin-cutouts";
+      console.warn(`[lego-passport] Storage bucket '${targetBucket}' not found. Falling back to '${fallbackBucket}'.`);
+      targetBucket = fallbackBucket;
       uploadPath = `passport-scans/${path}`;
 
       const retryRes = await supabase.storage
