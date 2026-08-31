@@ -147,3 +147,50 @@ export async function upsertFullPin(pin: Partial<FullPin> & { id: string }): Pro
   const { error } = await supabase.from("pins").upsert(pin, { onConflict: "id" });
   if (error) throw error;
 }
+export interface StampDesign {
+  id: string;
+  code: string;
+  name: string;
+  category: 'CITY' | 'YEAR' | 'STORE' | 'AIRPORT' | 'TERMINAL' | 'SPECIAL' | 'THEMED' | string;
+  description: string | null;
+  preview_image_url: string | null;
+  represented_city_id: string | null;
+  created_at: string;
+}
+
+export interface StampingLocation {
+  id: string;
+  name: string;
+  location_type: 'STORE' | 'AIRPORT' | 'VENUE' | 'POPUP' | 'OTHER' | string;
+  city_id: string | null;
+  city_name: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  created_at: string;
+}
+
+export interface PassportPage {
+  id: string;
+  page_number: number;
+  dimension_w_cm: number;
+  dimension_h_cm: number;
+  max_slots: number;
+  scanned_image_url: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface PhysicalStamp {
+  id: string;
+  stamp_design_id: string;
+  passport_page_id: string | null;
+  slot_position: number | null;
+  stamped_at: string;
+  stamping_location_id: string | null;
+  trip_id: string | null;
+  cutout_image_url: string | null;
+  raw_image_url: string | null;
+  obtained_personally: boolean;
+  created_at: string;
+}
