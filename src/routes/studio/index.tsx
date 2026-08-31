@@ -454,9 +454,12 @@ function StudioPage() {
     if (!cvReady || batchItems.length === 0) return;
     setBatchProcessing(true);
 
+    let savedCount = 0;
+    let errorCount = 0;
+
     for (let i = 0; i < batchItems.length; i++) {
       const item = batchItems[i];
-      if (item.status === "done") continue;
+      if (item.status === "done") { savedCount++; continue; }
 
       setBatchItems((prev) =>
         prev.map((it, idx) => (idx === i ? { ...it, status: "processing" } : it))
@@ -470,30 +473,61 @@ function StudioPage() {
           setBatchItems((prev) =>
             prev.map((it, idx) => (idx === i ? { ...it, status: "error" } : it))
           );
+          errorCount++;
           continue;
         }
         const cutoutData = res.thumbnailDataUrl ?? item.dataUrl;
         const cutoutUrl = await uploadCutout(pinId, cutoutData);
 
-        const matchedCity = cities.find(
-          (c) =>
-            (item.city && c.name.toLowerCase().includes(item.city.toLowerCase()))
+        // --- City sync (same logic as saveSinglePin) ---
+        const cityName = (item.city || res.rawText?.split("\n")[0]?.trim() || "Ciudad").trim();
+        const countryName = (item.country || "Desconocido").trim();
+
+        let matchedCity = cities.find(
+          (c) => c.name.toLowerCase() === cityName.toLowerCase()
         );
+        let cityId = matchedCity?.id;
+
+        if (!matchedCity && cityName !== "Ciudad") {
+          const newCityId = nanoid();
+          const pinCode = `${cityName.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
+          const { error: cityErr } = await supabase.from("cities").insert({
+            id: newCityId,
+            trip_id: batchTripId || null,
+            name: cityName,
+            region: res.shape || null,
+            country: countryName,
+            continent: "Europa",
+            has_pin: true,
+            pin_code: pinCode,
+          });
+          if (!cityErr) {
+            cityId = newCityId;
+          }
+        } else if (matchedCity) {
+          await supabase.from("cities").update({
+            has_pin: true,
+            trip_id: batchTripId || matchedCity.trip_id || null,
+          }).eq("id", matchedCity.id);
+        }
 
         const tripId = batchTripId || matchedCity?.trip_id || null;
+        const pinCode = matchedCity?.pin_code || `${cityName.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
 
         await supabase.from("pins").upsert({
           id: pinId,
           trip_id: tripId,
-          city_id: matchedCity?.id || null,
-          pin_id: matchedCity?.pin_code || `${(item.city || "PIN").slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`,
-          city: matchedCity?.name || item.city || "Pin",
-          country: matchedCity?.country || "Desconocido",
+          city_id: cityId || null,
+          pin_id: pinCode,
+          city: matchedCity?.name || cityName,
+          country: countryName,
           region: matchedCity?.region || res.shape,
           dimensions: { width_mm: res.widthMm, height_mm: res.heightMm },
           shape: res.shape,
           transparent_image_url: cutoutUrl,
         }, { onConflict: "id" });
+
+        savedCount++;
 
         setBatchItems((prev) =>
           prev.map((it, idx) =>
@@ -502,8 +536,8 @@ function StudioPage() {
                   ...it,
                   status: "done",
                   cutoutUrl,
-                  city: matchedCity?.name || item.city,
-                  country: matchedCity?.country,
+                  city: matchedCity?.name || cityName,
+                  country: countryName,
                   widthMm: res.widthMm,
                   heightMm: res.heightMm,
                   region: matchedCity?.region || undefined,
@@ -515,10 +549,19 @@ function StudioPage() {
         setBatchItems((prev) =>
           prev.map((it, idx) => (idx === i ? { ...it, status: "error" } : it))
         );
+        errorCount++;
       }
     }
+
+    // Refresh cities list so new ones appear in dropdowns
+    listCities().then(setCities).catch(() => {});
+
     setBatchProcessing(false);
-    toast.success("Lote completado y sincronizado con Supabase ✓");
+    if (errorCount === 0) {
+      toast.success(`✓ ${savedCount} pin${savedCount !== 1 ? "es" : ""} guardados y ciudades sincronizadas`);
+    } else {
+      toast.warning(`${savedCount} guardados · ${errorCount} con error`);
+    }
   };
 
   const startCamera = async () => {

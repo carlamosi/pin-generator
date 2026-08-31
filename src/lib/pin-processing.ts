@@ -629,22 +629,46 @@ export async function processPinImage(
   // Draw centered square crop
   ctx.drawImage(img, cropX, cropY, squareSize, squareSize, 0, 0, TARGET_DIM, TARGET_DIM);
 
-  // Try state-of-the-art AI background removal first (@imgly/background-removal)
-  try {
-    console.log(`${tag} attempting AI background removal via @imgly/background-removal...`);
-    const squareBlob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob((b) => resolve(b), "image/png")
-    );
+  // Check if the image ALREADY has transparent background (e.g. transparent PNG / WebP)
+  const initialImageData = ctx.getImageData(0, 0, TARGET_DIM, TARGET_DIM).data;
+  let transparentPixelCount = 0;
+  for (let i = 3; i < initialImageData.length; i += 16) {
+    if (initialImageData[i] < 200) {
+      transparentPixelCount++;
+    }
+  }
 
-    if (squareBlob) {
-      const removedBgBlob = await removeBackground(squareBlob, {
-        progress: (key, current, total) => {
-          console.log(`${tag} AI bg removal progress [${key}]: ${current}/${total}`);
-        },
-      });
+  const alreadyTransparent = transparentPixelCount > 150; // noticeable transparent area
+  let removedBgBlob: Blob | null = null;
+  let cutoutUrl: string = "";
 
-      const cutoutUrl = await fileToImageDataUrl(removedBgBlob);
+  if (alreadyTransparent) {
+    console.log(`${tag} image already has transparent alpha channels. Skipping neural background removal.`);
+    cutoutUrl = canvas.toDataURL("image/png");
+    removedBgBlob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
+  } else {
+    // Try state-of-the-art AI background removal (@imgly/background-removal)
+    try {
+      console.log(`${tag} attempting AI background removal via @imgly/background-removal...`);
+      const squareBlob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob((b) => resolve(b), "image/png")
+      );
 
+      if (squareBlob) {
+        removedBgBlob = await removeBackground(squareBlob, {
+          progress: (key, current, total) => {
+            console.log(`${tag} AI bg removal progress [${key}]: ${current}/${total}`);
+          },
+        });
+        cutoutUrl = await fileToImageDataUrl(removedBgBlob);
+      }
+    } catch (aiErr) {
+      console.warn(`${tag} @imgly bg removal failed or skipped, falling back to OpenCV chroma pipeline`, aiErr);
+    }
+  }
+
+  if (removedBgBlob && cutoutUrl) {
+    try {
       // Now compute shape and dimensions using the clean cutout mask
       const cleanImg = await loadImage(cutoutUrl);
       const cleanCanvas = document.createElement("canvas");
@@ -728,9 +752,9 @@ export async function processPinImage(
           location: pinLocation,
         };
       }
+    } catch (innerErr) {
+      console.warn(`${tag} cutout analysis failed, falling through to OpenCV:`, innerErr);
     }
-  } catch (aiErr) {
-    console.warn(`${tag} AI bg removal fell back to OpenCV pipeline:`, aiErr);
   }
 
   // --- FALLBACK: OPENCV SEGMENTATION ---
