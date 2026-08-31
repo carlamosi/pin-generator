@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
 import {
   normalizePassportPage,
   detectStamps,
+  computeSlotRect,
+  SLOT_LAYOUT,
   type SlotDetection,
   type SlotState,
 } from "@/lib/passport-cv";
@@ -85,6 +87,129 @@ const CONFIDENCE_LABEL: Record<RecognitionConfidence, string> = {
 const CATEGORIES = [
   "CITY", "YEAR", "STORE", "AIRPORT", "TERMINAL", "SPECIAL", "THEMED",
 ] as const;
+
+// ---------------------------------------------------------------------------
+// PageWithOverlays — SVG-based slot + bounding-box overlay
+// ---------------------------------------------------------------------------
+
+interface PageWithOverlaysProps {
+  normalizedImage: string;
+  detections: SlotDetection[];
+  selectedSlot: number | null;
+  onSelectSlot: (slot: number) => void;
+}
+
+/**
+ * Renders the normalized passport page with two overlay layers:
+ *   1. Fixed slot regions (deterministic, semi-transparent)
+ *   2. Detected stamp bounding box for the selected slot (precise)
+ *
+ * We use a natural-size reference (naturalW × naturalH) so SVG coordinates
+ * map 1-to-1 with the geometry in passport-cv.ts, then scale via viewBox.
+ */
+function PageWithOverlays({
+  normalizedImage,
+  detections,
+  selectedSlot,
+  onSelectSlot,
+}: PageWithOverlaysProps) {
+  const [naturalW, setNaturalW] = useState(800);
+  const [naturalH, setNaturalH] = useState(1200);
+
+  const detMap = new Map(detections.map((d) => [d.slot_position, d]));
+
+  // Precompute all 6 slot rects at the natural page size
+  const slotRects = SLOT_LAYOUT.map((slot) => ({
+    id: slot.id,
+    rect: computeSlotRect(slot, naturalW, naturalH),
+  }));
+
+  const selectedDet = selectedSlot ? detMap.get(selectedSlot) : null;
+
+  return (
+    <div className="relative w-full max-w-[400px] aspect-[8/12] rounded-lg overflow-hidden shadow-2xl">
+      <img
+        src={normalizedImage}
+        alt="Passport Page"
+        className="absolute inset-0 w-full h-full object-contain"
+        onLoad={(e) => {
+          const el = e.currentTarget;
+          setNaturalW(el.naturalWidth);
+          setNaturalH(el.naturalHeight);
+        }}
+      />
+      {/* SVG overlay – same viewBox as the natural image size */}
+      <svg
+        className="absolute inset-0 w-full h-full"
+        viewBox={`0 0 ${naturalW} ${naturalH}`}
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ pointerEvents: "none" }}
+      >
+        {/* Layer 1: fixed slot regions */}
+        {slotRects.map(({ id, rect }) => {
+          const det = detMap.get(id);
+          const isSelected = selectedSlot === id;
+          const state = det?.state ?? "EMPTY";
+
+          const strokeColor =
+            state === "DETECTED" ? "#22c55e" :
+            state === "UNCERTAIN" ? "#f59e0b" :
+            "#6b7280";
+          const fillColor =
+            state === "DETECTED" ? "rgba(34,197,94,0.08)" :
+            state === "UNCERTAIN" ? "rgba(245,158,11,0.12)" :
+            "rgba(0,0,0,0)";
+
+          return (
+            <g key={id} style={{ pointerEvents: "all", cursor: "pointer" }}
+               onClick={() => onSelectSlot(id)}>
+              <rect
+                x={rect.x} y={rect.y}
+                width={rect.width} height={rect.height}
+                fill={fillColor}
+                stroke={strokeColor}
+                strokeWidth={isSelected ? 3 : 1.5}
+                strokeDasharray={isSelected ? "none" : "6 4"}
+                rx={4}
+              />
+              {/* Slot number badge */}
+              <rect
+                x={rect.x + 4} y={rect.y + 4}
+                width={26} height={16}
+                fill="rgba(0,0,0,0.55)" rx={3}
+              />
+              <text
+                x={rect.x + 17} y={rect.y + 15}
+                textAnchor="middle"
+                fontSize={10}
+                fontFamily="monospace"
+                fill="white"
+              >
+                0{id}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Layer 2: detected bounding box for selected slot */}
+        {selectedDet?.boundingBox && (
+          <rect
+            x={selectedDet.boundingBox.x}
+            y={selectedDet.boundingBox.y}
+            width={selectedDet.boundingBox.width}
+            height={selectedDet.boundingBox.height}
+            fill="none"
+            stroke="white"
+            strokeWidth={2}
+            strokeDasharray="4 2"
+            rx={2}
+            opacity={0.85}
+          />
+        )}
+      </svg>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -436,53 +561,13 @@ function PassportScanPage() {
               </Button>
             </div>
 
-            {/* Passport page with slot overlays */}
-            <div className="relative w-full max-w-[400px] aspect-[8/12] rounded-lg overflow-hidden shadow-2xl">
-              <img
-                src={normalizedImage}
-                alt="Passport Page"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 grid grid-cols-2 grid-rows-3 p-[10%] gap-[2%] pointer-events-none">
-                {detections.map((det) => {
-                  const isSelected = selectedSlot === det.slot_position;
-                  const borderCol =
-                    det.state === "DETECTED"
-                      ? "border-emerald-500"
-                      : det.state === "UNCERTAIN"
-                      ? "border-amber-500"
-                      : "border-gray-400/50";
-                  return (
-                    <div
-                      key={det.slot_position}
-                      onClick={() => setSelectedSlot(det.slot_position)}
-                      className={cn(
-                        "relative border-2 border-dashed rounded-md cursor-pointer pointer-events-auto transition-all duration-150",
-                        borderCol,
-                        isSelected ? "border-solid scale-[1.03] shadow-lg" : "hover:border-white/40",
-                        det.state === "DETECTED" && "bg-emerald-500/10",
-                        det.state === "UNCERTAIN" && "bg-amber-500/20"
-                      )}
-                    >
-                      <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] font-mono px-1 rounded-sm">
-                        0{det.slot_position}
-                      </div>
-                      <div className="absolute bottom-1 right-1">
-                        {det.state === "DETECTED" && (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500 drop-shadow" />
-                        )}
-                        {det.state === "UNCERTAIN" && (
-                          <HelpCircle className="h-4 w-4 text-amber-500 drop-shadow" />
-                        )}
-                        {det.state === "EMPTY" && (
-                          <XCircle className="h-4 w-4 text-gray-400 drop-shadow" />
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Passport page with slot overlays — SVG-based, scale-aware */}
+            <PageWithOverlays
+              normalizedImage={normalizedImage}
+              detections={detections}
+              selectedSlot={selectedSlot}
+              onSelectSlot={setSelectedSlot}
+            />
           </div>
 
           {/* Right: inspector */}
@@ -493,67 +578,77 @@ function PassportScanPage() {
               </h3>
 
               {selectedDet && (
-                <div className="space-y-5">
-                  {/* Crop */}
-                  <div className="w-full aspect-[4/3] bg-white/5 rounded-lg border border-white/10 flex items-center justify-center overflow-hidden">
+                <div className="space-y-4">
+                  {/* Crop — tight boundary extract, not full slot */}
+                  <div className="w-full aspect-[4/3] bg-[#FAF7EE] rounded-lg border border-black/10 flex items-center justify-center overflow-hidden">
                     {selectedDet.cropDataUrl ? (
                       <img
                         src={selectedDet.cropDataUrl}
-                        alt={`Slot ${selectedSlot}`}
+                        alt={`Sello posicion ${selectedSlot}`}
                         className="max-w-full max-h-full object-contain"
                       />
                     ) : (
                       <div className="flex flex-col items-center text-muted-fg">
                         <Stamp className="h-8 w-8 opacity-30 mb-1" />
-                        <span className="text-xs font-mono">Vacio</span>
+                        <span className="text-xs font-mono">Sin recorte</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Status */}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-fg">Estado:</span>
-                    <span
-                      className={cn(
-                        "font-mono font-bold px-2 py-0.5 rounded text-xs",
-                        selectedDet.state === "DETECTED"
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : selectedDet.state === "UNCERTAIN"
-                          ? "bg-amber-500/20 text-amber-400"
-                          : "bg-gray-500/20 text-gray-400"
-                      )}
-                    >
-                      {selectedDet.state}
-                      {(selectedDet as unknown as { _isManualOverride?: boolean })
-                        ._isManualOverride && " (Manual)"}
-                    </span>
+                  {/* Three separate metrics */}
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-fg">Estado:</span>
+                      <span className={cn(
+                        "font-mono font-bold px-2 py-0.5 rounded",
+                        selectedDet.state === "DETECTED" ? "bg-emerald-500/20 text-emerald-400" :
+                        selectedDet.state === "UNCERTAIN" ? "bg-amber-500/20 text-amber-400" :
+                        "bg-gray-500/20 text-gray-400"
+                      )}>
+                        {selectedDet.state}
+                        {(selectedDet as unknown as { _isManualOverride?: boolean })._isManualOverride && " ●"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-fg">Confianza de contorno:</span>
+                      <span className="font-mono text-white">{(selectedDet.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-fg">Cobertura de tinta:</span>
+                      <span className="font-mono text-white">{(((selectedDet as SlotDetection & { inkCoverage?: number }).inkCoverage ?? 0) * 100).toFixed(1)}%</span>
+                    </div>
+                    {selectedDet.boundingBox && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-fg">Contorno detectado:</span>
+                        <span className="font-mono text-emerald-400 text-[10px]">
+                          {selectedDet.boundingBox.width}×{selectedDet.boundingBox.height}px
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Override */}
-                  <div className="grid grid-cols-2 gap-3 pt-1">
+                  {/* Manual overrides — three states */}
+                  <div className="grid grid-cols-3 gap-2 pt-1">
                     <Button
                       variant={selectedDet.state === "EMPTY" ? "default" : "outline"}
-                      className={cn(
-                        "h-9 text-xs",
-                        selectedDet.state === "EMPTY"
-                          ? "bg-gray-600 hover:bg-gray-500"
-                          : "border-white/10"
-                      )}
+                      className={cn("h-8 text-[10px]", selectedDet.state === "EMPTY" ? "bg-gray-600 hover:bg-gray-500" : "border-white/10")}
                       onClick={() => overrideState(selectedSlot!, "EMPTY")}
                     >
-                      Marcar Vacio
+                      Vacio
+                    </Button>
+                    <Button
+                      variant={selectedDet.state === "UNCERTAIN" ? "default" : "outline"}
+                      className={cn("h-8 text-[10px]", selectedDet.state === "UNCERTAIN" ? "bg-amber-600 hover:bg-amber-500" : "border-white/10")}
+                      onClick={() => overrideState(selectedSlot!, "UNCERTAIN")}
+                    >
+                      Incierto
                     </Button>
                     <Button
                       variant={selectedDet.state === "DETECTED" ? "default" : "outline"}
-                      className={cn(
-                        "h-9 text-xs",
-                        selectedDet.state === "DETECTED"
-                          ? "bg-emerald-600 hover:bg-emerald-500"
-                          : "border-white/10"
-                      )}
+                      className={cn("h-8 text-[10px]", selectedDet.state === "DETECTED" ? "bg-emerald-600 hover:bg-emerald-500" : "border-white/10")}
                       onClick={() => overrideState(selectedSlot!, "DETECTED")}
                     >
-                      Marcar Detectado
+                      Detectado
                     </Button>
                   </div>
                 </div>
