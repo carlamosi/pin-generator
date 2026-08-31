@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Stamp,
@@ -13,6 +13,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Info,
+  Scan,
 } from "lucide-react";
 import {
   listPassportPages,
@@ -278,6 +279,12 @@ function LegoPassportPage() {
               {totalPages} {totalPages === 1 ? "pagina" : "paginas"}
             </span>
           </Badge>
+          <Link to="/passport/scan">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2 ml-2 border border-emerald-500/50">
+              <Scan className="h-4 w-4" />
+              Escanear Pasaporte
+            </Button>
+          </Link>
         </div>
       </div>
 

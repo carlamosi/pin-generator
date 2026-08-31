@@ -1,4 +1,4 @@
-﻿import { supabase } from "../supabase";
+import { supabase } from "../supabase";
 
 export interface Trip {
   id: string;
@@ -294,4 +294,47 @@ export async function upsertPhysicalStamp(stamp: Partial<PhysicalStamp> & { id?:
     throw error;
   }
   return data as PhysicalStamp;
+}
+
+export async function uploadPassportImage(fileOrDataUrl: File | string, path: string): Promise<string> {
+  let fileBody: File | Blob | Uint8Array;
+  
+  if (typeof fileOrDataUrl === "string") {
+    // Convert data URL to Blob
+    const res = await fetch(fileOrDataUrl);
+    fileBody = await res.blob();
+  } else {
+    fileBody = fileOrDataUrl;
+  }
+
+  const { data, error } = await supabase.storage
+    .from("passport-scans")
+    .upload(path, fileBody, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error) {
+    console.error("[lego-passport] uploadPassportImage failed:", error);
+    throw error;
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("passport-scans")
+    .getPublicUrl(path);
+
+  return publicUrlData.publicUrl;
+}
+
+export async function getNextPassportPageNumber(): Promise<number> {
+  const { data, error } = await supabase
+    .from("passport_pages")
+    .select("page_number")
+    .order("page_number", { ascending: false })
+    .limit(1);
+
+  if (error || !data || data.length === 0) {
+    return 1;
+  }
+  return data[0].page_number + 1;
 }

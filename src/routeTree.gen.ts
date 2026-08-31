@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CollectionIndexRouteImport } from './routes/collection/index'
 import { Route as GeneratorIndexRouteImport } from './routes/generator/index'
 import { Route as PassportIndexRouteImport } from './routes/passport/index'
+import { Route as PassportScanRouteImport } from './routes/passport/scan'
 import { Route as StudioIndexRouteImport } from './routes/studio/index'
 import { Route as TripsIndexRouteImport } from './routes/trips/index'
 
@@ -42,6 +43,11 @@ const PassportIndexRoute = PassportIndexRouteImport.update({
   path: '/passport/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PassportScanRoute = PassportScanRouteImport.update({
+  id: '/passport/scan',
+  path: '/passport/scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudioIndexRoute = StudioIndexRouteImport.update({
   id: '/studio/',
   path: '/studio/',
@@ -56,6 +62,7 @@ const TripsIndexRoute = TripsIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/passport/scan': typeof PassportScanRoute
   '/collection/': typeof CollectionIndexRoute
   '/generator/': typeof GeneratorIndexRoute
   '/passport/': typeof PassportIndexRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/passport/scan': typeof PassportScanRoute
   '/collection': typeof CollectionIndexRoute
   '/generator': typeof GeneratorIndexRoute
   '/passport': typeof PassportIndexRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/passport/scan': typeof PassportScanRoute
   '/collection/': typeof CollectionIndexRoute
   '/generator/': typeof GeneratorIndexRoute
   '/passport/': typeof PassportIndexRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sitemap.xml'
+    | '/passport/scan'
     | '/collection/'
     | '/generator/'
     | '/passport/'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/sitemap.xml'
+    | '/passport/scan'
     | '/collection'
     | '/generator'
     | '/passport'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/sitemap.xml'
+    | '/passport/scan'
     | '/collection/'
     | '/generator/'
     | '/passport/'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  PassportScanRoute: typeof PassportScanRoute
   CollectionIndexRoute: typeof CollectionIndexRoute
   GeneratorIndexRoute: typeof GeneratorIndexRoute
   PassportIndexRoute: typeof PassportIndexRoute
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PassportIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/passport/scan': {
+      id: '/passport/scan'
+      path: '/passport/scan'
+      fullPath: '/passport/scan'
+      preLoaderRoute: typeof PassportScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/studio/': {
       id: '/studio/'
       path: '/studio'
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  PassportScanRoute: PassportScanRoute,
   CollectionIndexRoute: CollectionIndexRoute,
   GeneratorIndexRoute: GeneratorIndexRoute,
   PassportIndexRoute: PassportIndexRoute,
