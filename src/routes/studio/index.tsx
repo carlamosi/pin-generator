@@ -121,9 +121,34 @@ function StudioPage() {
   const handleSingleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Reset so the same file can be selected again
+    e.target.value = "";
     try {
-      const dataUrl = await fileToImageDataUrl(file);
-      setSingleImage(dataUrl);
+      const rawDataUrl = await fileToImageDataUrl(file);
+
+      // Center-crop to 1:1 square at up to 1200px for consistent processing
+      const squareDataUrl = await new Promise<string>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const sw = img.naturalWidth;
+          const sh = img.naturalHeight;
+          const size = Math.min(sw, sh);
+          const sx = Math.max(0, Math.floor((sw - size) / 2));
+          const sy = Math.max(0, Math.floor((sh - size) / 2));
+          const dim = Math.min(size, 1200);
+          const cnv = document.createElement("canvas");
+          cnv.width = dim;
+          cnv.height = dim;
+          const ctx = cnv.getContext("2d");
+          if (!ctx) { resolve(rawDataUrl); return; }
+          ctx.drawImage(img, sx, sy, size, size, 0, 0, dim, dim);
+          resolve(cnv.toDataURL("image/jpeg", 0.94));
+        };
+        img.onerror = () => reject(new Error("decode failed"));
+        img.src = rawDataUrl;
+      });
+
+      setSingleImage(squareDataUrl);
       setSingleName(file.name);
       setSingleResult(null);
 
@@ -350,12 +375,14 @@ function StudioPage() {
         cameraStream.getTracks().forEach((track) => track.stop());
       }
 
-      // Constraints with iOS Safari compatibility (avoid rigid 1080p exact constraints)
-      const constraints: MediaStreamConstraints = {
+      // Constraints with iOS Safari compatibility & autofocus enhancement
+      const constraints: any = {
         video: {
           facingMode: { ideal: "environment" },
-          width: { min: 640, ideal: 1280, max: 1920 },
-          height: { min: 480, ideal: 720, max: 1080 },
+          width: { min: 640, ideal: 1440, max: 1920 },
+          height: { min: 640, ideal: 1440, max: 1920 },
+          aspectRatio: { ideal: 1.0 },
+          focusMode: { ideal: "continuous" },
         },
         audio: false,
       };
@@ -363,6 +390,19 @@ function StudioPage() {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setCameraStream(stream);
       setCameraActive(true);
+
+      // Attempt to apply hardware focus / zoom if supported by mobile browser
+      const track = stream.getVideoTracks()[0];
+      if (track && typeof (track as any).applyConstraints === "function") {
+        try {
+          const capabilities = (track as any).getCapabilities ? (track as any).getCapabilities() : {};
+          if (capabilities.focusMode?.includes("continuous")) {
+            await (track as any).applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+          }
+        } catch (focusErr) {
+          console.warn("Focus mode apply error:", focusErr);
+        }
+      }
 
       // Give React a tick to mount video element if it wasn't rendered yet
       setTimeout(() => {
@@ -375,9 +415,9 @@ function StudioPage() {
             videoRef.current?.play();
           });
         }
-      }, 50);
+      }, 60);
 
-      toast.success("Cámara activada");
+      toast.success("Cámara activada en 1:1 ✓");
     } catch (err: any) {
       console.error("Camera access error:", err);
       toast.error(err?.name === "NotAllowedError" ? "Permiso de cámara denegado" : "Error al activar la cámara");
@@ -403,22 +443,31 @@ function StudioPage() {
     }
 
     try {
+      // Precise 1:1 square centered crop
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      const squareSize = Math.min(vw, vh);
+      const startX = Math.max(0, Math.floor((vw - squareSize) / 2));
+      const startY = Math.max(0, Math.floor((vh - squareSize) / 2));
+
+      const targetDim = Math.min(squareSize, 1200);
       const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = targetDim;
+      canvas.height = targetDim;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+      // Draw centered 1:1 square
+      ctx.drawImage(video, startX, startY, squareSize, squareSize, 0, 0, targetDim, targetDim);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.94);
 
       setSingleImage(dataUrl);
-      setSingleName(`captura_camara_${Date.now()}.jpg`);
+      setSingleName(`captura_camara_1x1_${Date.now()}.jpg`);
       setSingleResult(null);
       setStudioMode("single");
       stopCamera();
 
-      toast.success("Fotografía capturada con éxito ✓");
+      toast.success("Fotografía 1:1 capturada con éxito ✓");
     } catch (e: any) {
       toast.error("Error al capturar la foto: " + (e?.message || ""));
     }
@@ -782,7 +831,7 @@ function StudioPage() {
               </div>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden bg-black aspect-video max-h-[480px] flex items-center justify-center border border-white/10">
+            <div className="relative rounded-2xl overflow-hidden bg-black aspect-square w-full max-w-sm mx-auto flex items-center justify-center border border-white/10">
               {cameraActive ? (
                 <>
                   <video
@@ -790,13 +839,22 @@ function StudioPage() {
                     autoPlay
                     playsInline
                     muted
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
-                  {/* Viewfinder crosshairs */}
+                  {/* 1:1 Corner bracket viewfinder */}
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                    <div className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-dashed border-cyan/70 rounded-3xl shadow-[0_0_30px_rgba(0,212,255,0.3)] flex items-center justify-center">
-                      <span className="text-[10px] font-mono text-cyan/90 bg-black/70 px-2.5 py-1 rounded-md">
-                        Encuadra el pin aquí
+                    <div className="relative w-3/4 h-3/4">
+                      {/* Top-left */}
+                      <span className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-cyan rounded-tl-lg" />
+                      {/* Top-right */}
+                      <span className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-cyan rounded-tr-lg" />
+                      {/* Bottom-left */}
+                      <span className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-cyan rounded-bl-lg" />
+                      {/* Bottom-right */}
+                      <span className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-cyan rounded-br-lg" />
+                      {/* Center crosshair */}
+                      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-mono text-cyan/90 bg-black/60 px-2 py-0.5 rounded-md whitespace-nowrap">
+                        Centrar pin aquí
                       </span>
                     </div>
                   </div>
@@ -807,9 +865,9 @@ function StudioPage() {
                     <Camera className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="font-display font-semibold text-sm text-white">Cámara en Vivo</p>
-                    <p className="text-xs text-muted-fg mt-0.5 max-w-sm">
-                      En dispositivos iOS / iPhone puedes usar tanto la cámara en vivo integrada como la cámara nativa del sistema.
+                    <p className="font-display font-semibold text-sm text-white">Cámara en Vivo 1:1</p>
+                    <p className="text-xs text-muted-fg mt-1 max-w-[240px]">
+                      Funciona con cualquier fondo. Encuadra el pin centrado. En iPhone usa "Hacer Foto Nativa" si prefieres la cámara del sistema.
                     </p>
                   </div>
                 </div>

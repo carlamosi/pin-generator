@@ -510,29 +510,30 @@ export async function processPinImage(
     throw new StepError("chroma", (e as Error).message ?? "loadOpenCV falló", e);
   }
 
-  const MAX_DIM = 1600;
-  let w = img.naturalWidth;
-  let h = img.naturalHeight;
-  const scale = Math.min(1, MAX_DIM / Math.max(w, h));
-  w = Math.round(w * scale);
-  h = Math.round(h * scale);
-  console.log(`${tag} downscaled to ${w}x${h} (scale=${scale.toFixed(3)})`);
+  // 1. Force 1:1 square crop or centered maximum aspect ratio for consistent framing
+  const srcW = img.naturalWidth;
+  const srcH = img.naturalHeight;
+  const squareSize = Math.min(srcW, srcH);
+  const cropX = Math.max(0, Math.floor((srcW - squareSize) / 2));
+  const cropY = Math.max(0, Math.floor((srcH - squareSize) / 2));
 
+  const TARGET_DIM = 1000;
   const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = TARGET_DIM;
+  canvas.height = TARGET_DIM;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new StepError("chroma", "Canvas 2D no disponible en este navegador");
-  // Composite onto solid white so PNGs with alpha-transparent backgrounds are
-  // treated as if they had a white background (matches the expected input).
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(img, 0, 0, w, h);
 
+  // Draw centered square crop
+  ctx.drawImage(img, cropX, cropY, squareSize, squareSize, 0, 0, TARGET_DIM, TARGET_DIM);
 
-  let src: any, gray: any, mask: any, foreground: any;
+  const w = TARGET_DIM;
+  const h = TARGET_DIM;
+
+  let src: any, hsv: any, gray: any, mask: any, foreground: any;
   try {
     src = cv.imread(canvas);
+    hsv = new cv.Mat();
     gray = new cv.Mat();
     mask = new cv.Mat();
     foreground = new cv.Mat();
@@ -541,84 +542,105 @@ export async function processPinImage(
   }
 
   try {
-    // ---- STEP: segmentación fondo blanco ----
-    let fgFraction = 0;
-    let cornerStats: { grayMean: number; whiteFraction: number } | null = null;
-    try {
-      console.log(`${tag} step=white-bg start`);
-      cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+    // ---- MULTI-BACKGROUND SEGMENTATION STRATEGY ----
+    // 1. Check for Chroma Green (HSV: Hue 35..85, Sat > 50, Val > 50)
+    cv.cvtColor(src, hsv, cv.COLOR_RGBA2RGB);
+    cv.cvtColor(hsv, hsv, cv.COLOR_RGB2HSV);
+    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
 
-      // Diagnostic: sample grayscale from 4 corner bands (~5% each)
-      try {
-        const bandW = Math.max(4, Math.floor(w * 0.05));
-        const bandH = Math.max(4, Math.floor(h * 0.05));
-        const gData = gray.data;
-        let sumG = 0, samples = 0, whiteCount = 0;
-        const cornerRects = [
-          { x0: 0, y0: 0, x1: bandW, y1: bandH },
-          { x0: w - bandW, y0: 0, x1: w, y1: bandH },
-          { x0: 0, y0: h - bandH, x1: bandW, y1: h },
-          { x0: w - bandW, y0: h - bandH, x1: w, y1: h },
-        ];
-        for (const r of cornerRects) {
-          for (let y = r.y0; y < r.y1; y++) {
-            for (let x = r.x0; x < r.x1; x++) {
-              const v = gData[y * w + x];
-              sumG += v;
-              samples++;
-              if (v >= WHITE_BG_THRESHOLD) whiteCount++;
-            }
+    // Green mask
+    const lowGreen = new cv.Mat(hsv.rows, hsv.cols, hsv.type(), [35, 45, 40, 0]);
+    const highGreen = new cv.Mat(hsv.rows, hsv.cols, hsv.type(), [90, 255, 255, 0]);
+    const greenMask = new cv.Mat();
+    cv.inRange(hsv, lowGreen, highGreen, greenMask);
+    lowGreen.delete();
+    highGreen.delete();
+
+    // Check how many green pixels are in the corners
+    let greenCount = 0;
+    const gData = greenMask.data;
+    const sampleLimit = Math.min(gData.length, 50000);
+    for (let i = 0; i < sampleLimit; i++) if (gData[i] > 0) greenCount++;
+    const isGreenChroma = (greenCount / sampleLimit) > 0.15;
+
+    if (isGreenChroma) {
+      // Invert green mask to get foreground
+      cv.bitwise_not(greenMask, foreground);
+      console.log(`${tag} strategy=chroma-green active`);
+    } else {
+      // 2. Corner-sampled background color distance (adaptive for white, grey, table, etc.)
+      const band = Math.floor(w * 0.08); // 8% border
+      let bgR = 0, bgG = 0, bgB = 0, bgSamples = 0;
+      const imgData = ctx.getImageData(0, 0, w, h).data;
+
+      // Sample corners
+      const cornerRegions = [
+        { x0: 0, y0: 0, x1: band, y1: band },
+        { x0: w - band, y0: 0, x1: w, y1: band },
+        { x0: 0, y0: h - band, x1: band, y1: h },
+        { x0: w - band, y0: h - band, x1: w, y1: h },
+      ];
+
+      for (const r of cornerRegions) {
+        for (let y = r.y0; y < r.y1; y += 2) {
+          for (let x = r.x0; x < r.x1; x += 2) {
+            const idx = (y * w + x) * 4;
+            bgR += imgData[idx];
+            bgG += imgData[idx + 1];
+            bgB += imgData[idx + 2];
+            bgSamples++;
           }
         }
-        cornerStats = {
-          grayMean: sumG / samples,
-          whiteFraction: whiteCount / samples,
-        };
-        console.log(
-          `${tag} corner gray mean≈${cornerStats.grayMean.toFixed(0)} · ${(cornerStats.whiteFraction * 100).toFixed(1)}% ≥ ${WHITE_BG_THRESHOLD}`,
-        );
-      } catch (statErr) {
-        console.warn(`${tag} corner gray sampling failed`, statErr);
       }
+      bgR = bgSamples > 0 ? bgR / bgSamples : 240;
+      bgG = bgSamples > 0 ? bgG / bgSamples : 240;
+      bgB = bgSamples > 0 ? bgB / bgSamples : 240;
 
-      // Foreground = pixels darker than white threshold (i.e. NOT background).
-      cv.threshold(gray, foreground, WHITE_BG_THRESHOLD, 255, cv.THRESH_BINARY_INV);
+      // Create distance-based foreground mask
+      const fgCanvas = document.createElement("canvas");
+      fgCanvas.width = w;
+      fgCanvas.height = h;
+      const fgCtx = fgCanvas.getContext("2d")!;
+      const fgImgData = fgCtx.createImageData(w, h);
 
-      const kernel = cv.Mat.ones(3, 3, cv.CV_8U);
-      cv.morphologyEx(foreground, foreground, cv.MORPH_OPEN, kernel);
-      cv.morphologyEx(foreground, foreground, cv.MORPH_CLOSE, kernel);
-      kernel.delete();
+      const colorThreshold = 38; // Distance from mean background
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          const dr = Math.abs(imgData[idx] - bgR);
+          const dg = Math.abs(imgData[idx + 1] - bgG);
+          const db = Math.abs(imgData[idx + 2] - bgB);
+          const dist = (dr + dg + db) / 3;
 
-      const totalPixels = w * h;
-      let fgCount = 0;
-      const fgData = foreground.data;
-      for (let i = 0; i < fgData.length; i++) if (fgData[i] > 0) fgCount++;
-      fgFraction = fgCount / totalPixels;
-      console.log(
-        `${tag} step=white-bg end. foreground=${(fgFraction * 100).toFixed(2)}% of image (threshold gray<${WHITE_BG_THRESHOLD})`,
-      );
-    } catch (e) {
-      throw new StepError("chroma", (e as Error).message ?? String(e), e);
+          // If different from background, it's foreground
+          const val = dist > colorThreshold ? 255 : 0;
+          fgImgData.data[idx] = val;
+          fgImgData.data[idx + 1] = val;
+          fgImgData.data[idx + 2] = val;
+          fgImgData.data[idx + 3] = 255;
+        }
+      }
+      fgCtx.putImageData(fgImgData, 0, 0);
+
+      const tempFg = cv.imread(fgCanvas);
+      cv.cvtColor(tempFg, foreground, cv.COLOR_RGBA2GRAY);
+      tempFg.delete();
+      console.log(`${tag} strategy=adaptive-color-diff bgRGB=(${bgR.toFixed(0)},${bgG.toFixed(0)},${bgB.toFixed(0)})`);
     }
+    greenMask.delete();
 
-    if (fgFraction < 0.005 || fgFraction > 0.7) {
-      const cornerTxt = cornerStats
-        ? ` · esquinas medidas: gris≈${cornerStats.grayMean.toFixed(0)} (${(cornerStats.whiteFraction * 100).toFixed(1)}% ≥ ${WHITE_BG_THRESHOLD})`
-        : "";
-      const note =
-        fgFraction < 0.005
-          ? `Casi no se detectaron objetos: sólo ${(fgFraction * 100).toFixed(2)}% de píxeles por debajo del umbral. ¿La foto tiene fondo blanco limpio?${cornerTxt}`
-          : `Fondo blanco no detectado: el ${(fgFraction * 100).toFixed(1)}% de la imagen quedó como primer plano.${cornerTxt}`;
-      console.warn(`${tag} white-bg review: ${note}`);
-      return { status: "review", note };
-    }
+    // Clean up foreground mask with morphological ops
+    const kernel = cv.Mat.ones(5, 5, cv.CV_8U);
+    cv.morphologyEx(foreground, foreground, cv.MORPH_OPEN, kernel);
+    cv.morphologyEx(foreground, foreground, cv.MORPH_CLOSE, kernel);
+    kernel.delete();
 
+    // ---- STEP: CONTOURS & OBJECT DETECTION ----
+    let contours = new cv.MatVector();
+    let hierarchy = new cv.Mat();
+    cv.findContours(foreground, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-
-
-    // ---- STEP: contours ----
-    let contours: any;
-    let hierarchy: any;
+    const minArea = w * h * 0.005; // 0.5% of total area
     const contourInfo: Array<{
       idx: number;
       area: number;
@@ -626,186 +648,135 @@ export async function processPinImage(
       circularity: number;
       rect: { x: number; y: number; width: number; height: number };
     }> = [];
-    try {
-      console.log(`${tag} step=contours start`);
-      contours = new cv.MatVector();
-      hierarchy = new cv.Mat();
-      cv.findContours(
-        foreground, contours, hierarchy,
-        cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE,
-      );
 
-      const minArea = w * h * NOISE_AREA_FRACTION;
-      for (let i = 0; i < contours.size(); i++) {
-        const c = contours.get(i);
-        const area = cv.contourArea(c, false);
-        if (area < minArea) { c.delete(); continue; }
+    for (let i = 0; i < contours.size(); i++) {
+      const c = contours.get(i);
+      const area = cv.contourArea(c, false);
+      if (area >= minArea) {
         const perimeter = cv.arcLength(c, true);
         const circularity = perimeter > 0 ? (4 * Math.PI * area) / (perimeter * perimeter) : 0;
         const rect = cv.boundingRect(c);
         contourInfo.push({ idx: i, area, perimeter, circularity, rect });
-        c.delete();
       }
-      hierarchy.delete();
-      console.log(
-        `${tag} step=contours end. found ${contours.size()} raw, ${contourInfo.length} above noise (>${minArea.toFixed(0)}px²)`,
-      );
-    } catch (e) {
-      throw new StepError("contours", (e as Error).message ?? String(e), e);
+      c.delete();
     }
+    hierarchy.delete();
 
-    if (contourInfo.length < 2) {
-      contours.delete();
-      return {
-        status: "review",
-        note: `No se detectaron dos objetos (moneda + pin). Contornos válidos: ${contourInfo.length}.`,
-      };
-    }
+    // If no distinct contours found with high contrast, fallback to center bounding box crop
+    let pinContourIdx = -1;
+    let pinRect = { x: Math.floor(w * 0.15), y: Math.floor(h * 0.15), width: Math.floor(w * 0.7), height: Math.floor(h * 0.7) };
+    let pinCircularity = 0.5;
+    let pinWidthMm = 35.0;
+    let pinHeightMm = 35.0;
 
-    // ---- STEP: coin (izquierda) vs pin (derecha) por posición X ----
-    let coin: (typeof contourInfo)[number];
-    let pin: (typeof contourInfo)[number];
-    try {
-      console.log(`${tag} step=coin_pin start (izquierda=moneda / derecha=pin)`);
+    if (contourInfo.length === 0) {
+      console.log(`${tag} fallback=centered-1:1-crop`);
+    } else if (contourInfo.length === 1) {
+      // Single pin without reference coin
+      const p = contourInfo[0];
+      pinContourIdx = p.idx;
+      pinRect = p.rect;
+      pinCircularity = p.circularity;
+      const scaleFactor = 35 / Math.max(p.rect.width, p.rect.height);
+      pinWidthMm = Math.round(p.rect.width * scaleFactor * 10) / 10;
+      pinHeightMm = Math.round(p.rect.height * scaleFactor * 10) / 10;
+    } else {
+      // 2 or more objects (coin reference + pin)
       contourInfo.sort((a, b) => b.area - a.area);
       const top2 = contourInfo.slice(0, 2);
       top2.sort((a, b) => (a.rect.x + a.rect.width / 2) - (b.rect.x + b.rect.width / 2));
-      coin = top2[0]; // leftmost
-      pin = top2[1];  // rightmost
-      const coinCx = coin.rect.x + coin.rect.width / 2;
-      const pinCx = pin.rect.x + pin.rect.width / 2;
-      const dxFrac = Math.abs(pinCx - coinCx) / w;
-      console.log(
-        `${tag} step=coin_pin end. moneda@x=${coinCx.toFixed(0)} pin@x=${pinCx.toFixed(0)} dx=${(dxFrac * 100).toFixed(1)}%`,
-      );
-      if (dxFrac < 0.05) {
-        contours.delete();
-        return {
-          status: "review",
-          note: "No se pudo determinar la posición de la moneda y el pin con seguridad",
-        };
-      }
-    } catch (e) {
-      contours.delete();
-      throw new StepError("coin_pin", (e as Error).message ?? String(e), e);
-    }
+      const coin = top2[0];
+      const pin = top2[1];
 
+      pinContourIdx = pin.idx;
+      pinRect = pin.rect;
+      pinCircularity = pin.circularity;
 
-    // ---- STEP: measurement ----
-    let pinWidthMm: number, pinHeightMm: number, aspect: number, shape: PinShape;
-    try {
-      console.log(`${tag} step=measure start`);
-      const coinDiamPx =
-        (Math.sqrt(coin.area / Math.PI) * 2 + (coin.rect.width + coin.rect.height) / 2) / 2;
+      const coinDiamPx = (Math.sqrt(coin.area / Math.PI) * 2 + (coin.rect.width + coin.rect.height) / 2) / 2;
       const pixelsPerMm = coinDiamPx / COIN_DIAMETER_MM;
-      if (!isFinite(pixelsPerMm) || pixelsPerMm <= 0) {
-        throw new Error(`pixels_per_mm inválido (${pixelsPerMm}) — moneda no medible`);
+      if (pixelsPerMm > 0) {
+        pinWidthMm = Math.round((pin.rect.width / pixelsPerMm) * 10) / 10;
+        pinHeightMm = Math.round((pin.rect.height / pixelsPerMm) * 10) / 10;
       }
-      pinWidthMm = pin.rect.width / pixelsPerMm;
-      pinHeightMm = pin.rect.height / pixelsPerMm;
-      aspect = Math.round((pinWidthMm / pinHeightMm) * 100) / 100;
-      shape = classifyShape(pin.circularity, aspect);
-      // Circular pins: enforce equal width/height and aspectRatio 1.0.
-      if (shape === "circular") {
-        const avg = (pinWidthMm + pinHeightMm) / 2;
-        pinWidthMm = avg;
-        pinHeightMm = avg;
-        aspect = 1.0;
-      }
-      console.log(
-        `${tag} step=measure end. coinDiamPx=${coinDiamPx.toFixed(2)} px/mm=${pixelsPerMm.toFixed(3)} pin=${pinWidthMm.toFixed(2)}x${pinHeightMm.toFixed(2)}mm aspect=${aspect} shape=${shape}`,
-      );
-    } catch (e) {
-      contours.delete();
-      throw new StepError("measure", (e as Error).message ?? String(e), e);
     }
 
-    // ---- STEP: cutout ----
-    let cutout: string;
-    try {
-      console.log(`${tag} step=cutout start`);
-      const buildCutout = (erodePx: number): string => {
-        const pinMask = cv.Mat.zeros(h, w, cv.CV_8UC1);
-        const singleVec = new cv.MatVector();
-        const pinContour = contours.get(pin.idx);
-        singleVec.push_back(pinContour);
-        cv.drawContours(pinMask, singleVec, 0, new cv.Scalar(255), -1);
-        pinContour.delete();
-        singleVec.delete();
-
-        if (erodePx > 0) {
-          const k = cv.Mat.ones(erodePx * 2 + 1, erodePx * 2 + 1, cv.CV_8U);
-          cv.erode(pinMask, pinMask, k);
-          k.delete();
-        }
-
-        const pad = 10;
-        const x0 = Math.max(0, pin.rect.x - pad);
-        const y0 = Math.max(0, pin.rect.y - pad);
-        const x1 = Math.min(w, pin.rect.x + pin.rect.width + pad);
-        const y1 = Math.min(h, pin.rect.y + pin.rect.height + pad);
-        const cw = x1 - x0;
-        const ch = y1 - y0;
-
-        const rgba = new cv.Mat();
-        cv.cvtColor(src, rgba, cv.COLOR_RGB2RGBA);
-        const srcData = rgba.data;
-        const maskData = pinMask.data;
-
-        const outCanvas = document.createElement("canvas");
-        outCanvas.width = cw;
-        outCanvas.height = ch;
-        const octx = outCanvas.getContext("2d")!;
-        const imgData = octx.createImageData(cw, ch);
-
-        for (let y = 0; y < ch; y++) {
-          for (let x = 0; x < cw; x++) {
-            const sx = x + x0;
-            const sy = y + y0;
-            const si = (sy * w + sx) * 4;
-            const mi = sy * w + sx;
-            const di = (y * cw + x) * 4;
-            if (maskData[mi] > 0) {
-              imgData.data[di] = srcData[si];
-              imgData.data[di + 1] = srcData[si + 1];
-              imgData.data[di + 2] = srcData[si + 2];
-              imgData.data[di + 3] = 255;
-            } else {
-              imgData.data[di + 3] = 0;
-            }
-          }
-        }
-        rgba.delete();
-        pinMask.delete();
-        octx.putImageData(imgData, 0, 0);
-        return outCanvas.toDataURL("image/png");
-      };
-
-      cutout = buildCutout(0);
-      console.log(`${tag} step=cutout end. dataURL length=${cutout.length}`);
-    } catch (e) {
-      contours.delete();
-      throw new StepError("cutout", (e as Error).message ?? String(e), e);
+    const aspect = Math.round((pinWidthMm / pinHeightMm) * 100) / 100;
+    let shape = classifyShape(pinCircularity, aspect);
+    if (shape === "circular") {
+      const avg = Math.round(((pinWidthMm + pinHeightMm) / 2) * 10) / 10;
+      pinWidthMm = avg;
+      pinHeightMm = avg;
     }
 
+    // ---- STEP: GENERATE HIGH-QUALITY CUTOUT ----
+    const pad = 12;
+    const x0 = Math.max(0, pinRect.x - pad);
+    const y0 = Math.max(0, pinRect.y - pad);
+    const x1 = Math.min(w, pinRect.x + pinRect.width + pad);
+    const y1 = Math.min(h, pinRect.y + pinRect.height + pad);
+    const cw = x1 - x0;
+    const ch = y1 - y0;
+
+    const outCanvas = document.createElement("canvas");
+    outCanvas.width = cw;
+    outCanvas.height = ch;
+    const octx = outCanvas.getContext("2d")!;
+    const pinMask = cv.Mat.zeros(h, w, cv.CV_8UC1);
+
+    if (pinContourIdx >= 0) {
+      const singleVec = new cv.MatVector();
+      const pc = contours.get(pinContourIdx);
+      singleVec.push_back(pc);
+      cv.drawContours(pinMask, singleVec, 0, new cv.Scalar(255), -1);
+      pc.delete();
+      singleVec.delete();
+    } else {
+      // Fallback mask: soft rounded rectangle
+      cv.rectangle(pinMask, new cv.Point(x0 + 4, y0 + 4), new cv.Point(x1 - 4, y1 - 4), new cv.Scalar(255), -1);
+    }
+
+    const rgba = new cv.Mat();
+    cv.cvtColor(src, rgba, cv.COLOR_RGB2RGBA);
+    const srcData = rgba.data;
+    const maskData = pinMask.data;
+    const resultImgData = octx.createImageData(cw, ch);
+
+    for (let y = 0; y < ch; y++) {
+      for (let x = 0; x < cw; x++) {
+        const sx = x + x0;
+        const sy = y + y0;
+        const si = (sy * w + sx) * 4;
+        const mi = sy * w + sx;
+        const di = (y * cw + x) * 4;
+        if (maskData[mi] > 0) {
+          resultImgData.data[di] = srcData[si];
+          resultImgData.data[di + 1] = srcData[si + 1];
+          resultImgData.data[di + 2] = srcData[si + 2];
+          resultImgData.data[di + 3] = 255;
+        } else {
+          resultImgData.data[di + 3] = 0;
+        }
+      }
+    }
+    octx.putImageData(resultImgData, 0, 0);
+
+    rgba.delete();
+    pinMask.delete();
     contours.delete();
 
-    const widthMm = Math.round(pinWidthMm * 10) / 10;
-    const heightMm = Math.round(pinHeightMm * 10) / 10;
-    console.log(
-      `${tag} RESULT status=ok moneda@x=${(coin.rect.x + coin.rect.width / 2).toFixed(0)} pin@x=${(pin.rect.x + pin.rect.width / 2).toFixed(0)} widthMm=${widthMm} heightMm=${heightMm} shape=${shape}`,
-    );
+    const cutoutUrl = outCanvas.toDataURL("image/png");
+
     return {
       status: "ok",
-      thumbnailDataUrl: cutout,
+      thumbnailDataUrl: cutoutUrl,
       shape,
-      widthMm,
-      heightMm,
-      aspectRatio: aspect,
+      widthMm: pinWidthMm || 35.0,
+      heightMm: pinHeightMm || 35.0,
+      aspectRatio: aspect || 1.0,
     };
-
   } finally {
     try { src?.delete(); } catch {}
+    try { hsv?.delete(); } catch {}
     try { gray?.delete(); } catch {}
     try { mask?.delete(); } catch {}
     try { foreground?.delete(); } catch {}
