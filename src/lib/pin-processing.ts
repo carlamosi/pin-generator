@@ -1,3 +1,5 @@
+import { removeBackground } from "@imgly/background-removal";
+
 // Client-side pin processing pipeline. OpenCV.js is loaded lazily from the local npm package.
 import opencvUmdUrl from "@techstark/opencv-js/dist/opencv.js?url";
 
@@ -503,13 +505,6 @@ export async function processPinImage(
   const tag = `[pipeline:${filename}]`;
   console.log(`${tag} start. naturalSize=${img.naturalWidth}x${img.naturalHeight}`);
 
-  let cv: any;
-  try {
-    cv = await loadOpenCV();
-  } catch (e) {
-    throw new StepError("chroma", (e as Error).message ?? "loadOpenCV falló", e);
-  }
-
   // 1. Force 1:1 square crop or centered maximum aspect ratio for consistent framing
   const srcW = img.naturalWidth;
   const srcH = img.naturalHeight;
@@ -527,6 +522,88 @@ export async function processPinImage(
   // Draw centered square crop
   ctx.drawImage(img, cropX, cropY, squareSize, squareSize, 0, 0, TARGET_DIM, TARGET_DIM);
 
+  // Try state-of-the-art AI background removal first (@imgly/background-removal)
+  try {
+    console.log(`${tag} attempting AI background removal via @imgly/background-removal...`);
+    const squareBlob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/png")
+    );
+
+    if (squareBlob) {
+      const removedBgBlob = await removeBackground(squareBlob, {
+        progress: (key, current, total) => {
+          console.log(`${tag} AI bg removal progress [${key}]: ${current}/${total}`);
+        },
+      });
+
+      const cutoutUrl = await fileToImageDataUrl(removedBgBlob);
+
+      // Now compute shape and dimensions using the clean cutout mask
+      const cleanImg = await loadImage(cutoutUrl);
+      const cleanCanvas = document.createElement("canvas");
+      cleanCanvas.width = cleanImg.naturalWidth;
+      cleanCanvas.height = cleanImg.naturalHeight;
+      const cctx = cleanCanvas.getContext("2d")!;
+      cctx.drawImage(cleanImg, 0, 0);
+
+      const cData = cctx.getImageData(0, 0, cleanCanvas.width, cleanCanvas.height).data;
+      let minX = cleanCanvas.width, minY = cleanCanvas.height, maxX = 0, maxY = 0;
+      let visiblePixels = 0;
+
+      for (let y = 0; y < cleanCanvas.height; y++) {
+        for (let x = 0; x < cleanCanvas.width; x++) {
+          const alpha = cData[(y * cleanCanvas.width + x) * 4 + 3];
+          if (alpha > 30) {
+            visiblePixels++;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      if (visiblePixels > 500 && maxX > minX && maxY > minY) {
+        const objW = maxX - minX;
+        const objH = maxY - minY;
+        const aspect = Math.round((objW / objH) * 100) / 100;
+        const totalArea = objW * objH;
+        const fillRatio = visiblePixels / totalArea;
+        // Circular shapes usually have fillRatio ≈ π/4 ≈ 0.785
+        const circularity = fillRatio > 0.7 && fillRatio < 0.86 && Math.abs(aspect - 1) < 0.15 ? 0.9 : 0.5;
+        let shape = classifyShape(circularity, aspect);
+
+        let pinWidthMm = 35.0;
+        let pinHeightMm = 35.0;
+        if (aspect > 1) {
+          pinHeightMm = Math.round((35.0 / aspect) * 10) / 10;
+        } else if (aspect < 1) {
+          pinWidthMm = Math.round((35.0 * aspect) * 10) / 10;
+        }
+
+        console.log(`${tag} AI bg removal SUCCESS! shape=${shape} aspect=${aspect}`);
+        return {
+          status: "ok",
+          thumbnailDataUrl: cutoutUrl,
+          shape,
+          widthMm: pinWidthMm,
+          heightMm: pinHeightMm,
+          aspectRatio: aspect,
+        };
+      }
+    }
+  } catch (aiErr) {
+    console.warn(`${tag} AI bg removal fell back to OpenCV pipeline:`, aiErr);
+  }
+
+  // --- FALLBACK: OPENCV SEGMENTATION ---
+  let cv: any;
+  try {
+    cv = await loadOpenCV();
+  } catch (e) {
+    throw new StepError("chroma", (e as Error).message ?? "loadOpenCV falló", e);
+  }
+
   const w = TARGET_DIM;
   const h = TARGET_DIM;
 
@@ -543,7 +620,6 @@ export async function processPinImage(
 
   try {
     // ---- MULTI-BACKGROUND SEGMENTATION STRATEGY ----
-    // 1. Check for Chroma Green (HSV: Hue 35..85, Sat > 50, Val > 50)
     cv.cvtColor(src, hsv, cv.COLOR_RGBA2RGB);
     cv.cvtColor(hsv, hsv, cv.COLOR_RGB2HSV);
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
@@ -556,7 +632,6 @@ export async function processPinImage(
     lowGreen.delete();
     highGreen.delete();
 
-    // Check how many green pixels are in the corners
     let greenCount = 0;
     const gData = greenMask.data;
     const sampleLimit = Math.min(gData.length, 50000);
@@ -564,16 +639,13 @@ export async function processPinImage(
     const isGreenChroma = (greenCount / sampleLimit) > 0.15;
 
     if (isGreenChroma) {
-      // Invert green mask to get foreground
       cv.bitwise_not(greenMask, foreground);
       console.log(`${tag} strategy=chroma-green active`);
     } else {
-      // 2. Corner-sampled background color distance (adaptive for white, grey, table, etc.)
       const band = Math.floor(w * 0.08); // 8% border
       let bgR = 0, bgG = 0, bgB = 0, bgSamples = 0;
       const imgData = ctx.getImageData(0, 0, w, h).data;
 
-      // Sample corners
       const cornerRegions = [
         { x0: 0, y0: 0, x1: band, y1: band },
         { x0: w - band, y0: 0, x1: w, y1: band },
@@ -596,14 +668,13 @@ export async function processPinImage(
       bgG = bgSamples > 0 ? bgG / bgSamples : 240;
       bgB = bgSamples > 0 ? bgB / bgSamples : 240;
 
-      // Create distance-based foreground mask
       const fgCanvas = document.createElement("canvas");
       fgCanvas.width = w;
       fgCanvas.height = h;
       const fgCtx = fgCanvas.getContext("2d")!;
       const fgImgData = fgCtx.createImageData(w, h);
 
-      const colorThreshold = 38; // Distance from mean background
+      const colorThreshold = 38;
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
           const idx = (y * w + x) * 4;
@@ -612,7 +683,6 @@ export async function processPinImage(
           const db = Math.abs(imgData[idx + 2] - bgB);
           const dist = (dr + dg + db) / 3;
 
-          // If different from background, it's foreground
           const val = dist > colorThreshold ? 255 : 0;
           fgImgData.data[idx] = val;
           fgImgData.data[idx + 1] = val;
@@ -625,22 +695,19 @@ export async function processPinImage(
       const tempFg = cv.imread(fgCanvas);
       cv.cvtColor(tempFg, foreground, cv.COLOR_RGBA2GRAY);
       tempFg.delete();
-      console.log(`${tag} strategy=adaptive-color-diff bgRGB=(${bgR.toFixed(0)},${bgG.toFixed(0)},${bgB.toFixed(0)})`);
     }
     greenMask.delete();
 
-    // Clean up foreground mask with morphological ops
     const kernel = cv.Mat.ones(5, 5, cv.CV_8U);
     cv.morphologyEx(foreground, foreground, cv.MORPH_OPEN, kernel);
     cv.morphologyEx(foreground, foreground, cv.MORPH_CLOSE, kernel);
     kernel.delete();
 
-    // ---- STEP: CONTOURS & OBJECT DETECTION ----
     let contours = new cv.MatVector();
     let hierarchy = new cv.Mat();
     cv.findContours(foreground, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-    const minArea = w * h * 0.005; // 0.5% of total area
+    const minArea = w * h * 0.005;
     const contourInfo: Array<{
       idx: number;
       area: number;
@@ -662,7 +729,6 @@ export async function processPinImage(
     }
     hierarchy.delete();
 
-    // If no distinct contours found with high contrast, fallback to center bounding box crop
     let pinContourIdx = -1;
     let pinRect = { x: Math.floor(w * 0.15), y: Math.floor(h * 0.15), width: Math.floor(w * 0.7), height: Math.floor(h * 0.7) };
     let pinCircularity = 0.5;
@@ -672,7 +738,6 @@ export async function processPinImage(
     if (contourInfo.length === 0) {
       console.log(`${tag} fallback=centered-1:1-crop`);
     } else if (contourInfo.length === 1) {
-      // Single pin without reference coin
       const p = contourInfo[0];
       pinContourIdx = p.idx;
       pinRect = p.rect;
@@ -681,7 +746,6 @@ export async function processPinImage(
       pinWidthMm = Math.round(p.rect.width * scaleFactor * 10) / 10;
       pinHeightMm = Math.round(p.rect.height * scaleFactor * 10) / 10;
     } else {
-      // 2 or more objects (coin reference + pin)
       contourInfo.sort((a, b) => b.area - a.area);
       const top2 = contourInfo.slice(0, 2);
       top2.sort((a, b) => (a.rect.x + a.rect.width / 2) - (b.rect.x + b.rect.width / 2));
@@ -708,7 +772,6 @@ export async function processPinImage(
       pinHeightMm = avg;
     }
 
-    // ---- STEP: GENERATE HIGH-QUALITY CUTOUT ----
     const pad = 12;
     const x0 = Math.max(0, pinRect.x - pad);
     const y0 = Math.max(0, pinRect.y - pad);
@@ -731,7 +794,6 @@ export async function processPinImage(
       pc.delete();
       singleVec.delete();
     } else {
-      // Fallback mask: soft rounded rectangle
       cv.rectangle(pinMask, new cv.Point(x0 + 4, y0 + 4), new cv.Point(x1 - 4, y1 - 4), new cv.Scalar(255), -1);
     }
 
