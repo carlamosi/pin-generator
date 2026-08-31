@@ -1,4 +1,84 @@
 import { PIN_CUTOUTS_BUCKET, supabase } from "../supabase";
+import { Country as CscCountry, City as CscCity, State as CscState } from "country-state-city";
+
+export function resolveGeoForCity(cityName: string): { country: string; region: string; continent: string } {
+  const norm = cityName.trim().toLowerCase();
+
+  if (norm.includes("copenh") || norm.includes("copenag")) {
+    return { country: "Dinamarca", region: "Hovedstaden", continent: "Europa" };
+  }
+  if (norm.includes("billund")) {
+    return { country: "Dinamarca", region: "Syddanmark", continent: "Europa" };
+  }
+  if (norm.includes("london") || norm.includes("londres")) {
+    return { country: "Reino Unido", region: "Greater London", continent: "Europa" };
+  }
+  if (norm.includes("barcelona")) {
+    return { country: "España", region: "Cataluña", continent: "Europa" };
+  }
+  if (norm.includes("madrid")) {
+    return { country: "España", region: "Comunidad de Madrid", continent: "Europa" };
+  }
+
+  try {
+    const allCscCities = CscCity.getAllCities();
+    const match = allCscCities.find((c) => c.name.toLowerCase() === norm);
+    if (match) {
+      const countryObj = CscCountry.getCountryByCode(match.countryCode);
+      const stateObj = match.stateCode ? CscState.getStateByCodeAndCountry(match.stateCode, match.countryCode) : null;
+      return {
+        country: countryObj?.name || match.countryCode,
+        region: stateObj?.name || "General",
+        continent: (countryObj as any)?.region || "Europa",
+      };
+    }
+  } catch {
+    // fallback
+  }
+
+  return { country: "Internacional", region: "General", continent: "Mundial" };
+}
+
+export async function findOrCreateCityFromGeo(cityName: string): Promise<City | null> {
+  if (!cityName || !cityName.trim()) return null;
+  const trimmed = cityName.trim();
+
+  const { data: existing } = await supabase
+    .from("cities")
+    .select("*")
+    .ilike("name", trimmed)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    return existing[0] as City;
+  }
+
+  const geo = resolveGeoForCity(trimmed);
+  const cityId = `city-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const recordToSave: Partial<City> & { id: string; name: string } = {
+    id: cityId,
+    name: trimmed,
+    country: geo.country,
+    region: geo.region,
+    continent: geo.continent,
+    trip_id: null,
+    start_date: null,
+    end_date: null,
+    notes: "Auto-detectado por escáner de pasaporte",
+  };
+
+  const { data, error } = await supabase
+    .from("cities")
+    .insert(recordToSave)
+    .select()
+    .single();
+
+  if (error) {
+    console.warn("[lego-passport] findOrCreateCityFromGeo fallback:", error);
+    return recordToSave as City;
+  }
+  return data as City;
+}
 
 export interface Trip {
   id: string;
