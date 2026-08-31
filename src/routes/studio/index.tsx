@@ -355,7 +355,7 @@ function StudioPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] font-mono tracking-widest text-cyan uppercase bg-cyan/10 px-2.5 py-1 rounded-full border border-cyan/20">
-              Motor Digitalizador OpenCV
+              
             </span>
           </div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
@@ -681,3 +681,4 @@ function StudioPage() {
     </div>
   );
 }
+

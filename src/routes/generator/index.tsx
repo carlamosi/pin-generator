@@ -154,7 +154,7 @@ function GeneratorPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] font-mono tracking-widest text-neon uppercase bg-neon/10 px-2.5 py-1 rounded-full border border-neon/20">
-              Editor Satelital Interactivo · WYSIWYG
+              
             </span>
           </div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
@@ -375,3 +375,4 @@ function GeneratorPage() {
     </div>
   );
 }
+

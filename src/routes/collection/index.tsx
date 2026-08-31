@@ -131,7 +131,7 @@ function CollectionPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px] font-mono tracking-widest text-coral uppercase bg-coral/10 px-2.5 py-1 rounded-full border border-coral/20">
-              Colección Cronológica · 3×4
+              
             </span>
           </div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
@@ -339,3 +339,4 @@ function CollectionPage() {
     </div>
   );
 }
+

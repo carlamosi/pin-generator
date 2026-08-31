@@ -214,14 +214,8 @@ function TripsPage() {
 
   return (
     <div className="space-y-8 animate-float-in max-w-7xl mx-auto pb-12">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] font-mono tracking-widest text-violet uppercase bg-violet/10 px-2.5 py-1 rounded-full border border-violet/20">
-              Gestión Integral de Expediciones
-            </span>
-          </div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
             Mis Viajes y Rutas
           </h2>
@@ -533,3 +527,4 @@ function TripsPage() {
     </div>
   );
 }
+

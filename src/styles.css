@@ -5,8 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ====================================================================
-   ORBITA — Cinematic Geography Mastery Platform
-   Design tokens. Dark-space aesthetic only. Do not introduce light mode.
+   ORBITA Design System — Refined Dark Space Architecture
    ==================================================================== */
 
 @theme inline {
@@ -27,7 +26,7 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--foreground);
-  --color-popover: #0a0a14;
+  --color-popover: #09090d;
   --color-popover-foreground: var(--foreground);
   --color-primary: var(--violet);
   --color-primary-foreground: #ffffff;
@@ -42,51 +41,47 @@
   --color-input: var(--border);
   --color-ring: var(--violet);
 
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif;
+  --color-sidebar: #07070b;
+  --color-sidebar-foreground: #f4f5fb;
+  --color-sidebar-primary: var(--violet);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: rgba(255, 255, 255, 0.06);
+  --color-sidebar-accent-foreground: #ffffff;
+  --color-sidebar-border: rgba(255, 255, 255, 0.08);
+  --color-sidebar-ring: var(--violet);
+
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 :root {
-  /* Cinematic palette */
-  --space: #050508;
-  --violet: #6c63ff;
-  --cyan: #00d4ff;
-  --coral: #ff6b6b;
-  --neon: #00ffb2;
+  --space: #060609;
+  --violet: #6366f1;
+  --cyan: #06b6d4;
+  --coral: #f43f5e;
+  --neon: #10b981;
 
-  --background: #050508;
+  --background: #060609;
   --foreground: #f4f5fb;
-  --card: rgba(255, 255, 255, 0.04);
-  --glass: rgba(255, 255, 255, 0.05);
-  --glass-strong: rgba(255, 255, 255, 0.08);
+  --card: rgba(255, 255, 255, 0.03);
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-strong: rgba(255, 255, 255, 0.05);
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.14);
-  --muted-fg: #8b8fa8;
+  --muted-fg: #94a3b8;
 
-  /* Atmospheric gradients */
   --grad-aurora: radial-gradient(
-      1200px 800px at 18% 12%,
-      color-mix(in oklab, var(--violet) 28%, transparent),
-      transparent 60%
+      1000px 600px at 15% 10%,
+      rgba(99, 102, 241, 0.15),
+      transparent 70%
     ),
     radial-gradient(
-      1000px 700px at 85% 78%,
-      color-mix(in oklab, var(--cyan) 22%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      900px 700px at 50% 110%,
-      color-mix(in oklab, var(--coral) 14%, transparent),
-      transparent 65%
+      800px 500px at 85% 85%,
+      rgba(6, 182, 212, 0.12),
+      transparent 70%
     );
-  --grad-deep: radial-gradient(ellipse at center, #0a0a14 0%, #050508 70%);
-
-  /* Glow shadows */
-  --glow-violet: 0 0 40px -8px color-mix(in oklab, var(--violet) 60%, transparent);
-  --glow-cyan: 0 0 40px -8px color-mix(in oklab, var(--cyan) 55%, transparent);
-  --shadow-lift: 0 20px 60px -20px rgba(0, 0, 0, 0.8),
-    0 8px 24px -12px color-mix(in oklab, var(--violet) 45%, transparent);
+  --grad-deep: radial-gradient(ellipse at center, #090912 0%, #060609 80%);
 
   color-scheme: dark;
 }
@@ -111,57 +106,38 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--violet) 45%, transparent);
+  background: rgba(99, 102, 241, 0.35);
   color: #fff;
 }
 
-/* Headings default to display font */
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
 }
 
-/* ============== Atmosphere utilities ============== */
+/* ============== Refined Glassmorphism Utilities ============== */
 
 @utility glass {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
-  border: 1px solid var(--border);
-  backdrop-filter: blur(18px) saturate(140%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
-    0 10px 40px -20px rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 @utility glass-strong {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.09),
-    rgba(255, 255, 255, 0.03)
-  );
-  border: 1px solid var(--border-strong);
-  backdrop-filter: blur(24px) saturate(160%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 20px 60px -24px rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
 }
 
 @utility glow-violet {
-  box-shadow: var(--glow-violet);
+  box-shadow: 0 0 30px -6px rgba(99, 102, 241, 0.35);
 }
 @utility glow-cyan {
-  box-shadow: var(--glow-cyan);
-}
-
-@utility text-glow-violet {
-  text-shadow: 0 0 24px color-mix(in oklab, var(--violet) 55%, transparent);
-}
-@utility text-glow-cyan {
-  text-shadow: 0 0 24px color-mix(in oklab, var(--cyan) 50%, transparent);
+  box-shadow: 0 0 30px -6px rgba(6, 182, 212, 0.35);
 }
 
 @utility hairline {
@@ -170,69 +146,25 @@ h1, h2, h3, h4 {
 
 @utility checker-bg {
   background-image:
-    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
+    linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%);
   background-size: 12px 12px;
   background-position: 0 0, 0 6px, 6px -6px, -6px 0;
-  background-color: rgba(10, 10, 20, 0.8);
+  background-color: rgba(9, 9, 16, 0.9);
 }
 
 @utility orbita-grain {
   position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    mix-blend-mode: overlay;
-    opacity: 0.06;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  }
-}
-
-@utility vignette {
-  position: relative;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(
-      ellipse at center,
-      transparent 55%,
-      rgba(0, 0, 0, 0.75) 100%
-    );
-  }
-}
-
-/* ============== Motion keyframes ============== */
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--violet) 50%, transparent),
-      0 0 40px -8px color-mix(in oklab, var(--violet) 55%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 14px transparent,
-      0 0 64px -6px color-mix(in oklab, var(--violet) 70%, transparent);
-  }
-}
-
-@keyframes breathe {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.04); opacity: 1; }
 }
 
 @keyframes float-in {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-breathe { animation: breathe 6s ease-in-out infinite; }
-.animate-pulse-glow { animation: pulse-glow 3.2s ease-in-out infinite; }
-.animate-float-in { animation: float-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-float-in { animation: float-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 @layer base {
   * {
