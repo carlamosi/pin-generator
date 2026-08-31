@@ -155,6 +155,7 @@ export interface StampDesign {
   description: string | null;
   preview_image_url: string | null;
   represented_city_id: string | null;
+  visual_hash: string | null;
   created_at: string;
 }
 
@@ -229,6 +230,29 @@ export async function listStampDesigns(): Promise<StampDesign[]> {
     return [];
   }
   return (data ?? []) as StampDesign[];
+}
+
+export interface StampDesignInsert {
+  code: string;
+  name: string;
+  category: string;
+  description?: string | null;
+  preview_image_url?: string | null;
+  represented_city_id?: string | null;
+  visual_hash?: string | null;
+}
+
+export async function insertStampDesign(design: StampDesignInsert): Promise<StampDesign> {
+  const { data, error } = await supabase
+    .from("stamp_designs")
+    .insert(design)
+    .select()
+    .single();
+  if (error) {
+    console.error("[lego-passport] insertStampDesign failed:", error);
+    throw error;
+  }
+  return data as StampDesign;
 }
 
 export async function listStampingLocations(): Promise<StampingLocation[]> {
