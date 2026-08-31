@@ -714,294 +714,411 @@ function PassportScanPage() {
 
       {/* ── STEP: IDENTIFY ────────────────────────────────────────────────── */}
       {step === "identify" && current && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left: Crop + queue indicator */}
-          <div className="lg:col-span-5 flex flex-col gap-5">
-            {/* Crop preview */}
-            <div className="w-full aspect-[4/3] bg-white/5 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
-              {current.slot.cropDataUrl ? (
-                <img
-                  src={current.slot.cropDataUrl}
-                  alt={`Slot ${current.slot.slot_position}`}
-                  className="max-w-full max-h-full object-contain"
-                />
-              ) : (
-                <Stamp className="h-12 w-12 text-muted-fg opacity-30" />
-              )}
-            </div>
-
-            {/* Queue pills */}
-            <div className="flex gap-2 flex-wrap">
-              {identifyQueue.map((item, i) => (
-                <button
-                  key={item.slot.slot_position}
-                  onClick={() => setIdentifyIndex(i)}
-                  className={cn(
-                    "h-8 px-3 rounded-lg text-xs font-mono border transition-all",
-                    i === identifyIndex
-                      ? "border-white/30 bg-white/10 text-white"
-                      : item.confirmed
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                      : "border-white/10 bg-white/[0.02] text-muted-fg"
-                  )}
-                >
-                  0{item.slot.slot_position}
-                  {item.confirmed && <Check className="inline h-3 w-3 ml-1" />}
-                </button>
-              ))}
-            </div>
-
-            {/* Confidence */}
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-muted-fg text-xs">Confianza de reconocimiento:</span>
-              <span
-                className={cn(
-                  "px-2.5 py-0.5 rounded text-xs font-mono font-bold border",
-                  CONFIDENCE_STYLE[current.recognition.confidence]
-                )}
-              >
-                {CONFIDENCE_LABEL[current.recognition.confidence]}
-              </span>
-            </div>
-
-            {/* Raw OCR tokens */}
-            {current.recognition.ocrTokens.length > 0 && (
-              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 space-y-1.5">
-                <p className="text-[10px] font-mono text-muted-fg uppercase tracking-wider mb-2">
-                  Texto OCR extraido
-                </p>
-                {current.recognition.ocrTokens.map((tok, i) => (
-                  <span
-                    key={i}
-                    className="inline-block bg-white/5 border border-white/10 text-white/70 text-xs font-mono px-2 py-0.5 rounded mr-1 mb-1"
-                  >
-                    {tok}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Right: Identification form */}
-          <div className="lg:col-span-7 space-y-5">
-            {/* Duplicate warning */}
-            {current.recognition.isDuplicate && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-sm text-amber-300 flex gap-3 items-start">
-                <HelpCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span>
-                  Esta imagen es visualmente muy similar a{" "}
-                  <strong>{current.recognition.existingDesign?.name}</strong>. Revisa si
-                  es un sello ya en tu coleccion.
+        <div className="space-y-6">
+          {/* Top Stamp Queue Carousel & Quick Actions */}
+          <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-fg">
+                  Cola de Identificación &bull; {confirmedCount} de {totalCount} confirmados
                 </span>
-              </div>
-            )}
-
-            {/* Design mode selector */}
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
-              <p className="text-xs font-mono text-muted-fg uppercase tracking-wider">
-                Diseno de Sello
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => updateCurrent({ designMode: "existing" })}
-                  className={cn(
-                    "flex-1 py-2 rounded-lg text-xs border transition-all",
-                    current.designMode === "existing"
-                      ? "bg-white/10 border-white/20 text-white"
-                      : "bg-transparent border-white/5 text-muted-fg hover:border-white/10"
-                  )}
-                >
-                  Reutilizar Diseno Existente
-                </button>
-                <button
-                  onClick={() => updateCurrent({ designMode: "new" })}
-                  className={cn(
-                    "flex-1 py-2 rounded-lg text-xs border transition-all",
-                    current.designMode === "new"
-                      ? "bg-white/10 border-white/20 text-white"
-                      : "bg-transparent border-white/5 text-muted-fg hover:border-white/10"
-                  )}
-                >
-                  Nuevo Diseno
-                </button>
+                <h3 className="text-base font-bold text-white">
+                  Revisando Sello 0{current.slot.slot_position} ({identifyIndex + 1} de {identifyQueue.length})
+                </h3>
               </div>
 
-              {current.designMode === "existing" ? (
-                <div className="space-y-2">
-                  <label className="text-xs text-muted-fg">Seleccionar diseno existente</label>
-                  <select
-                    value={current.selectedDesignId ?? ""}
-                    onChange={(e) =>
-                      updateCurrent({ selectedDesignId: e.target.value || null })
-                    }
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
-                  >
-                    <option value="">— Seleccionar —</option>
-                    {existingDesigns.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        [{d.category}] {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {/* Name */}
-                  <div>
-                    <label className="text-xs text-muted-fg block mb-1">
-                      Nombre del diseno
-                    </label>
-                    <input
-                      type="text"
-                      value={current.editName}
-                      onChange={(e) => updateCurrent({ editName: e.target.value })}
-                      placeholder="Ej: Copenhagen, 2026, Everyone is Awesome…"
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
-                    />
-                  </div>
-                  {/* Category */}
-                  <div>
-                    <label className="text-xs text-muted-fg block mb-1">Categoria</label>
-                    <select
-                      value={current.editCategory}
-                      onChange={(e) => updateCurrent({ editCategory: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
-                    >
-                      {CATEGORIES.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* Represented city */}
-                  <div>
-                    <label className="text-xs text-muted-fg block mb-1">
-                      Ciudad representada{" "}
-                      <span className="text-muted-fg/50">(opcional)</span>
-                    </label>
-                    <select
-                      value={current.editCityId}
-                      onChange={(e) => updateCurrent({ editCityId: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
-                    >
-                      <option value="">— Sin ciudad especifica —</option>
-                      {existingCities.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}, {c.country}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Physical stamp details */}
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
-              <p className="text-xs font-mono text-muted-fg uppercase tracking-wider">
-                Sello Fisico
-              </p>
-              {/* Location Name */}
-              <div>
-                <label className="text-xs text-muted-fg block mb-1">
-                  Nombre de la Tienda LEGO / Ubicación{" "}
-                  <span className="text-muted-fg/50">(manual, ej: LEGO Store Strøget)</span>
-                </label>
-                <input
-                  type="text"
-                  value={current.editLocationName}
-                  onChange={(e) => updateCurrent({ editLocationName: e.target.value })}
-                  placeholder="Ej: LEGO Store Copenhagen, Strøget…"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
-                />
-              </div>
-
-              {/* Trip Link */}
-              <div>
-                <label className="text-xs text-muted-fg block mb-1">
-                  Vincular con viaje <span className="text-muted-fg/50">(opcional)</span>
-                </label>
-                <select
-                  value={current.editTripId}
-                  onChange={(e) => updateCurrent({ editTripId: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
-                >
-                  <option value="">— Sin viaje asociado —</option>
-                  {existingTrips.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} ({t.description})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/* stamped_at */}
-              <div>
-                <label className="text-xs text-muted-fg block mb-1">
-                  Fecha de estampado (stamped_at){" "}
-                  <span className="text-muted-fg/50">YYYY-MM-DD — dejar vacio si desconocida</span>
-                </label>
-                <input
-                  type="date"
-                  value={current.editStampedAt}
-                  onChange={(e) => updateCurrent({ editStampedAt: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/20"
-                />
-              </div>
-            </div>
-
-            {/* Confirm this stamp */}
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1 border-white/10 text-muted-fg hover:text-white text-xs"
-                onClick={() =>
-                  updateCurrent({ confirmed: false })
-                }
-              >
-                Dejar sin confirmar
-              </Button>
-              <Button
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs gap-2"
-                onClick={() => {
-                  updateCurrent({ confirmed: true });
-                  if (identifyIndex < identifyQueue.length - 1) {
-                    setIdentifyIndex((i) => i + 1);
-                  }
-                }}
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                Confirmar Sello
-              </Button>
-            </div>
-
-            {/* Save all */}
-            {confirmedCount > 0 && (
-              <div className="bg-emerald-950/30 border border-emerald-900/50 rounded-2xl p-5">
-                <p className="text-xs text-emerald-400/80 mb-3 leading-relaxed">
-                  {confirmedCount} de {totalCount} sellos confirmados. Puedes
-                  guardar cuando hayas revisado todos los que desees.
-                </p>
-                {saveError && (
-                  <p className="text-red-400 text-xs mb-3 flex items-center gap-1.5">
-                    <AlertCircle className="h-3.5 w-3.5" /> {saveError}
-                  </p>
-                )}
+              {/* Batch action */}
+              <div className="flex items-center gap-2">
                 <Button
-                  onClick={handleSaveAll}
-                  disabled={isSaving}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIdentifyQueue((prev) =>
+                      prev.map((item) => ({
+                        ...item,
+                        confirmed: true,
+                      }))
+                    );
+                  }}
+                  className="text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 gap-1.5"
                 >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Guardando…
-                    </>
-                  ) : (
-                    `Guardar ${confirmedCount} ${confirmedCount === 1 ? "sello" : "sellos"} en la coleccion`
-                  )}
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Confirmar todos ({identifyQueue.length})
                 </Button>
               </div>
-            )}
+            </div>
+
+            {/* Thumbnail cards strip */}
+            <div className="flex gap-3 overflow-x-auto pb-2 pt-1 scrollbar-thin">
+              {identifyQueue.map((item, i) => {
+                const isActive = i === identifyIndex;
+                const hasMatch = Boolean(item.recognition.matchedCity || item.recognition.existingDesign);
+                return (
+                  <div
+                    key={item.slot.slot_position}
+                    onClick={() => setIdentifyIndex(i)}
+                    className={cn(
+                      "flex-shrink-0 w-32 p-2 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col items-center text-center relative",
+                      isActive
+                        ? "border-amber-400/60 bg-amber-400/10 shadow-lg shadow-amber-400/5 ring-1 ring-amber-400/40"
+                        : item.confirmed
+                        ? "border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500/60"
+                        : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                    )}
+                  >
+                    {/* Status badge */}
+                    <div className="absolute top-1.5 right-1.5">
+                      {item.confirmed ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <span className="h-2 w-2 rounded-full bg-amber-400/60 block" />
+                      )}
+                    </div>
+
+                    <div className="h-14 w-14 rounded-lg bg-[#FAF7EE] border border-black/10 flex items-center justify-center p-1 overflow-hidden my-1">
+                      {item.slot.cropDataUrl ? (
+                        <img
+                          src={item.slot.cropDataUrl}
+                          alt={`Slot ${item.slot.slot_position}`}
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      ) : (
+                        <Stamp className="h-6 w-6 text-[#A8A08C]" />
+                      )}
+                    </div>
+
+                    <span className="text-[10px] font-mono font-bold text-white">
+                      Posición 0{item.slot.slot_position}
+                    </span>
+                    <span className="text-[9px] text-muted-fg truncate max-w-full font-medium">
+                      {item.editName || item.recognition.suggestedName || "Sin identificar"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Main 2-Column Inspector */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Visual Crop, OCR & Comparison */}
+            <div className="lg:col-span-5 space-y-4">
+              {/* Main Stamp Crop with Paper Texture */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col items-center">
+                <div className="flex w-full items-center justify-between text-xs font-mono text-muted-fg mb-3">
+                  <span>Recorte Extraído &bull; Posición 0{current.slot.slot_position}</span>
+                  <span
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-bold border",
+                      CONFIDENCE_STYLE[current.recognition.confidence]
+                    )}
+                  >
+                    Confianza {CONFIDENCE_LABEL[current.recognition.confidence]}
+                  </span>
+                </div>
+
+                <div
+                  className="w-full aspect-square max-w-[260px] rounded-2xl p-4 flex items-center justify-center relative overflow-hidden shadow-xl"
+                  style={{
+                    backgroundColor: "#FAF7EE",
+                    backgroundImage: "radial-gradient(#D6CEB8 0.75px, transparent 0.75px)",
+                    backgroundSize: "12px 12px",
+                    boxShadow: "inset 0 0 20px rgba(180,165,130,0.3), 0 10px 30px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  {current.slot.cropDataUrl ? (
+                    <img
+                      src={current.slot.cropDataUrl}
+                      alt={`Sello 0${current.slot.slot_position}`}
+                      className="max-w-full max-h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
+                    />
+                  ) : (
+                    <Stamp className="h-12 w-12 text-[#A8A08C]" />
+                  )}
+                </div>
+              </div>
+
+              {/* Side-by-Side Comparison if Existing Design Matched */}
+              {current.recognition.existingDesign && (
+                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-amber-300 text-xs font-semibold">
+                    <HelpCircle className="h-4 w-4" />
+                    <span>Diseño Existente Detectado en Colección</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-black/20 rounded-xl p-3">
+                    {current.recognition.existingDesign.preview_image_url && (
+                      <img
+                        src={current.recognition.existingDesign.preview_image_url}
+                        alt="Existing design"
+                        className="h-12 w-12 rounded-lg object-contain bg-white/10 p-1 border border-white/10"
+                      />
+                    )}
+                    <div className="text-xs">
+                      <p className="font-bold text-white">{current.recognition.existingDesign.name}</p>
+                      <p className="text-muted-fg text-[11px]">
+                        Categoría: {current.recognition.existingDesign.category} &bull; Código: {current.recognition.existingDesign.code}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Interactive Clickable OCR Chips */}
+              {current.recognition.ocrTokens.length > 0 && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-mono text-muted-fg uppercase tracking-wider">
+                      Texto Detectado por OCR (Clic para autocompletar)
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {current.recognition.ocrTokens.map((tok, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          const formatted = tok.charAt(0).toUpperCase() + tok.slice(1);
+                          updateCurrent({ editName: formatted });
+                        }}
+                        className="bg-white/5 hover:bg-amber-400/20 border border-white/10 hover:border-amber-400/40 text-white/80 hover:text-amber-300 text-xs font-mono px-2.5 py-1 rounded-lg transition-colors"
+                        title="Usar este texto como nombre"
+                      >
+                        + {tok}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Identification Form & Meta */}
+            <div className="lg:col-span-7 space-y-5">
+              {/* Design mode selector */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+                <p className="text-xs font-mono text-muted-fg uppercase tracking-wider">
+                  1. Definición del Diseño
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => updateCurrent({ designMode: "existing" })}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl text-xs font-medium border transition-all",
+                      current.designMode === "existing"
+                        ? "bg-white/15 border-white/30 text-white shadow-sm"
+                        : "bg-transparent border-white/5 text-muted-fg hover:border-white/15"
+                    )}
+                  >
+                    Reutilizar Diseño Existente
+                  </button>
+                  <button
+                    onClick={() => updateCurrent({ designMode: "new" })}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl text-xs font-medium border transition-all",
+                      current.designMode === "new"
+                        ? "bg-white/15 border-white/30 text-white shadow-sm"
+                        : "bg-transparent border-white/5 text-muted-fg hover:border-white/15"
+                    )}
+                  >
+                    Nuevo Diseño
+                  </button>
+                </div>
+
+                {current.designMode === "existing" ? (
+                  <div className="space-y-2">
+                    <label className="text-xs text-muted-fg">Seleccionar diseño de tu catálogo</label>
+                    <select
+                      value={current.selectedDesignId ?? ""}
+                      onChange={(e) =>
+                        updateCurrent({ selectedDesignId: e.target.value || null })
+                      }
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                    >
+                      <option value="">— Seleccionar —</option>
+                      {existingDesigns.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          [{d.category}] {d.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Name with quick-apply suggestion */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs text-muted-fg">
+                          Nombre del diseño
+                        </label>
+                        {current.recognition.matchedCity && (
+                          <span className="text-[10px] text-emerald-400 font-mono">
+                            Ciudad sugerida: {current.recognition.matchedCity.name}
+                          </span>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        value={current.editName}
+                        onChange={(e) => updateCurrent({ editName: e.target.value })}
+                        placeholder="Ej: Copenhagen, 2026, Everyone is Awesome…"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Category */}
+                      <div>
+                        <label className="text-xs text-muted-fg block mb-1.5">Categoría</label>
+                        <select
+                          value={current.editCategory}
+                          onChange={(e) => updateCurrent({ editCategory: e.target.value })}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                        >
+                          {CATEGORIES.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Represented city */}
+                      <div>
+                        <label className="text-xs text-muted-fg block mb-1.5">
+                          Ciudad Representada
+                        </label>
+                        <select
+                          value={current.editCityId}
+                          onChange={(e) => updateCurrent({ editCityId: e.target.value })}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                        >
+                          <option value="">— Sin ciudad específica —</option>
+                          {existingCities.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}, {c.country}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Physical stamp details */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+                <p className="text-xs font-mono text-muted-fg uppercase tracking-wider">
+                  2. Datos del Estampado Físico
+                </p>
+
+                {/* Location Name */}
+                <div>
+                  <label className="text-xs text-muted-fg block mb-1.5">
+                    Nombre de la Tienda LEGO / Ubicación <span className="text-muted-fg/50">(manual)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={current.editLocationName}
+                    onChange={(e) => updateCurrent({ editLocationName: e.target.value })}
+                    placeholder="Ej: LEGO Store Copenhagen, Strøget…"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Trip Link */}
+                  <div>
+                    <label className="text-xs text-muted-fg block mb-1.5">
+                      Vincular con viaje <span className="text-muted-fg/50">(opcional)</span>
+                    </label>
+                    <select
+                      value={current.editTripId}
+                      onChange={(e) => updateCurrent({ editTripId: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                    >
+                      <option value="">— Sin viaje asociado —</option>
+                      {existingTrips.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.description})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* stamped_at */}
+                  <div>
+                    <label className="text-xs text-muted-fg block mb-1.5">
+                      Fecha de estampado <span className="text-muted-fg/50">(opcional)</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={current.editStampedAt}
+                      onChange={(e) => updateCurrent({ editStampedAt: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation & Confirmation Actions */}
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-white/10 text-muted-fg hover:text-white text-xs h-11 rounded-xl"
+                  onClick={() => {
+                    updateCurrent({ confirmed: false });
+                    if (identifyIndex < identifyQueue.length - 1) {
+                      setIdentifyIndex((i) => i + 1);
+                    }
+                  }}
+                >
+                  Saltar / Sin Confirmar
+                </Button>
+                <Button
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs gap-2 h-11 rounded-xl font-semibold shadow-lg shadow-emerald-900/20"
+                  onClick={() => {
+                    updateCurrent({ confirmed: true });
+                    if (identifyIndex < identifyQueue.length - 1) {
+                      setIdentifyIndex((i) => i + 1);
+                    }
+                  }}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Confirmar y Siguiente
+                </Button>
+              </div>
+
+              {/* Save All Bottom Banner */}
+              {confirmedCount > 0 && (
+                <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-emerald-300 font-medium">
+                      ✓ {confirmedCount} de {totalCount} sellos confirmados
+                    </span>
+                    <span className="text-muted-fg font-mono">
+                      Página {identifyIndex + 1} de {identifyQueue.length}
+                    </span>
+                  </div>
+                  {saveError && (
+                    <p className="text-red-400 text-xs flex items-center gap-1.5">
+                      <AlertCircle className="h-3.5 w-3.5" /> {saveError}
+                    </p>
+                  )}
+                  <Button
+                    onClick={handleSaveAll}
+                    disabled={isSaving}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-11 rounded-xl font-bold shadow-xl shadow-emerald-900/30"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Guardando en Pasaporte…
+                      </>
+                    ) : (
+                      `Guardar ${confirmedCount} ${confirmedCount === 1 ? "sello" : "sellos"} en el Pasaporte`
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
