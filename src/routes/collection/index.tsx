@@ -1,41 +1,33 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   BookImage, Wifi, ChevronLeft, ChevronRight,
-  Sparkles, Search, ArrowUpDown,
+  Search, ArrowUpDown, Tag, Check, Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { FinishedCard } from "@/components/FinishedCard";
-import { listAllPins, listCountries, type FullPin, type Country, upsertFullPin } from "@/lib/trips/trips-repo";
+import { listAllPins, type FullPin, upsertFullPin } from "@/lib/trips/trips-repo";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/collection/")({
   component: CollectionPage,
 });
 
-const PINS_PER_PAGE = 12;
+const PINS_PER_PAGE = 24;
 
 function CollectionPage() {
   const [pins, setPins] = useState<FullPin[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-
-  // Filters
-  const [selectedCountry, setSelectedCountry] = useState<string>("all");
-  const [selectedYear, setSelectedYear] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
-  // Inspection Modal
+  // NFC Quick Inspection Modal
   const [inspectPin, setInspectPin] = useState<FullPin | null>(null);
   const [nfcInput, setNfcInput] = useState("");
   const [savingNfc, setSavingNfc] = useState(false);
@@ -43,14 +35,10 @@ function CollectionPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [pinsData, countriesData] = await Promise.all([
-        listAllPins().catch(() => []),
-        listCountries().catch(() => []),
-      ]);
+      const pinsData = await listAllPins().catch(() => []);
       setPins(pinsData ?? []);
-      setCountries(countriesData ?? []);
     } catch {
-      toast.error("Aviso al consultar la base de datos");
+      toast.error("Error al consultar la base de datos");
     } finally {
       setLoading(false);
     }
@@ -60,32 +48,10 @@ function CollectionPage() {
     loadData();
   }, []);
 
-  const availableYears = useMemo(() => {
-    const years = new Set<string>();
-    pins.forEach((p) => {
-      if (p.acquisition_date) {
-        try {
-          const y = new Date(p.acquisition_date).getFullYear();
-          if (!isNaN(y)) years.add(y.toString());
-        } catch {}
-      }
-    });
-    return Array.from(years).sort();
-  }, [pins]);
-
   const filteredPins = useMemo(() => {
     return (pins ?? [])
       .filter((p) => {
         if (!p) return false;
-        if (selectedCountry !== "all" && p.country !== selectedCountry) return false;
-        if (selectedYear !== "all") {
-          try {
-            const year = p.acquisition_date ? new Date(p.acquisition_date).getFullYear().toString() : "";
-            if (year !== selectedYear) return false;
-          } catch {
-            return false;
-          }
-        }
         if (search) {
           const s = search.toLowerCase();
           const matchCity = p.city?.toLowerCase().includes(s);
@@ -100,11 +66,10 @@ function CollectionPage() {
         const dateB = b.acquisition_date ? new Date(b.acquisition_date).getTime() : 0;
         return sortAsc ? dateA - dateB : dateB - dateA;
       });
-  }, [pins, selectedCountry, selectedYear, search, sortAsc]);
+  }, [pins, search, sortAsc]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPins.length / PINS_PER_PAGE));
   const currentBatch = filteredPins.slice(page * PINS_PER_PAGE, (page + 1) * PINS_PER_PAGE);
-  const pageSlots = Array.from({ length: PINS_PER_PAGE }, (_, i) => currentBatch[i] ?? null);
   const nfcCount = pins.filter((p) => p.nfc_uid).length;
 
   const handleSaveNfc = async () => {
@@ -116,7 +81,7 @@ function CollectionPage() {
         prev.map((p) => (p.id === inspectPin.id ? { ...p, nfc_uid: nfcInput || null } : p))
       );
       setInspectPin((prev) => (prev ? { ...prev, nfc_uid: nfcInput || null } : null));
-      toast.success("Chip NFC vinculado a la cartulina física ✓");
+      toast.success("Chip NFC vinculado a la cartulina ✓");
     } catch {
       toast.error("Error al actualizar chip NFC");
     } finally {
@@ -125,171 +90,173 @@ function CollectionPage() {
   };
 
   return (
-    <div className="space-y-8 animate-float-in max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] font-mono tracking-widest text-coral uppercase bg-coral/10 px-2.5 py-1 rounded-full border border-coral/20">
-              
-            </span>
-          </div>
-          <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
-            Mi Álbum Físico
+          <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">
+            Álbum Físico
           </h2>
-          <p className="text-muted-fg text-sm mt-1 max-w-2xl">
-            Simulador de tu álbum de colección física. Cada hoja contiene 12 cartulinas terminadas (55 × 75 mm) ordenadas cronológicamente.
+          <p className="text-muted-fg text-xs mt-1 leading-relaxed">
+            Catálogo cronológico compacto de cartulinas físicas y enlace de chips NFC.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Badge className="bg-white/5 text-white border-white/15 gap-2 py-1.5 px-3.5 font-mono text-xs">
+          <Badge className="bg-white/5 text-white border-white/15 gap-2 py-1.5 px-3 font-mono text-xs">
             <BookImage className="h-3.5 w-3.5 text-cyan" />
             <span>Página {page + 1} de {totalPages}</span>
           </Badge>
-          <Badge className="bg-neon/15 text-neon border-neon/30 gap-2 py-1.5 px-3.5 font-mono text-xs shadow-[0_0_16px_-4px_#00ffb2]">
+          <Badge className="bg-neon/15 text-neon border-neon/30 gap-2 py-1.5 px-3 font-mono text-xs shadow-[0_0_12px_-3px_#00ffb2]">
             <Wifi className="h-3.5 w-3.5" />
-            <span>{nfcCount} NFC Vinculados</span>
+            <span>{nfcCount} / {pins.length} NFC</span>
           </Badge>
         </div>
       </div>
 
-      {/* Control Bar: Filters & Sorting */}
-      <div className="glass rounded-3xl p-4 flex flex-wrap items-center justify-between gap-4">
+      {/* Control Bar: Clean & Minimalist */}
+      <div className="glass rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          {/* Search */}
           <div className="relative w-64">
-            <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-fg" />
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
             <Input
-              placeholder="Buscar ciudad o código..."
+              placeholder="Buscar ciudad o país..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-              className="pl-10 h-10 text-xs bg-white/5 border-white/10 text-white placeholder:text-muted-fg rounded-xl focus-visible:ring-violet"
+              className="pl-9 h-9 text-xs bg-white/5 border-white/10 text-white placeholder:text-muted-fg rounded-xl focus-visible:ring-violet"
             />
           </div>
-
-          {/* Country Filter */}
-          <Select value={selectedCountry} onValueChange={(v) => { setSelectedCountry(v); setPage(0); }}>
-            <SelectTrigger className="w-48 h-10 text-xs bg-white/5 border-white/10 text-white rounded-xl">
-              <SelectValue placeholder="Todos los países" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#0a0a14] border-white/15 text-white">
-              <SelectItem value="all">Todos los países</SelectItem>
-              {countries.map((c) => (
-                <SelectItem key={c.name} value={c.name}>
-                  {c.flag} {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Year Filter */}
-          <Select value={selectedYear} onValueChange={(v) => { setSelectedYear(v); setPage(0); }}>
-            <SelectTrigger className="w-40 h-10 text-xs bg-white/5 border-white/10 text-white rounded-xl">
-              <SelectValue placeholder="Todos los años" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#0a0a14] border-white/15 text-white">
-              <SelectItem value="all">Todos los años</SelectItem>
-              {availableYears.map((y) => (
-                <SelectItem key={y} value={y}>
-                  Año {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
-        {/* Chronological Sorting Toggle */}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setSortAsc((prev) => !prev)}
-          className="text-xs font-mono gap-2 text-cyan hover:text-white hover:bg-white/5"
+          className="text-xs font-mono gap-1.5 text-cyan hover:text-white hover:bg-white/5 h-8 px-3 rounded-lg"
         >
           <ArrowUpDown className="h-3.5 w-3.5" />
-          {sortAsc ? "Antiguos → Recientes" : "Recientes → Antiguos"}
+          {sortAsc ? "Cronológico: Antiguos → Recientes" : "Cronológico: Recientes → Antiguos"}
         </Button>
       </div>
 
-      {/* Cinematic Physical Sheet Container (3 cols x 4 rows) */}
-      <div className="glass-strong rounded-3xl p-8 relative overflow-hidden border border-white/15 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9)]">
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-coral shadow-[0_0_8px_#ff6b6b]" />
+      {/* Compact Minimalist Grid Container */}
+      <div className="glass rounded-3xl p-6 relative border border-white/15 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)]">
+        <div className="flex items-center justify-between mb-6 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <span className="h-2 w-2 rounded-full bg-cyan shadow-[0_0_8px_#00d4ff]" />
             <span className="font-display font-bold text-xs tracking-wider text-white uppercase">
-              ÁLBUM DE COLECCIÓN · HOJA {page + 1}
+              HOJA {page + 1} · ({currentBatch.length} CARTULINAS)
             </span>
           </div>
           <span className="text-xs font-mono text-muted-fg">
-            {filteredPins.length} cartulinas catalogadas
+            {filteredPins.length} registros totales
           </span>
         </div>
 
-        {/* 3 Columns x 4 Rows Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {pageSlots.map((slot, index) =>
-            slot ? (
-              <FinishedCard
-                key={slot.id}
-                pin={slot}
-                onClick={() => {
-                  setInspectPin(slot);
-                  setNfcInput(slot.nfc_uid ?? "");
-                }}
-              />
-            ) : (
+        {/* Minimalist Cards Grid: 24 cards per view, highly visible and compact */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+          {currentBatch.map((pin, index) => {
+            const absoluteIndex = page * PINS_PER_PAGE + index + 1;
+            const formattedIndex = String(absoluteIndex).padStart(3, "0");
+            const hasNfc = !!pin.nfc_uid;
+
+            return (
               <div
-                key={`empty-${index}`}
-                className="aspect-[55/75] rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-4 bg-white/[0.02] transition-colors hover:border-white/20"
+                key={pin.id}
+                onClick={() => {
+                  setInspectPin(pin);
+                  setNfcInput(pin.nfc_uid ?? "");
+                }}
+                className={cn(
+                  "group relative cursor-pointer flex flex-col justify-between rounded-xl p-3 transition-all duration-200",
+                  "bg-white/[0.03] border hover:bg-white/[0.07] hover:-translate-y-1 hover:shadow-lg",
+                  hasNfc
+                    ? "border-white/15 hover:border-cyan/50 shadow-[0_4px_16px_-4px_rgba(0,212,255,0.15)]"
+                    : "border-white/10 hover:border-violet/40"
+                )}
+                style={{ aspectRatio: "55 / 75" }}
               >
-                <div className="h-9 w-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2">
-                  <Sparkles className="h-4 w-4 text-muted-fg/40" />
+                {/* Card Top: Number & NFC Tag indicator */}
+                <div className="flex items-start justify-between">
+                  <span className={cn(
+                    "text-[10px] font-mono p-1 rounded-md transition-colors",
+                    hasNfc ? "text-cyan bg-cyan/10" : "text-muted-fg bg-white/5"
+                  )}>
+                    <Wifi className="h-3 w-3" />
+                  </span>
+                  <span className="font-mono text-[11px] font-semibold text-white/70 group-hover:text-white">
+                    {formattedIndex} / ∞
+                  </span>
                 </div>
-                <span className="text-[10px] text-muted-fg/50 font-mono tracking-wider uppercase">
-                  Ranura {index + 1}
-                </span>
+
+                {/* Card Middle: Pin Silhouette / Image preview if available */}
+                <div className="my-auto flex items-center justify-center py-1">
+                  {pin.transparent_image_url ? (
+                    <img
+                      src={pin.transparent_image_url}
+                      alt={pin.city || "Pin"}
+                      className="max-h-14 max-w-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full border border-dashed border-white/15 flex items-center justify-center bg-white/[0.02]">
+                      <Tag className="h-4 w-4 text-muted-fg/40" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Card Bottom: Big City & Country */}
+                <div className="space-y-0.5 border-t border-white/10 pt-2">
+                  <p className="font-display font-bold text-sm text-white truncate leading-tight group-hover:text-cyan transition-colors">
+                    {pin.city || "Sin ciudad"}
+                  </p>
+                  <p className="text-[11px] text-muted-fg truncate leading-none">
+                    {pin.country || "Desconocido"}
+                  </p>
+                </div>
               </div>
-            )
-          )}
+            );
+          })}
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/10">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Página Anterior
-          </Button>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-8 pt-5 border-t border-white/10">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Página Anterior
+            </Button>
 
-          <span className="text-xs font-mono font-semibold text-cyan">
-            Página {page + 1} de {totalPages}
-          </span>
+            <span className="text-xs font-mono font-semibold text-cyan">
+              Página {page + 1} de {totalPages}
+            </span>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
-            className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10"
-          >
-            Página Siguiente
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl"
+            >
+              Página Siguiente
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Inspection & NFC Linking Modal */}
+      {/* Inspection & NFC Fast Linker Modal */}
       <Dialog open={!!inspectPin} onOpenChange={(open) => !open && setInspectPin(null)}>
-        <DialogContent className="max-w-md bg-[#0a0a14] border-white/15 text-white rounded-3xl p-6 shadow-2xl">
+        <DialogContent className="max-w-md bg-[#09090e] border-white/15 text-white rounded-2xl p-6 shadow-2xl">
           {inspectPin && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <DialogHeader>
-                <DialogTitle className="font-display text-lg font-bold flex items-center gap-2.5 text-white">
+                <DialogTitle className="font-display text-lg font-bold flex items-center justify-between text-white">
                   <span>{inspectPin.city}</span>
                   <Badge variant="outline" className="text-xs font-mono bg-white/5 border-white/15 text-cyan">
                     {inspectPin.country}
@@ -297,37 +264,59 @@ function CollectionPage() {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="w-60 mx-auto drop-shadow-2xl">
-                <FinishedCard pin={inspectPin} />
+              {/* Minimal preview */}
+              <div className="glass rounded-xl p-4 flex flex-col items-center justify-center bg-white/[0.02]">
+                {inspectPin.transparent_image_url ? (
+                  <img
+                    src={inspectPin.transparent_image_url}
+                    alt={inspectPin.city || "Pin"}
+                    className="max-h-28 object-contain filter drop-shadow-xl"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-full border border-dashed border-white/20 flex items-center justify-center text-muted-fg">
+                    <Tag className="h-6 w-6" />
+                  </div>
+                )}
+                <div className="mt-3 text-center">
+                  <p className="text-xs font-mono text-muted-fg">
+                    ID Registro: <span className="text-white">{inspectPin.pin_id || inspectPin.id}</span>
+                  </p>
+                </div>
               </div>
 
-              <div className="glass rounded-2xl p-5 space-y-3 border border-white/10">
+              {/* NFC Manager Card */}
+              <div className="glass rounded-xl p-4 space-y-3 border border-white/10 bg-white/[0.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Wifi className="h-4 w-4 text-neon" />
-                    <span className="text-xs font-display font-semibold text-white">Vincular Chip NFC</span>
+                    <Radio className="h-4 w-4 text-cyan" />
+                    <span className="text-xs font-display font-semibold text-white">Vincular Chip NFC Físico</span>
                   </div>
-                  {inspectPin.nfc_uid && (
+                  {inspectPin.nfc_uid ? (
                     <Badge className="bg-neon/15 text-neon border-neon/30 text-[10px] font-mono">
                       Vinculado
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-muted-fg border-white/10 text-[10px] font-mono">
+                      Sin chip
                     </Badge>
                   )}
                 </div>
                 <p className="text-xs text-muted-fg leading-relaxed">
-                  Asocia el identificador hexadecimal del chip NFC físico pegado detrás de la cartulina.
+                  Pega el identificador UID del chip NFC adherido al dorso de la cartulina física.
                 </p>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Ej: 04:A2:4B:91:78..."
                     value={nfcInput}
                     onChange={(e) => setNfcInput(e.target.value)}
-                    className="text-xs font-mono h-10 bg-white/5 border-white/10 text-white placeholder:text-muted-fg focus-visible:ring-violet"
+                    className="text-xs font-mono h-9 bg-white/5 border-white/10 text-white placeholder:text-muted-fg focus-visible:ring-violet rounded-xl"
                   />
                   <Button
                     onClick={handleSaveNfc}
                     disabled={savingNfc}
-                    className="h-10 px-5 text-xs font-semibold bg-violet hover:bg-violet/90 text-white shadow-[0_0_16px_-4px_rgba(108,99,255,0.6)]"
+                    className="h-9 px-4 text-xs font-semibold bg-gradient-to-r from-violet to-cyan text-white rounded-xl shadow-[0_0_12px_-3px_rgba(108,99,255,0.5)]"
                   >
+                    <Check className="h-3.5 w-3.5 mr-1" />
                     Guardar
                   </Button>
                 </div>

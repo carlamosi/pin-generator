@@ -1,4 +1,4 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import JSZip from "jszip";
 import { toast } from "sonner";
@@ -145,14 +145,36 @@ function StudioPage() {
     setSingleProcessing(true);
     try {
       const img = await loadImage(singleImage);
-      const pinId = nanoid();
-      const row = await processPinImage(img, singleName || "pin.jpg", pinId);
-      setSingleResult(row);
-
-      if (row.city && !singleCity) setSingleCity(row.city);
-      if (row.country && !singleCountry) setCustomCountry(row.country);
-
-      toast.success("Pin procesado con OpenCV con éxito ✓");
+      const res = await processPinImage(img, singleName || "pin.jpg");
+      if (res.status === "ok") {
+        const pinId = nanoid();
+        const parsed = parseLocationFromFilename(singleName || "");
+        const pinRow: PinRow = {
+          id: pinId,
+          originalName: singleName || "pin.jpg",
+          status: "ok",
+          thumbnailDataUrl: res.thumbnailDataUrl,
+          city: singleCity || parsed.city || null,
+          country: singleCountry || null,
+          year: parsed.year ? parseInt(parsed.year, 10) : null,
+          month: null,
+          shape: res.shape,
+          widthMm: res.widthMm,
+          heightMm: res.heightMm,
+          aspectRatio: res.aspectRatio,
+          bentoSize: "",
+          visualScale: 1.0,
+          visited: true,
+          isFuture: false,
+          isEmbassy: false,
+        };
+        setSingleResult(pinRow);
+        if (pinRow.city && !singleCity) setSingleCity(pinRow.city);
+        if (pinRow.country && !singleCountry) setCustomCountry(pinRow.country);
+        toast.success("Pin procesado con OpenCV con éxito ✓");
+      } else {
+        toast.error("Revisión requerida: " + (res.note || "No se pudo procesar"));
+      }
     } catch (e: any) {
       toast.error("Error en OpenCV: " + (e?.message || "Recorte fallido"));
     } finally {
@@ -261,14 +283,19 @@ function StudioPage() {
       try {
         const img = await loadImage(item.dataUrl);
         const pinId = nanoid();
-        const row = await processPinImage(img, item.name, pinId);
-        const cutoutData = row.thumbnailDataUrl ?? row.cutoutImageUrl ?? item.dataUrl;
+        const res = await processPinImage(img, item.name);
+        if (res.status !== "ok") {
+          setBatchItems((prev) =>
+            prev.map((it, idx) => (idx === i ? { ...it, status: "error" } : it))
+          );
+          continue;
+        }
+        const cutoutData = res.thumbnailDataUrl ?? item.dataUrl;
         const cutoutUrl = await uploadCutout(pinId, cutoutData);
 
         const matchedCity = cities.find(
           (c) =>
-            (item.city && c.name.toLowerCase().includes(item.city.toLowerCase())) ||
-            (row.city && c.name.toLowerCase().includes(row.city.toLowerCase()))
+            (item.city && c.name.toLowerCase().includes(item.city.toLowerCase()))
         );
 
         const tripId = batchTripId || matchedCity?.trip_id || null;
@@ -277,12 +304,12 @@ function StudioPage() {
           id: pinId,
           trip_id: tripId,
           city_id: matchedCity?.id || null,
-          pin_id: matchedCity?.pin_code || `${(item.city || row.city || "PIN").slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`,
-          city: matchedCity?.name || item.city || row.city,
-          country: matchedCity?.country || row.country,
-          region: matchedCity?.region || row.shape,
-          dimensions: { width_mm: row.widthMm, height_mm: row.heightMm },
-          shape: row.shape,
+          pin_id: matchedCity?.pin_code || `${(item.city || "PIN").slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`,
+          city: matchedCity?.name || item.city || "Pin",
+          country: matchedCity?.country || "Desconocido",
+          region: matchedCity?.region || res.shape,
+          dimensions: { width_mm: res.widthMm, height_mm: res.heightMm },
+          shape: res.shape,
           transparent_image_url: cutoutUrl,
         }, { onConflict: "id" });
 
@@ -293,10 +320,11 @@ function StudioPage() {
                   ...it,
                   status: "done",
                   cutoutUrl,
-                  city: matchedCity?.name || item.city || row.city,
-                  country: matchedCity?.country || row.country,
-                  widthMm: row.widthMm,
-                  heightMm: row.heightMm,
+                  city: matchedCity?.name || item.city,
+                  country: matchedCity?.country,
+                  widthMm: res.widthMm,
+                  heightMm: res.heightMm,
+                  region: matchedCity?.region || undefined,
                 }
               : it
           )
