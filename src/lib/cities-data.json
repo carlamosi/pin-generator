@@ -1,1 +1,5746 @@
-[{"name": "Copenhague", "country": "Dinamarca", "countryCode": "DK", "region": "Hovedstaden", "continent": "Europa", "aliases": ["copenhagen", "kobenhavn", "koebenhavn", "copenhague", "copenh", "copenag", "copenhag", "coph", "kbh", "kbhn", "kobenhavns", "kjoebenhavn"]}, {"name": "Billund", "country": "Dinamarca", "countryCode": "DK", "region": "Syddanmark", "continent": "Europa", "aliases": ["billund", "bllund", "bilund", "bllnd"]}, {"name": "Madrid", "country": "España", "countryCode": "ES", "region": "Comunidad de Madrid", "continent": "Europa", "aliases": ["madrid", "madrd", "madrld"]}, {"name": "Barcelona", "country": "España", "countryCode": "ES", "region": "Cataluña", "continent": "Europa", "aliases": ["barcelona", "barna", "barcel", "brcl", "barcelna", "barcelon"]}, {"name": "Sevilla", "country": "España", "countryCode": "ES", "region": "Andalucía", "continent": "Europa", "aliases": ["sevilla", "seville", "sevila", "sevilha"]}, {"name": "Valencia", "country": "España", "countryCode": "ES", "region": "Comunidad Valenciana", "continent": "Europa", "aliases": ["valencia", "valncia", "vlencia"]}, {"name": "Bilbao", "country": "España", "countryCode": "ES", "region": "País Vasco", "continent": "Europa", "aliases": ["bilbao", "bilba0", "vilbao"]}, {"name": "Alcalá de Henares", "country": "España", "countryCode": "ES", "region": "Comunidad de Madrid", "continent": "Europa", "aliases": ["alcala de henares", "alcala henares", "alcala d henares"]}, {"name": "Zaragoza", "country": "España", "countryCode": "ES", "region": "Aragón", "continent": "Europa", "aliases": ["zaragoza", "saragossa", "zaragosa"]}, {"name": "Málaga", "country": "España", "countryCode": "ES", "region": "Andalucía", "continent": "Europa", "aliases": ["malaga", "malga"]}, {"name": "Londres", "country": "Reino Unido", "countryCode": "GB", "region": "Inglaterra", "continent": "Europa", "aliases": ["london", "londres", "londra", "lndn", "londn"]}, {"name": "Manchester", "country": "Reino Unido", "countryCode": "GB", "region": "Inglaterra", "continent": "Europa", "aliases": ["manchester", "manchestr", "mancehster"]}, {"name": "Edimburgo", "country": "Reino Unido", "countryCode": "GB", "region": "Escocia", "continent": "Europa", "aliases": ["edinburgh", "edimburgo", "edimburg", "edinbur"]}, {"name": "París", "country": "Francia", "countryCode": "FR", "region": "Île-de-France", "continent": "Europa", "aliases": ["paris", "par1s", "parjs", "pars"]}, {"name": "Berlín", "country": "Alemania", "countryCode": "DE", "region": "Berlín", "continent": "Europa", "aliases": ["berlin", "belin", "berln"]}, {"name": "Múnich", "country": "Alemania", "countryCode": "DE", "region": "Baviera", "continent": "Europa", "aliases": ["munich", "munchen", "munique", "mnchen", "muenchen"]}, {"name": "Roma", "country": "Italia", "countryCode": "IT", "region": "Lacio", "continent": "Europa", "aliases": ["rome", "roma"]}, {"name": "Milán", "country": "Italia", "countryCode": "IT", "region": "Lombardía", "continent": "Europa", "aliases": ["milan", "milano", "miln"]}, {"name": "Nueva York", "country": "Estados Unidos", "countryCode": "US", "region": "Nueva York", "continent": "América del Norte", "aliases": ["new york", "newyork", "nyc", "nueva york"]}, {"name": "Los Ángeles", "country": "Estados Unidos", "countryCode": "US", "region": "California", "continent": "América del Norte", "aliases": ["los angeles", "losangeles", "la"]}, {"name": "Chicago", "country": "Estados Unidos", "countryCode": "US", "region": "Illinois", "continent": "América del Norte", "aliases": ["chicago", "chicgo"]}, {"name": "Tokio", "country": "Japón", "countryCode": "JP", "region": "Tokio", "continent": "Asia", "aliases": ["tokyo", "tokio", "tkyo"]}, {"name": "Osaka", "country": "Japón", "countryCode": "JP", "region": "Osaka", "continent": "Asia", "aliases": ["osaka", "osak"]}, {"name": "Ámsterdam", "country": "Países Bajos", "countryCode": "NL", "region": "Holanda del Norte", "continent": "Europa", "aliases": ["amsterdam", "amstrdam", "ams", "amtserdam"]}, {"name": "Lisboa", "country": "Portugal", "countryCode": "PT", "region": "Lisboa", "continent": "Europa", "aliases": ["lisbon", "lisboa", "lisbonne", "lisba"]}, {"name": "Estocolmo", "country": "Suecia", "countryCode": "SE", "region": "Estocolmo", "continent": "Europa", "aliases": ["stockholm", "estocolmo", "stockolm", "sthlm"]}, {"name": "Dubái", "country": "Emiratos Árabes Unidos", "countryCode": "AE", "region": "Dubái", "continent": "Asia", "aliases": ["dubai", "dub", "dubais"]}, {"name": "Sídney", "country": "Australia", "countryCode": "AU", "region": "Nueva Gales del Sur", "continent": "Oceanía", "aliases": ["sydney", "sidne", "sydne", "syde"]}, {"name": "Singapur", "country": "Singapur", "countryCode": "SG", "region": "Singapur", "continent": "Asia", "aliases": ["singapore", "singapur", "sing"]}, {"name": "Pekín", "country": "China", "countryCode": "CN", "region": "Pekín", "continent": "Asia", "aliases": ["beijing", "pekin", "bejing", "pekn"]}, {"name": "Abu Dhabi", "country": "Emiratos Árabes Unidos", "countryCode": "AE", "region": "01", "continent": "Asia", "aliases": ["abu dhabi"]}, {"name": "Tītān", "country": "Afganistán", "countryCode": "AF", "region": "09", "continent": "Asia", "aliases": ["titan"]}, {"name": "Puri", "country": "Angola", "countryCode": "AO", "region": "15", "continent": "África", "aliases": ["puri"]}, {"name": "San José", "country": "Argentina", "countryCode": "AR", "region": "14", "continent": "América del Sur", "aliases": ["san jose"]}, {"name": "San Antonio", "country": "Argentina", "countryCode": "AR", "region": "14", "continent": "América del Sur", "aliases": ["san antonio"]}, {"name": "San Francisco", "country": "Argentina", "countryCode": "AR", "region": "05", "continent": "América del Sur", "aliases": ["san francisco", "sf"]}, {"name": "Lincoln", "country": "Argentina", "countryCode": "AR", "region": "01", "continent": "América del Sur", "aliases": ["lincoln"]}, {"name": "Arauco", "country": "Argentina", "countryCode": "AR", "region": "12", "continent": "América del Sur", "aliases": ["arauco"]}, {"name": "América", "country": "Argentina", "countryCode": "AR", "region": "01", "continent": "América del Sur", "aliases": ["america"]}, {"name": "Vienna", "country": "Austria", "countryCode": "AT", "region": "09", "continent": "Europa", "aliases": ["wien", "vienna", "viena"]}, {"name": "Oberhausen", "country": "Austria", "countryCode": "AT", "region": "03", "continent": "Europa", "aliases": ["oberhausen"]}, {"name": "Brand", "country": "Austria", "countryCode": "AT", "region": "08", "continent": "Europa", "aliases": ["brand"]}, {"name": "York", "country": "Australia", "countryCode": "AU", "region": "08", "continent": "Oceanía", "aliases": ["york"]}, {"name": "Virginia", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["virginia"]}, {"name": "Perth", "country": "Australia", "countryCode": "AU", "region": "08", "continent": "Oceanía", "aliases": ["perth"]}, {"name": "Moana", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["moana"]}, {"name": "Meadows", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["meadows"]}, {"name": "Marion", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["marion"]}, {"name": "Denmark", "country": "Australia", "countryCode": "AU", "region": "08", "continent": "Oceanía", "aliases": ["denmark"]}, {"name": "Brighton", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["brighton"]}, {"name": "Bridgewater", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["bridgewater"]}, {"name": "Bellevue", "country": "Australia", "countryCode": "AU", "region": "08", "continent": "Oceanía", "aliases": ["bellevue"]}, {"name": "Windsor", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["windsor"]}, {"name": "Wellington", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["wellington"]}, {"name": "Townsville", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["townsville"]}, {"name": "Sydney", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["sidne", "sydne", "sydney"]}, {"name": "Sunshine", "country": "Australia", "countryCode": "AU", "region": "07", "continent": "Oceanía", "aliases": ["sunshine"]}, {"name": "Stratford", "country": "Australia", "countryCode": "AU", "region": "07", "continent": "Oceanía", "aliases": ["stratford"]}, {"name": "Somerset", "country": "Australia", "countryCode": "AU", "region": "06", "continent": "Oceanía", "aliases": ["somerset"]}, {"name": "Sheffield", "country": "Australia", "countryCode": "AU", "region": "06", "continent": "Oceanía", "aliases": ["sheffield"]}, {"name": "Scottsdale", "country": "Australia", "countryCode": "AU", "region": "06", "continent": "Oceanía", "aliases": ["scottsdale"]}, {"name": "Roseville", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["roseville"]}, {"name": "Richmond", "country": "Australia", "countryCode": "AU", "region": "06", "continent": "Oceanía", "aliases": ["richmond"]}, {"name": "Penrith", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["penrith"]}, {"name": "Newmarket", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["newmarket"]}, {"name": "Newcastle", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["newcastle"]}, {"name": "Miranda", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["miranda"]}, {"name": "Milton", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["milton"]}, {"name": "Melbourne", "country": "Australia", "countryCode": "AU", "region": "07", "continent": "Oceanía", "aliases": ["melbourne", "melbourn"]}, {"name": "Liverpool", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["liverpool"]}, {"name": "Lauderdale", "country": "Australia", "countryCode": "AU", "region": "06", "continent": "Oceanía", "aliases": ["lauderdale"]}, {"name": "Hobart", "country": "Australia", "countryCode": "AU", "region": "06", "continent": "Oceanía", "aliases": ["hobart"]}, {"name": "Grafton", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["grafton"]}, {"name": "Edmonton", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["edmonton"]}, {"name": "Doncaster", "country": "Australia", "countryCode": "AU", "region": "07", "continent": "Oceanía", "aliases": ["doncaster"]}, {"name": "Concord", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["concord"]}, {"name": "Clermont", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["clermont"]}, {"name": "Charlestown", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["charlestown"]}, {"name": "Cardiff", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["cardiff"]}, {"name": "Canberra", "country": "Australia", "countryCode": "AU", "region": "01", "continent": "Oceanía", "aliases": ["canberra"]}, {"name": "Brisbane", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["brisbane"]}, {"name": "Brandon", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["brandon"]}, {"name": "Bondi", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["bondi"]}, {"name": "Paradise", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["paradise"]}, {"name": "Chermside", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["chermside"]}, {"name": "Parkside", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["parkside"]}, {"name": "Parramatta", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["parramatta"]}, {"name": "Macquarie", "country": "Australia", "countryCode": "AU", "region": "01", "continent": "Oceanía", "aliases": ["macquarie"]}, {"name": "Miami", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["miami"]}, {"name": "Chadstone", "country": "Australia", "countryCode": "AU", "region": "07", "continent": "Oceanía", "aliases": ["chadstone"]}, {"name": "Ross", "country": "Australia", "countryCode": "AU", "region": "03", "continent": "Oceanía", "aliases": ["ross"]}, {"name": "Abbey", "country": "Australia", "countryCode": "AU", "region": "08", "continent": "Oceanía", "aliases": ["abbey"]}, {"name": "Panorama", "country": "Australia", "countryCode": "AU", "region": "05", "continent": "Oceanía", "aliases": ["panorama"]}, {"name": "Douglas", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["douglas"]}, {"name": "Dallas", "country": "Australia", "countryCode": "AU", "region": "07", "continent": "Oceanía", "aliases": ["dallas"]}, {"name": "Riverside", "country": "Australia", "countryCode": "AU", "region": "06", "continent": "Oceanía", "aliases": ["riverside"]}, {"name": "Booragoon", "country": "Australia", "countryCode": "AU", "region": "08", "continent": "Oceanía", "aliases": ["booragoon"]}, {"name": "Arundel", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["arundel"]}, {"name": "Haven", "country": "Australia", "countryCode": "AU", "region": "07", "continent": "Oceanía", "aliases": ["haven"]}, {"name": "Robina", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["robina"]}, {"name": "Hillsdale", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["hillsdale"]}, {"name": "Karrinyup", "country": "Australia", "countryCode": "AU", "region": "08", "continent": "Oceanía", "aliases": ["karrinyup"]}, {"name": "Barton", "country": "Australia", "countryCode": "AU", "region": "01", "continent": "Oceanía", "aliases": ["barton"]}, {"name": "Bluewater", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["bluewater"]}, {"name": "Chandler", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["chandler"]}, {"name": "Springfield", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["springfield"]}, {"name": "Tivoli", "country": "Australia", "countryCode": "AU", "region": "04", "continent": "Oceanía", "aliases": ["tivoli"]}, {"name": "Glendale", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["glendale"]}, {"name": "Toronto", "country": "Australia", "countryCode": "AU", "region": "02", "continent": "Oceanía", "aliases": ["toronto"]}, {"name": "Washington", "country": "AW", "countryCode": "AW", "region": "00", "continent": "Mundial", "aliases": ["washington"]}, {"name": "Sarajevo", "country": "Bosnia y Herzegovina", "countryCode": "BA", "region": "01", "continent": "Europa", "aliases": ["sarajevo"]}, {"name": "Wijnegem", "country": "Bélgica", "countryCode": "BE", "region": "VLG", "continent": "Europa", "aliases": ["wijnegem"]}, {"name": "Mal", "country": "Bélgica", "countryCode": "BE", "region": "VLG", "continent": "Europa", "aliases": ["mal"]}, {"name": "Lille", "country": "Bélgica", "countryCode": "BE", "region": "VLG", "continent": "Europa", "aliases": ["lille"]}, {"name": "Lens", "country": "Bélgica", "countryCode": "BE", "region": "WAL", "continent": "Europa", "aliases": ["lens"]}, {"name": "Havré", "country": "Bélgica", "countryCode": "BE", "region": "WAL", "continent": "Europa", "aliases": ["havre"]}, {"name": "Essen", "country": "Bélgica", "countryCode": "BE", "region": "VLG", "continent": "Europa", "aliases": ["essen"]}, {"name": "Brussels", "country": "Bélgica", "countryCode": "BE", "region": "BRU", "continent": "Europa", "aliases": ["bruxelles", "brussels", "bruselas"]}, {"name": "Belgrade", "country": "Bélgica", "countryCode": "BE", "region": "WAL", "continent": "Europa", "aliases": ["belgrade"]}, {"name": "Sofia", "country": "Bulgaria", "countryCode": "BG", "region": "42", "continent": "Europa", "aliases": ["sofia"]}, {"name": "Recife", "country": "Brasil", "countryCode": "BR", "region": "30", "continent": "América del Sur", "aliases": ["recife"]}, {"name": "Porto", "country": "Brasil", "countryCode": "BR", "region": "20", "continent": "América del Sur", "aliases": ["porto", "oporto"]}, {"name": "Jardim", "country": "Brasil", "countryCode": "BR", "region": "06", "continent": "América del Sur", "aliases": ["jardim"]}, {"name": "Fortaleza", "country": "Brasil", "countryCode": "BR", "region": "06", "continent": "América del Sur", "aliases": ["fortaleza"]}, {"name": "Belém", "country": "Brasil", "countryCode": "BR", "region": "02", "continent": "América del Sur", "aliases": ["belem"]}, {"name": "Salvador", "country": "Brasil", "countryCode": "BR", "region": "05", "continent": "América del Sur", "aliases": ["salvador"]}, {"name": "Panamá", "country": "Brasil", "countryCode": "BR", "region": "29", "continent": "América del Sur", "aliases": ["panama"]}, {"name": "Nantes", "country": "Brasil", "countryCode": "BR", "region": "27", "continent": "América del Sur", "aliases": ["nantes"]}, {"name": "Moema", "country": "Brasil", "countryCode": "BR", "region": "15", "continent": "América del Sur", "aliases": ["moema"]}, {"name": "Iguatemi", "country": "Brasil", "countryCode": "BR", "region": "11", "continent": "América del Sur", "aliases": ["iguatemi"]}, {"name": "Goiânia", "country": "Brasil", "countryCode": "BR", "region": "29", "continent": "América del Sur", "aliases": ["goiania"]}, {"name": "Flórida", "country": "Brasil", "countryCode": "BR", "region": "18", "continent": "América del Sur", "aliases": ["florida"]}, {"name": "Cuiabá", "country": "Brasil", "countryCode": "BR", "region": "14", "continent": "América del Sur", "aliases": ["cuiaba"]}, {"name": "Colorado", "country": "Brasil", "countryCode": "BR", "region": "23", "continent": "América del Sur", "aliases": ["colorado"]}, {"name": "Colômbia", "country": "Brasil", "countryCode": "BR", "region": "27", "continent": "América del Sur", "aliases": ["colombia"]}, {"name": "Central", "country": "Brasil", "countryCode": "BR", "region": "05", "continent": "América del Sur", "aliases": ["central"]}, {"name": "Campinas", "country": "Brasil", "countryCode": "BR", "region": "27", "continent": "América del Sur", "aliases": ["campinas"]}, {"name": "Califórnia", "country": "Brasil", "countryCode": "BR", "region": "18", "continent": "América del Sur", "aliases": ["california"]}, {"name": "Barra", "country": "Brasil", "countryCode": "BR", "region": "05", "continent": "América del Sur", "aliases": ["barra"]}, {"name": "Alegre", "country": "Brasil", "countryCode": "BR", "region": "08", "continent": "América del Sur", "aliases": ["alegre"]}, {"name": "Leblon", "country": "Brasil", "countryCode": "BR", "region": "21", "continent": "América del Sur", "aliases": ["leblon"]}, {"name": "Estação", "country": "Brasil", "countryCode": "BR", "region": "23", "continent": "América del Sur", "aliases": ["estacao"]}, {"name": "Morumbi", "country": "Brasil", "countryCode": "BR", "region": "27", "continent": "América del Sur", "aliases": ["morumbi"]}, {"name": "Alderwood", "country": "Canadá", "countryCode": "CA", "region": "08", "continent": "América del Norte", "aliases": ["alderwood"]}, {"name": "Belfast", "country": "Canadá", "countryCode": "CA", "region": "09", "continent": "América del Norte", "aliases": ["belfast"]}, {"name": "Bridgeport", "country": "Canadá", "countryCode": "CA", "region": "08", "continent": "América del Norte", "aliases": ["bridgeport"]}, {"name": "Burlington", "country": "Canadá", "countryCode": "CA", "region": "08", "continent": "América del Norte", "aliases": ["burlington"]}, {"name": "Calgary", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["calgary"]}, {"name": "Crabtree", "country": "Canadá", "countryCode": "CA", "region": "10", "continent": "América del Norte", "aliases": ["crabtree"]}, {"name": "Eastview", "country": "Canadá", "countryCode": "CA", "region": "11", "continent": "América del Norte", "aliases": ["eastview"]}, {"name": "Fairview", "country": "Canadá", "countryCode": "CA", "region": "07", "continent": "América del Norte", "aliases": ["fairview"]}, {"name": "Golden", "country": "Canadá", "countryCode": "CA", "region": "02", "continent": "América del Norte", "aliases": ["golden"]}, {"name": "Houston", "country": "Canadá", "countryCode": "CA", "region": "02", "continent": "América del Norte", "aliases": ["houston"]}, {"name": "King", "country": "Canadá", "countryCode": "CA", "region": "08", "continent": "América del Norte", "aliases": ["king"]}, {"name": "Landmark", "country": "Canadá", "countryCode": "CA", "region": "03", "continent": "América del Norte", "aliases": ["landmark"]}, {"name": "Langham", "country": "Canadá", "countryCode": "CA", "region": "11", "continent": "América del Norte", "aliases": ["langham"]}, {"name": "Laval", "country": "Canadá", "countryCode": "CA", "region": "10", "continent": "América del Norte", "aliases": ["laval"]}, {"name": "London", "country": "Canadá", "countryCode": "CA", "region": "08", "continent": "América del Norte", "aliases": ["lndn", "londres", "londra", "london"]}, {"name": "Mission", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["mission"]}, {"name": "Montgomery", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["montgomery"]}, {"name": "Montréal", "country": "Canadá", "countryCode": "CA", "region": "10", "continent": "América del Norte", "aliases": ["montreal"]}, {"name": "Ottawa", "country": "Canadá", "countryCode": "CA", "region": "08", "continent": "América del Norte", "aliases": ["ottawa"]}, {"name": "Oxford", "country": "Canadá", "countryCode": "CA", "region": "07", "continent": "América del Norte", "aliases": ["oxford"]}, {"name": "Vancouver", "country": "Canadá", "countryCode": "CA", "region": "02", "continent": "América del Norte", "aliases": ["vancouver"]}, {"name": "Westgate", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["westgate"]}, {"name": "Winnipeg", "country": "Canadá", "countryCode": "CA", "region": "03", "continent": "América del Norte", "aliases": ["winnipeg"]}, {"name": "Woodlands", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["woodlands"]}, {"name": "Downtown", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["downtown"]}, {"name": "Walden", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["walden"]}, {"name": "Legacy", "country": "Canadá", "countryCode": "CA", "region": "01", "continent": "América del Norte", "aliases": ["legacy"]}, {"name": "University", "country": "Canadá", "countryCode": "CA", "region": "08", "continent": "América del Norte", "aliases": ["university"]}, {"name": "Stoneridge", "country": "Canadá", "countryCode": "CA", "region": "07", "continent": "América del Norte", "aliases": ["stoneridge"]}, {"name": "Zürich", "country": "Suiza", "countryCode": "CH", "region": "ZH", "continent": "Europa", "aliases": ["zurich"]}, {"name": "Geneva", "country": "Suiza", "countryCode": "CH", "region": "GE", "continent": "Europa", "aliases": ["geneva"]}, {"name": "Sogo", "country": "CI", "countryCode": "CI", "region": "87", "continent": "Mundial", "aliases": ["sogo"]}, {"name": "Santa", "country": "CI", "countryCode": "CI", "region": "97", "continent": "Mundial", "aliases": ["santa"]}, {"name": "San", "country": "CI", "countryCode": "CI", "region": "87", "continent": "Mundial", "aliases": ["san"]}, {"name": "Métro", "country": "CI", "countryCode": "CI", "region": "97", "continent": "Mundial", "aliases": ["metro"]}, {"name": "Koréa", "country": "CI", "countryCode": "CI", "region": "96", "continent": "Mundial", "aliases": ["korea"]}, {"name": "Kong", "country": "CI", "countryCode": "CI", "region": "87", "continent": "Mundial", "aliases": ["kong"]}, {"name": "Grand", "country": "CI", "countryCode": "CI", "region": "78", "continent": "Mundial", "aliases": ["grand"]}, {"name": "Calama", "country": "Chile", "countryCode": "CL", "region": "03", "continent": "América del Sur", "aliases": ["calama"]}, {"name": "Bali", "country": "CM", "countryCode": "CM", "region": "07", "continent": "Mundial", "aliases": ["bali"]}, {"name": "Baohe", "country": "China", "countryCode": "CN", "region": "29", "continent": "Asia", "aliases": ["baohe"]}, {"name": "Bay", "country": "China", "countryCode": "CN", "region": "13", "continent": "Asia", "aliases": ["bay"]}, {"name": "Zhongxing", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["zhongxing"]}, {"name": "Kunshan", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["kunshan"]}, {"name": "Yichang", "country": "China", "countryCode": "CN", "region": "12", "continent": "Asia", "aliases": ["yichang"]}, {"name": "Yantai", "country": "China", "countryCode": "CN", "region": "25", "continent": "Asia", "aliases": ["yantai"]}, {"name": "Yangzhou", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["yangzhou"]}, {"name": "Xixi", "country": "China", "countryCode": "CN", "region": "11", "continent": "Asia", "aliases": ["xixi"]}, {"name": "Xinyi", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["xinyi"]}, {"name": "Xi’an", "country": "China", "countryCode": "CN", "region": "26", "continent": "Asia", "aliases": ["xian"]}, {"name": "Xiamen", "country": "China", "countryCode": "CN", "region": "07", "continent": "Asia", "aliases": ["xiamen"]}, {"name": "Wuxi", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["wuxi"]}, {"name": "Wuhu", "country": "China", "countryCode": "CN", "region": "01", "continent": "Asia", "aliases": ["wuhu"]}, {"name": "Wuhan", "country": "China", "countryCode": "CN", "region": "12", "continent": "Asia", "aliases": ["wuhan"]}, {"name": "Wenzhou", "country": "China", "countryCode": "CN", "region": "02", "continent": "Asia", "aliases": ["wenzhou"]}, {"name": "Tangshan", "country": "China", "countryCode": "CN", "region": "10", "continent": "Asia", "aliases": ["tangshan"]}, {"name": "Suzhou", "country": "China", "countryCode": "CN", "region": "01", "continent": "Asia", "aliases": ["suzhou"]}, {"name": "Suning", "country": "China", "countryCode": "CN", "region": "10", "continent": "Asia", "aliases": ["suning"]}, {"name": "Chaoyang", "country": "China", "countryCode": "CN", "region": "24", "continent": "Asia", "aliases": ["chaoyang"]}, {"name": "Shijiazhuang", "country": "China", "countryCode": "CN", "region": "10", "continent": "Asia", "aliases": ["shijiazhuang"]}, {"name": "Shenzhen", "country": "China", "countryCode": "CN", "region": "30", "continent": "Asia", "aliases": ["shenzhen"]}, {"name": "Shanghai", "country": "China", "countryCode": "CN", "region": "23", "continent": "Asia", "aliases": ["shanghai", "sanghai"]}, {"name": "Changsha", "country": "China", "countryCode": "CN", "region": "30", "continent": "Asia", "aliases": ["changsha"]}, {"name": "Renhe", "country": "China", "countryCode": "CN", "region": "32", "continent": "Asia", "aliases": ["renhe"]}, {"name": "Qibao", "country": "China", "countryCode": "CN", "region": "23", "continent": "Asia", "aliases": ["qibao"]}, {"name": "Ningbo", "country": "China", "countryCode": "CN", "region": "02", "continent": "Asia", "aliases": ["ningbo"]}, {"name": "Nantong", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["nantong"]}, {"name": "Nanqiao", "country": "China", "countryCode": "CN", "region": "23", "continent": "Asia", "aliases": ["nanqiao"]}, {"name": "Nanning", "country": "China", "countryCode": "CN", "region": "16", "continent": "Asia", "aliases": ["nanning"]}, {"name": "Nanjing", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["nanjing"]}, {"name": "Minhang", "country": "China", "countryCode": "CN", "region": "23", "continent": "Asia", "aliases": ["minhang"]}, {"name": "Luzhou", "country": "China", "countryCode": "CN", "region": "32", "continent": "Asia", "aliases": ["luzhou"]}, {"name": "Daxing", "country": "China", "countryCode": "CN", "region": "29", "continent": "Asia", "aliases": ["daxing"]}, {"name": "Lanzhou", "country": "China", "countryCode": "CN", "region": "15", "continent": "Asia", "aliases": ["lanzhou"]}, {"name": "Kunming", "country": "China", "countryCode": "CN", "region": "29", "continent": "Asia", "aliases": ["kunming"]}, {"name": "Fucheng", "country": "China", "countryCode": "CN", "region": "15", "continent": "Asia", "aliases": ["fucheng"]}, {"name": "Jinan", "country": "China", "countryCode": "CN", "region": "25", "continent": "Asia", "aliases": ["jinan"]}, {"name": "Hefei", "country": "China", "countryCode": "CN", "region": "01", "continent": "Asia", "aliases": ["hefei"]}, {"name": "Guilin", "country": "China", "countryCode": "CN", "region": "16", "continent": "Asia", "aliases": ["guilin"]}, {"name": "Guangzhou", "country": "China", "countryCode": "CN", "region": "30", "continent": "Asia", "aliases": ["guangzhou"]}, {"name": "Foshan", "country": "China", "countryCode": "CN", "region": "30", "continent": "Asia", "aliases": ["foshan"]}, {"name": "Fangshan", "country": "China", "countryCode": "CN", "region": "22", "continent": "Asia", "aliases": ["fangshan"]}, {"name": "Chongqing", "country": "China", "countryCode": "CN", "region": "33", "continent": "Asia", "aliases": ["chongqing"]}, {"name": "Chengdu", "country": "China", "countryCode": "CN", "region": "32", "continent": "Asia", "aliases": ["chengdu"]}, {"name": "Beijing", "country": "China", "countryCode": "CN", "region": "22", "continent": "Asia", "aliases": ["beijing", "pekin"]}, {"name": "Banqiao", "country": "China", "countryCode": "CN", "region": "33", "continent": "Asia", "aliases": ["banqiao"]}, {"name": "Ala", "country": "China", "countryCode": "CN", "region": "15", "continent": "Asia", "aliases": ["ala"]}, {"name": "Shenyang", "country": "China", "countryCode": "CN", "region": "19", "continent": "Asia", "aliases": ["shenyang"]}, {"name": "Anshan", "country": "China", "countryCode": "CN", "region": "19", "continent": "Asia", "aliases": ["anshan"]}, {"name": "Xiasha", "country": "China", "countryCode": "CN", "region": "30", "continent": "Asia", "aliases": ["xiasha"]}, {"name": "Binhu", "country": "China", "countryCode": "CN", "region": "04", "continent": "Asia", "aliases": ["binhu"]}, {"name": "Nanmen", "country": "China", "countryCode": "CN", "region": "33", "continent": "Asia", "aliases": ["nanmen"]}, {"name": "Zhongyuan", "country": "China", "countryCode": "CN", "region": "09", "continent": "Asia", "aliases": ["zhongyuan"]}, {"name": "Yintai", "country": "China", "countryCode": "CN", "region": "26", "continent": "Asia", "aliases": ["yintai"]}, {"name": "Mori", "country": "China", "countryCode": "CN", "region": "13", "continent": "Asia", "aliases": ["mori"]}, {"name": "Hongqi", "country": "China", "countryCode": "CN", "region": "09", "continent": "Asia", "aliases": ["hongqi"]}, {"name": "San Diego", "country": "Colombia", "countryCode": "CO", "region": "10", "continent": "América del Sur", "aliases": ["san diego"]}, {"name": "Palermo", "country": "Colombia", "countryCode": "CO", "region": "16", "continent": "América del Sur", "aliases": ["palermo"]}, {"name": "Jordán", "country": "Colombia", "countryCode": "CO", "region": "26", "continent": "América del Sur", "aliases": ["jordan"]}, {"name": "Jardín", "country": "Colombia", "countryCode": "CO", "region": "02", "continent": "América del Sur", "aliases": ["jardin"]}, {"name": "Granada", "country": "Colombia", "countryCode": "CO", "region": "02", "continent": "América del Sur", "aliases": ["granada"]}, {"name": "Génova", "country": "Colombia", "countryCode": "CO", "region": "23", "continent": "América del Sur", "aliases": ["genova"]}, {"name": "Envigado", "country": "Colombia", "countryCode": "CO", "region": "02", "continent": "América del Sur", "aliases": ["envigado"]}, {"name": "Bogotá", "country": "Colombia", "countryCode": "CO", "region": "34", "continent": "América del Sur", "aliases": ["bogota"]}, {"name": "Barranquilla", "country": "Colombia", "countryCode": "CO", "region": "04", "continent": "América del Sur", "aliases": ["barranquilla"]}, {"name": "Angelópolis", "country": "Colombia", "countryCode": "CO", "region": "02", "continent": "América del Sur", "aliases": ["angelopolis"]}, {"name": "Monterrey", "country": "Colombia", "countryCode": "CO", "region": "32", "continent": "América del Sur", "aliases": ["monterrey"]}, {"name": "Escazú", "country": "Costa Rica", "countryCode": "CR", "region": "08", "continent": "América del Norte", "aliases": ["escazu"]}, {"name": "Ángeles", "country": "Costa Rica", "countryCode": "CR", "region": "04", "continent": "América del Norte", "aliases": ["angeles"]}, {"name": "Australia", "country": "Cuba", "countryCode": "CU", "region": "03", "continent": "América del Norte", "aliases": ["australia"]}, {"name": "Prague", "country": "República Checa", "countryCode": "CZ", "region": "52", "continent": "Europa", "aliases": ["praha", "prague", "praga"]}, {"name": "Chodov", "country": "República Checa", "countryCode": "CZ", "region": "52", "continent": "Europa", "aliases": ["chodov"]}, {"name": "Westend", "country": "Alemania", "countryCode": "DE", "region": "16", "continent": "Europa", "aliases": ["westend"]}, {"name": "Valley", "country": "Alemania", "countryCode": "DE", "region": "02", "continent": "Europa", "aliases": ["valley"]}, {"name": "Stuttgart", "country": "Alemania", "countryCode": "DE", "region": "01", "continent": "Europa", "aliases": ["stuttgart"]}, {"name": "Saarbrücken", "country": "Alemania", "countryCode": "DE", "region": "09", "continent": "Europa", "aliases": ["saarbrucken"]}, {"name": "Pasing", "country": "Alemania", "countryCode": "DE", "region": "02", "continent": "Europa", "aliases": ["pasing"]}, {"name": "Osloß", "country": "Alemania", "countryCode": "DE", "region": "06", "continent": "Europa", "aliases": ["oslo"]}, {"name": "Leipzig", "country": "Alemania", "countryCode": "DE", "region": "13", "continent": "Europa", "aliases": ["leipzig"]}, {"name": "Köln", "country": "Alemania", "countryCode": "DE", "region": "07", "continent": "Europa", "aliases": ["koln"]}, {"name": "Hannover", "country": "Alemania", "countryCode": "DE", "region": "06", "continent": "Europa", "aliases": ["hannover"]}, {"name": "Hamburg", "country": "Alemania", "countryCode": "DE", "region": "04", "continent": "Europa", "aliases": ["hamburg"]}, {"name": "Düsseldorf", "country": "Alemania", "countryCode": "DE", "region": "07", "continent": "Europa", "aliases": ["dusseldorf"]}, {"name": "Dresden", "country": "Alemania", "countryCode": "DE", "region": "13", "continent": "Europa", "aliases": ["dresden"]}, {"name": "Bonn", "country": "Alemania", "countryCode": "DE", "region": "07", "continent": "Europa", "aliases": ["bonn"]}, {"name": "Wörth", "country": "Alemania", "countryCode": "DE", "region": "02", "continent": "Europa", "aliases": ["worth"]}, {"name": "Nexø", "country": "Dinamarca", "countryCode": "DK", "region": "17", "continent": "Europa", "aliases": ["nex"]}, {"name": "Copenhagen", "country": "Dinamarca", "countryCode": "DK", "region": "17", "continent": "Europa", "aliases": ["koebenhavn", "copenh", "kobenhavn", "copenhague", "copenhagen", "kbh"]}, {"name": "Chile", "country": "Ecuador", "countryCode": "EC", "region": "12", "continent": "América del Sur", "aliases": ["chile"]}, {"name": "Santafé", "country": "España", "countryCode": "ES", "region": "51", "continent": "Europa", "aliases": ["santafe"]}, {"name": "Mérida", "country": "España", "countryCode": "ES", "region": "57", "continent": "Europa", "aliases": ["merida"]}, {"name": "Cañada", "country": "España", "countryCode": "ES", "region": "60", "continent": "Europa", "aliases": ["canada"]}, {"name": "Villalobos", "country": "España", "countryCode": "ES", "region": "55", "continent": "Europa", "aliases": ["villalobos"]}, {"name": "Súria", "country": "España", "countryCode": "ES", "region": "56", "continent": "Europa", "aliases": ["suria"]}, {"name": "Orio", "country": "España", "countryCode": "ES", "region": "59", "continent": "Europa", "aliases": ["orio"]}, {"name": "Les", "country": "España", "countryCode": "ES", "region": "56", "continent": "Europa", "aliases": ["les"]}, {"name": "Laguardia", "country": "España", "countryCode": "ES", "region": "59", "continent": "Europa", "aliases": ["laguardia"]}, {"name": "Guadalajara", "country": "España", "countryCode": "ES", "region": "54", "continent": "Europa", "aliases": ["guadalajara"]}, {"name": "Centro", "country": "España", "countryCode": "ES", "region": "53", "continent": "Europa", "aliases": ["centro"]}, {"name": "Porta", "country": "España", "countryCode": "ES", "region": "56", "continent": "Europa", "aliases": ["porta"]}, {"name": "Mēga", "country": "ET", "countryCode": "ET", "region": "51", "continent": "Mundial", "aliases": ["mega"]}, {"name": "Helsinki", "country": "Finlandia", "countryCode": "FI", "region": "01", "continent": "Europa", "aliases": ["helsingfors", "helsinki"]}, {"name": "Toulouse", "country": "Francia", "countryCode": "FR", "region": "76", "continent": "Europa", "aliases": ["toulouse"]}, {"name": "Toulon", "country": "Francia", "countryCode": "FR", "region": "93", "continent": "Europa", "aliases": ["toulon"]}, {"name": "Strasbourg", "country": "Francia", "countryCode": "FR", "region": "44", "continent": "Europa", "aliases": ["strasbourg"]}, {"name": "Rennes", "country": "Francia", "countryCode": "FR", "region": "53", "continent": "Europa", "aliases": ["rennes"]}, {"name": "Nice", "country": "Francia", "countryCode": "FR", "region": "93", "continent": "Europa", "aliases": ["nice"]}, {"name": "Nancy", "country": "Francia", "countryCode": "FR", "region": "44", "continent": "Europa", "aliases": ["nancy"]}, {"name": "Metz", "country": "Francia", "countryCode": "FR", "region": "44", "continent": "Europa", "aliases": ["metz"]}, {"name": "Marseille", "country": "Francia", "countryCode": "FR", "region": "93", "continent": "Europa", "aliases": ["marseille"]}, {"name": "Lyon", "country": "Francia", "countryCode": "FR", "region": "84", "continent": "Europa", "aliases": ["lyon"]}, {"name": "Grenoble", "country": "Francia", "countryCode": "FR", "region": "84", "continent": "Europa", "aliases": ["grenoble"]}, {"name": "Dijon", "country": "Francia", "countryCode": "FR", "region": "27", "continent": "Europa", "aliases": ["dijon"]}, {"name": "Créteil", "country": "Francia", "countryCode": "FR", "region": "11", "continent": "Europa", "aliases": ["creteil"]}, {"name": "Coëx", "country": "Francia", "countryCode": "FR", "region": "52", "continent": "Europa", "aliases": ["coex"]}, {"name": "Cergy", "country": "Francia", "countryCode": "FR", "region": "11", "continent": "Europa", "aliases": ["cergy"]}, {"name": "Bordeaux", "country": "Francia", "countryCode": "FR", "region": "75", "continent": "Europa", "aliases": ["bordeaux"]}, {"name": "Biarritz", "country": "Francia", "countryCode": "FR", "region": "75", "continent": "Europa", "aliases": ["biarritz"]}, {"name": "Street", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["street"]}, {"name": "Southgate", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["southgate"]}, {"name": "Southampton", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["southampton"]}, {"name": "Luton", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["luton"]}, {"name": "Leicester", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["leicester"]}, {"name": "Leeds", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["leeds"]}, {"name": "Hill", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["hill"]}, {"name": "Glasgow", "country": "Reino Unido", "countryCode": "GB", "region": "SCT", "continent": "Europa", "aliases": ["glasgow"]}, {"name": "Edinburgh", "country": "Reino Unido", "countryCode": "GB", "region": "SCT", "continent": "Europa", "aliases": ["edinbur", "edimburgo", "edinburgh"]}, {"name": "Easton", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["easton"]}, {"name": "Danbury", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["danbury"]}, {"name": "Crossgates", "country": "Reino Unido", "countryCode": "GB", "region": "SCT", "continent": "Europa", "aliases": ["crossgates"]}, {"name": "Broadway", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["broadway"]}, {"name": "Bristol", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["bristol"]}, {"name": "Bridge", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["bridge"]}, {"name": "Boston", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["boston"]}, {"name": "Birmingham", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["birmingham"]}, {"name": "Beer", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["beer"]}, {"name": "Rock", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["rock"]}, {"name": "Battersea", "country": "Reino Unido", "countryCode": "GB", "region": "ENG", "continent": "Europa", "aliases": ["battersea"]}, {"name": "Java", "country": "Georgia", "countryCode": "GE", "region": "73", "continent": "Asia", "aliases": ["java"]}, {"name": "Athens", "country": "Grecia", "countryCode": "GR", "region": "ESYE31", "continent": "Europa", "aliases": ["athens"]}, {"name": "Thessaloníki", "country": "Grecia", "countryCode": "GR", "region": "ESYE12", "continent": "Europa", "aliases": ["thessaloniki"]}, {"name": "Marína", "country": "Grecia", "countryCode": "GR", "region": "ESYE12", "continent": "Europa", "aliases": ["marina"]}, {"name": "Hong Kong", "country": "Hong Kong", "countryCode": "HK", "region": "General", "continent": "Asia", "aliases": ["hong kong", "hk", "hongkong"]}, {"name": "Veracruz", "country": "HN", "countryCode": "HN", "region": "05", "continent": "Mundial", "aliases": ["veracruz"]}, {"name": "Las Vegas", "country": "HN", "countryCode": "HN", "region": "18", "continent": "Mundial", "aliases": ["las vegas"]}, {"name": "Arizona", "country": "HN", "countryCode": "HN", "region": "01", "continent": "Mundial", "aliases": ["arizona"]}, {"name": "Zagreb", "country": "Croacia", "countryCode": "HR", "region": "21", "continent": "Europa", "aliases": ["zagreb"]}, {"name": "Súr", "country": "Hungría", "countryCode": "HU", "region": "12", "continent": "Europa", "aliases": ["sur"]}, {"name": "Budapest", "country": "Hungría", "countryCode": "HU", "region": "05", "continent": "Europa", "aliases": ["budapest"]}, {"name": "Tunjungan", "country": "Indonesia", "countryCode": "ID", "region": "07", "continent": "Asia", "aliases": ["tunjungan"]}, {"name": "Surabaya", "country": "Indonesia", "countryCode": "ID", "region": "08", "continent": "Asia", "aliases": ["surabaya"]}, {"name": "Serpong", "country": "Indonesia", "countryCode": "ID", "region": "30", "continent": "Asia", "aliases": ["serpong"]}, {"name": "Semarang", "country": "Indonesia", "countryCode": "ID", "region": "07", "continent": "Asia", "aliases": ["semarang"]}, {"name": "Kelapa", "country": "Indonesia", "countryCode": "ID", "region": "35", "continent": "Asia", "aliases": ["kelapa"]}, {"name": "Bekasi", "country": "Indonesia", "countryCode": "ID", "region": "30", "continent": "Asia", "aliases": ["bekasi"]}, {"name": "Sanur", "country": "Indonesia", "countryCode": "ID", "region": "02", "continent": "Asia", "aliases": ["sanur"]}, {"name": "Pakuwon", "country": "Indonesia", "countryCode": "ID", "region": "30", "continent": "Asia", "aliases": ["pakuwon"]}, {"name": "Senayan", "country": "Indonesia", "countryCode": "ID", "region": "17", "continent": "Asia", "aliases": ["senayan"]}, {"name": "Tower", "country": "Irlanda", "countryCode": "IE", "region": "M", "continent": "Europa", "aliases": ["tower"]}, {"name": "Dublin", "country": "Irlanda", "countryCode": "IE", "region": "L", "continent": "Europa", "aliases": ["baile atha cliath", "dublin"]}, {"name": "Blanchardstown", "country": "Irlanda", "countryCode": "IE", "region": "L", "continent": "Europa", "aliases": ["blanchardstown"]}, {"name": "Bayside", "country": "Irlanda", "countryCode": "IE", "region": "L", "continent": "Europa", "aliases": ["bayside"]}, {"name": "Eilat", "country": "Israel", "countryCode": "IL", "region": "01", "continent": "Asia", "aliases": ["eilat"]}, {"name": "Ashdod", "country": "Israel", "countryCode": "IL", "region": "01", "continent": "Asia", "aliases": ["ashdod"]}, {"name": "Pen", "country": "India", "countryCode": "IN", "region": "16", "continent": "Asia", "aliases": ["pen"]}, {"name": "Chennai", "country": "India", "countryCode": "IN", "region": "25", "continent": "Asia", "aliases": ["chennai"]}, {"name": "Kota", "country": "India", "countryCode": "IN", "region": "24", "continent": "Asia", "aliases": ["kota"]}, {"name": "Gurugram", "country": "India", "countryCode": "IN", "region": "10", "continent": "Asia", "aliases": ["gurugram"]}, {"name": "Bāri", "country": "India", "countryCode": "IN", "region": "24", "continent": "Asia", "aliases": ["bari"]}, {"name": "Bengaluru", "country": "India", "countryCode": "IN", "region": "19", "continent": "Asia", "aliases": ["bengaluru"]}, {"name": "Doha", "country": "India", "countryCode": "IN", "region": "10", "continent": "Asia", "aliases": ["doha"]}, {"name": "Hui", "country": "India", "countryCode": "IN", "region": "10", "continent": "Asia", "aliases": ["hui"]}, {"name": "Red", "country": "India", "countryCode": "IN", "region": "16", "continent": "Asia", "aliases": ["red"]}, {"name": "Sīn", "country": "IR", "countryCode": "IR", "region": "28", "continent": "Mundial", "aliases": ["sin"]}, {"name": "Catania", "country": "Italia", "countryCode": "IT", "region": "15", "continent": "Europa", "aliases": ["catania"]}, {"name": "Cagliari", "country": "Italia", "countryCode": "IT", "region": "14", "continent": "Europa", "aliases": ["cagliari"]}, {"name": "Arena", "country": "Italia", "countryCode": "IT", "region": "03", "continent": "Europa", "aliases": ["arena"]}, {"name": "Verona", "country": "Italia", "countryCode": "IT", "region": "20", "continent": "Europa", "aliases": ["verona"]}, {"name": "Rome", "country": "Italia", "countryCode": "IT", "region": "07", "continent": "Europa", "aliases": ["rome", "roma"]}, {"name": "Rimini", "country": "Italia", "countryCode": "IT", "region": "05", "continent": "Europa", "aliases": ["rimini"]}, {"name": "Palazzo", "country": "Italia", "countryCode": "IT", "region": "18", "continent": "Europa", "aliases": ["palazzo"]}, {"name": "Nave", "country": "Italia", "countryCode": "IT", "region": "09", "continent": "Europa", "aliases": ["nave"]}, {"name": "Naples", "country": "Italia", "countryCode": "IT", "region": "04", "continent": "Europa", "aliases": ["naples"]}, {"name": "Monza", "country": "Italia", "countryCode": "IT", "region": "09", "continent": "Europa", "aliases": ["monza"]}, {"name": "Mel", "country": "Italia", "countryCode": "IT", "region": "20", "continent": "Europa", "aliases": ["mel"]}, {"name": "Cologne", "country": "Italia", "countryCode": "IT", "region": "09", "continent": "Europa", "aliases": ["cologne"]}, {"name": "Carugate", "country": "Italia", "countryCode": "IT", "region": "09", "continent": "Europa", "aliases": ["carugate"]}, {"name": "Brescia", "country": "Italia", "countryCode": "IT", "region": "09", "continent": "Europa", "aliases": ["brescia"]}, {"name": "Bolzano", "country": "Italia", "countryCode": "IT", "region": "17", "continent": "Europa", "aliases": ["bolzano"]}, {"name": "Bologna", "country": "Italia", "countryCode": "IT", "region": "05", "continent": "Europa", "aliases": ["bologna"]}, {"name": "Arese", "country": "Italia", "countryCode": "IT", "region": "09", "continent": "Europa", "aliases": ["arese"]}, {"name": "Assago", "country": "Italia", "countryCode": "IT", "region": "09", "continent": "Europa", "aliases": ["assago"]}, {"name": "Carrè", "country": "Italia", "countryCode": "IT", "region": "20", "continent": "Europa", "aliases": ["carre"]}, {"name": "Boca", "country": "Italia", "countryCode": "IT", "region": "12", "continent": "Europa", "aliases": ["boca"]}, {"name": "Alto", "country": "Italia", "countryCode": "IT", "region": "12", "continent": "Europa", "aliases": ["alto"]}, {"name": "Onè", "country": "Italia", "countryCode": "IT", "region": "20", "continent": "Europa", "aliases": ["one"]}, {"name": "Yokohama", "country": "Japón", "countryCode": "JP", "region": "19", "continent": "Asia", "aliases": ["yokohama"]}, {"name": "Tosu", "country": "Japón", "countryCode": "JP", "region": "33", "continent": "Asia", "aliases": ["tosu"]}, {"name": "Tokyo", "country": "Japón", "countryCode": "JP", "region": "40", "continent": "Asia", "aliases": ["tkyo", "tokio", "tokyo"]}, {"name": "Toki", "country": "Japón", "countryCode": "JP", "region": "09", "continent": "Asia", "aliases": ["toki"]}, {"name": "Tamagawa", "country": "Japón", "countryCode": "JP", "region": "40", "continent": "Asia", "aliases": ["tamagawa"]}, {"name": "Minato", "country": "Japón", "countryCode": "JP", "region": "43", "continent": "Asia", "aliases": ["minato"]}, {"name": "Sendai", "country": "Japón", "countryCode": "JP", "region": "18", "continent": "Asia", "aliases": ["sendai"]}, {"name": "Sano", "country": "Japón", "countryCode": "JP", "region": "38", "continent": "Asia", "aliases": ["sano"]}, {"name": "Ryūō", "country": "Japón", "countryCode": "JP", "region": "46", "continent": "Asia", "aliases": ["ryuo"]}, {"name": "Okazaki", "country": "Japón", "countryCode": "JP", "region": "01", "continent": "Asia", "aliases": ["okazaki"]}, {"name": "Nagoya", "country": "Japón", "countryCode": "JP", "region": "01", "continent": "Asia", "aliases": ["nagoya"]}, {"name": "Kyoto", "country": "Japón", "countryCode": "JP", "region": "22", "continent": "Asia", "aliases": ["kioto", "kyoto"]}, {"name": "Kurashiki", "country": "Japón", "countryCode": "JP", "region": "31", "continent": "Asia", "aliases": ["kurashiki"]}, {"name": "Koshigaya", "country": "Japón", "countryCode": "JP", "region": "34", "continent": "Asia", "aliases": ["koshigaya"]}, {"name": "Kobe", "country": "Japón", "countryCode": "JP", "region": "13", "continent": "Asia", "aliases": ["kobe"]}, {"name": "Kisarazu", "country": "Japón", "countryCode": "JP", "region": "04", "continent": "Asia", "aliases": ["kisarazu"]}, {"name": "Karuizawa", "country": "Japón", "countryCode": "JP", "region": "26", "continent": "Asia", "aliases": ["karuizawa"]}, {"name": "Gotemba", "country": "Japón", "countryCode": "JP", "region": "37", "continent": "Asia", "aliases": ["gotemba"]}, {"name": "Fukuoka", "country": "Japón", "countryCode": "JP", "region": "07", "continent": "Asia", "aliases": ["fukuoka"]}, {"name": "China", "country": "Japón", "countryCode": "JP", "region": "18", "continent": "Asia", "aliases": ["china"]}, {"name": "Okinawa", "country": "Japón", "countryCode": "JP", "region": "47", "continent": "Asia", "aliases": ["okinawa"]}, {"name": "Shisui", "country": "Japón", "countryCode": "JP", "region": "04", "continent": "Asia", "aliases": ["shisui"]}, {"name": "Narita", "country": "Japón", "countryCode": "JP", "region": "04", "continent": "Asia", "aliases": ["narita"]}, {"name": "Ami", "country": "Japón", "countryCode": "JP", "region": "14", "continent": "Asia", "aliases": ["ami"]}, {"name": "Sapporo", "country": "Japón", "countryCode": "JP", "region": "12", "continent": "Asia", "aliases": ["sapporo"]}, {"name": "Kitahiroshima", "country": "Japón", "countryCode": "JP", "region": "12", "continent": "Asia", "aliases": ["kitahiroshima"]}, {"name": "Umeda", "country": "Japón", "countryCode": "JP", "region": "32", "continent": "Asia", "aliases": ["umeda"]}, {"name": "Oyabe", "country": "Japón", "countryCode": "JP", "region": "42", "continent": "Asia", "aliases": ["oyabe"]}, {"name": "Ebina", "country": "Japón", "countryCode": "JP", "region": "19", "continent": "Asia", "aliases": ["ebina"]}, {"name": "Iruma", "country": "Japón", "countryCode": "JP", "region": "34", "continent": "Asia", "aliases": ["iruma"]}, {"name": "Saitama", "country": "Japón", "countryCode": "JP", "region": "34", "continent": "Asia", "aliases": ["saitama"]}, {"name": "Roppongi", "country": "Japón", "countryCode": "JP", "region": "40", "continent": "Asia", "aliases": ["roppongi"]}, {"name": "Fujimi", "country": "Japón", "countryCode": "JP", "region": "26", "continent": "Asia", "aliases": ["fujimi"]}, {"name": "Tachikawa", "country": "Japón", "countryCode": "JP", "region": "22", "continent": "Asia", "aliases": ["tachikawa"]}, {"name": "Usa", "country": "Japón", "countryCode": "JP", "region": "30", "continent": "Asia", "aliases": ["usa"]}, {"name": "Sanda", "country": "Japón", "countryCode": "JP", "region": "13", "continent": "Asia", "aliases": ["sanda"]}, {"name": "Ulsan", "country": "Corea del Sur", "countryCode": "KR", "region": "21", "continent": "Asia", "aliases": ["ulsan"]}, {"name": "Daejeon", "country": "Corea del Sur", "countryCode": "KR", "region": "19", "continent": "Asia", "aliases": ["daejeon"]}, {"name": "Daegu", "country": "Corea del Sur", "countryCode": "KR", "region": "15", "continent": "Asia", "aliases": ["daegu"]}, {"name": "Suwon", "country": "Corea del Sur", "countryCode": "KR", "region": "13", "continent": "Asia", "aliases": ["suwon"]}, {"name": "Seoul", "country": "Corea del Sur", "countryCode": "KR", "region": "11", "continent": "Asia", "aliases": ["seoul"]}, {"name": "Incheon", "country": "Corea del Sur", "countryCode": "KR", "region": "12", "continent": "Asia", "aliases": ["incheon"]}, {"name": "Creek", "country": "KY", "countryCode": "KY", "region": "00", "continent": "Mundial", "aliases": ["creek"]}, {"name": "Almaty", "country": "Kazajistán", "countryCode": "KZ", "region": "02", "continent": "Asia", "aliases": ["almaty"]}, {"name": "Kazakhstan", "country": "Kazajistán", "countryCode": "KZ", "region": "01", "continent": "Asia", "aliases": ["kazakhstan"]}, {"name": "Ann", "country": "MM", "countryCode": "MM", "region": "01", "continent": "Mundial", "aliases": ["ann"]}, {"name": "Providence", "country": "MU", "countryCode": "MU", "region": "15", "continent": "Mundial", "aliases": ["providence"]}, {"name": "Saltillo", "country": "México", "countryCode": "MX", "region": "21", "continent": "América del Norte", "aliases": ["saltillo"]}, {"name": "Metepec", "country": "México", "countryCode": "MX", "region": "13", "continent": "América del Norte", "aliases": ["metepec"]}, {"name": "Cancún", "country": "México", "countryCode": "MX", "region": "23", "continent": "América del Norte", "aliases": ["cancun"]}, {"name": "Chihuahua", "country": "México", "countryCode": "MX", "region": "05", "continent": "América del Norte", "aliases": ["chihuahua"]}, {"name": "Querétaro", "country": "México", "countryCode": "MX", "region": "05", "continent": "América del Norte", "aliases": ["queretaro"]}, {"name": "Lindavista", "country": "México", "countryCode": "MX", "region": "30", "continent": "América del Norte", "aliases": ["lindavista"]}, {"name": "Isla", "country": "México", "countryCode": "MX", "region": "30", "continent": "América del Norte", "aliases": ["isla"]}, {"name": "Tijuana", "country": "México", "countryCode": "MX", "region": "02", "continent": "América del Norte", "aliases": ["tijuana"]}, {"name": "Franco", "country": "México", "countryCode": "MX", "region": "11", "continent": "América del Norte", "aliases": ["franco"]}, {"name": "Kuching", "country": "Malasia", "countryCode": "MY", "region": "11", "continent": "Asia", "aliases": ["kuching"]}, {"name": "Putrajaya", "country": "Malasia", "countryCode": "MY", "region": "17", "continent": "Asia", "aliases": ["putrajaya"]}, {"name": "Bangsar", "country": "Malasia", "countryCode": "MY", "region": "14", "continent": "Asia", "aliases": ["bangsar"]}, {"name": "Hong", "country": "NG", "countryCode": "NG", "region": "35", "continent": "Mundial", "aliases": ["hong"]}, {"name": "Utrecht", "country": "Países Bajos", "countryCode": "NL", "region": "09", "continent": "Europa", "aliases": ["utrecht"]}, {"name": "Scheveningen", "country": "Países Bajos", "countryCode": "NL", "region": "11", "continent": "Europa", "aliases": ["scheveningen"]}, {"name": "Rotterdam", "country": "Países Bajos", "countryCode": "NL", "region": "11", "continent": "Europa", "aliases": ["roterdam", "rotterdam"]}, {"name": "Valle", "country": "Noruega", "countryCode": "NO", "region": "42", "continent": "Europa", "aliases": ["valle"]}, {"name": "Auckland", "country": "Nueva Zelanda", "countryCode": "NZ", "region": "E7", "continent": "Oceanía", "aliases": ["auckland"]}, {"name": "Riccarton", "country": "Nueva Zelanda", "countryCode": "NZ", "region": "E9", "continent": "Oceanía", "aliases": ["riccarton"]}, {"name": "David", "country": "Panamá", "countryCode": "PA", "region": "02", "continent": "América del Norte", "aliases": ["david"]}, {"name": "Salaverry", "country": "Perú", "countryCode": "PE", "region": "13", "continent": "América del Sur", "aliases": ["salaverry"]}, {"name": "Parco", "country": "Perú", "countryCode": "PE", "region": "12", "continent": "América del Sur", "aliases": ["parco"]}, {"name": "Asia", "country": "Perú", "countryCode": "PE", "region": "15", "continent": "América del Sur", "aliases": ["asia"]}, {"name": "Arequipa", "country": "Perú", "countryCode": "PE", "region": "04", "continent": "América del Sur", "aliases": ["arequipa"]}, {"name": "Real", "country": "Filipinas", "countryCode": "PH", "region": "01", "continent": "Asia", "aliases": ["real"]}, {"name": "Orion", "country": "Filipinas", "countryCode": "PH", "region": "03", "continent": "Asia", "aliases": ["orion"]}, {"name": "Mexico", "country": "Filipinas", "countryCode": "PH", "region": "03", "continent": "Asia", "aliases": ["mexico"]}, {"name": "Manila", "country": "Filipinas", "countryCode": "PH", "region": "NCR", "continent": "Asia", "aliases": ["manila"]}, {"name": "Egaña", "country": "Filipinas", "countryCode": "PH", "region": "06", "continent": "Asia", "aliases": ["egana"]}, {"name": "Hub", "country": "PK", "countryCode": "PK", "region": "02", "continent": "Mundial", "aliases": ["hub"]}, {"name": "Warsaw", "country": "Polonia", "countryCode": "PL", "region": "78", "continent": "Europa", "aliases": ["varsovia", "warszawa", "warsaw"]}, {"name": "Mokotów", "country": "Polonia", "countryCode": "PL", "region": "78", "continent": "Europa", "aliases": ["mokotow"]}, {"name": "Wrocław", "country": "Polonia", "countryCode": "PL", "region": "72", "continent": "Europa", "aliases": ["wrocaw"]}, {"name": "Poznań", "country": "Polonia", "countryCode": "PL", "region": "86", "continent": "Europa", "aliases": ["poznan"]}, {"name": "Łódź", "country": "Polonia", "countryCode": "PL", "region": "74", "continent": "Europa", "aliases": ["odz"]}, {"name": "Kraków", "country": "Polonia", "countryCode": "PL", "region": "77", "continent": "Europa", "aliases": ["krakow"]}, {"name": "Katowice", "country": "Polonia", "countryCode": "PL", "region": "83", "continent": "Europa", "aliases": ["katowice"]}, {"name": "Gdańsk", "country": "Polonia", "countryCode": "PL", "region": "82", "continent": "Europa", "aliases": ["gdansk"]}, {"name": "Ceiba", "country": "PR", "countryCode": "PR", "region": "037", "continent": "Mundial", "aliases": ["ceiba"]}, {"name": "Coco", "country": "PR", "countryCode": "PR", "region": "123", "continent": "Mundial", "aliases": ["coco"]}, {"name": "Mação", "country": "Portugal", "countryCode": "PT", "region": "18", "continent": "Europa", "aliases": ["macao"]}, {"name": "Lisbon", "country": "Portugal", "countryCode": "PT", "region": "14", "continent": "Europa", "aliases": ["lisbon", "lisboa", "lisbonne"]}, {"name": "Nine", "country": "Portugal", "countryCode": "PT", "region": "04", "continent": "Europa", "aliases": ["nine"]}, {"name": "Timişoara", "country": "Rumanía", "countryCode": "RO", "region": "36", "continent": "Europa", "aliases": ["timisoara"]}, {"name": "Şpring", "country": "Rumanía", "countryCode": "RO", "region": "01", "continent": "Europa", "aliases": ["spring"]}, {"name": "Ploieşti", "country": "Rumanía", "countryCode": "RO", "region": "30", "continent": "Europa", "aliases": ["ploiesti"]}, {"name": "Craiova", "country": "Rumanía", "countryCode": "RO", "region": "17", "continent": "Europa", "aliases": ["craiova"]}, {"name": "Băneasa", "country": "Rumanía", "countryCode": "RO", "region": "18", "continent": "Europa", "aliases": ["baneasa"]}, {"name": "Star’", "country": "Rusia", "countryCode": "RU", "region": "10", "continent": "Europa", "aliases": ["star"]}, {"name": "Makkah", "country": "Arabia Saudita", "countryCode": "SA", "region": "14", "continent": "Asia", "aliases": ["makkah"]}, {"name": "Dhahran", "country": "Arabia Saudita", "countryCode": "SA", "region": "06", "continent": "Asia", "aliases": ["dhahran"]}, {"name": "Riyadh", "country": "Arabia Saudita", "countryCode": "SA", "region": "10", "continent": "Asia", "aliases": ["riyadh"]}, {"name": "Stockholm", "country": "Suecia", "countryCode": "SE", "region": "26", "continent": "Europa", "aliases": ["sthlm", "estocolmo", "stockholm"]}, {"name": "Singapore", "country": "Singapur", "countryCode": "SG", "region": "General", "continent": "Asia", "aliases": ["singapur", "singapore", "sing"]}, {"name": "Sentosa", "country": "Singapur", "countryCode": "SG", "region": "General", "continent": "Asia", "aliases": ["sentosa"]}, {"name": "Ljubljana", "country": "Eslovenia", "countryCode": "SI", "region": "61", "continent": "Europa", "aliases": ["ljubljana"]}, {"name": "Marka", "country": "SO", "countryCode": "SO", "region": "14", "continent": "Mundial", "aliases": ["marka"]}, {"name": "Babīlā", "country": "SY", "countryCode": "SY", "region": "08", "continent": "Mundial", "aliases": ["babila"]}, {"name": "Van", "country": "Turquía", "countryCode": "TR", "region": "65", "continent": "Asia", "aliases": ["van"]}, {"name": "Meydan", "country": "Turquía", "countryCode": "TR", "region": "13", "continent": "Asia", "aliases": ["meydan"]}, {"name": "İzmir", "country": "Turquía", "countryCode": "TR", "region": "35", "continent": "Asia", "aliases": ["izmir"]}, {"name": "Han", "country": "Turquía", "countryCode": "TR", "region": "26", "continent": "Asia", "aliases": ["han"]}, {"name": "Antalya", "country": "Turquía", "countryCode": "TR", "region": "07", "continent": "Asia", "aliases": ["antalya"]}, {"name": "Ankara", "country": "Turquía", "countryCode": "TR", "region": "68", "continent": "Asia", "aliases": ["ankara"]}, {"name": "Adana", "country": "Turquía", "countryCode": "TR", "region": "81", "continent": "Asia", "aliases": ["adana"]}, {"name": "Istanbul", "country": "Turquía", "countryCode": "TR", "region": "34", "continent": "Asia", "aliases": ["istanbul"]}, {"name": "Bursa", "country": "Turquía", "countryCode": "TR", "region": "16", "continent": "Asia", "aliases": ["bursa"]}, {"name": "Taipei", "country": "Taiwán", "countryCode": "TW", "region": "04", "continent": "Asia", "aliases": ["taipei"]}, {"name": "Tainan", "country": "Taiwán", "countryCode": "TW", "region": "04", "continent": "Asia", "aliases": ["tainan"]}, {"name": "Taichung", "country": "Taiwán", "countryCode": "TW", "region": "04", "continent": "Asia", "aliases": ["taichung"]}, {"name": "Kaohsiung", "country": "Taiwán", "countryCode": "TW", "region": "02", "continent": "Asia", "aliases": ["kaohsiung"]}, {"name": "Hsinchu", "country": "Taiwán", "countryCode": "TW", "region": "04", "continent": "Asia", "aliases": ["hsinchu"]}, {"name": "Austin", "country": "Estados Unidos", "countryCode": "US", "region": "AR", "continent": "América del Norte", "aliases": ["austin"]}, {"name": "Nashville", "country": "Estados Unidos", "countryCode": "US", "region": "AR", "continent": "América del Norte", "aliases": ["nashville"]}, {"name": "Aventura", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["aventura"]}, {"name": "Century", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["century"]}, {"name": "Gateway", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["gateway"]}, {"name": "Holiday", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["holiday"]}, {"name": "Lakeside", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["lakeside"]}, {"name": "Orlando", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["orlando"]}, {"name": "Sawgrass", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["sawgrass"]}, {"name": "Westchester", "country": "Estados Unidos", "countryCode": "US", "region": "FL", "continent": "América del Norte", "aliases": ["westchester"]}, {"name": "Atlanta", "country": "Estados Unidos", "countryCode": "US", "region": "GA", "continent": "América del Norte", "aliases": ["atlanta"]}, {"name": "Columbus", "country": "Estados Unidos", "countryCode": "US", "region": "GA", "continent": "América del Norte", "aliases": ["columbus"]}, {"name": "Brazil", "country": "Estados Unidos", "countryCode": "US", "region": "IN", "continent": "América del Norte", "aliases": ["brazil"]}, {"name": "Annapolis", "country": "Estados Unidos", "countryCode": "US", "region": "MD", "continent": "América del Norte", "aliases": ["annapolis"]}, {"name": "Friendly", "country": "Estados Unidos", "countryCode": "US", "region": "MD", "continent": "América del Norte", "aliases": ["friendly"]}, {"name": "Guilford", "country": "Estados Unidos", "countryCode": "US", "region": "MD", "continent": "América del Norte", "aliases": ["guilford"]}, {"name": "Potomac", "country": "Estados Unidos", "countryCode": "US", "region": "MD", "continent": "América del Norte", "aliases": ["potomac"]}, {"name": "Crocker", "country": "Estados Unidos", "countryCode": "US", "region": "MO", "continent": "América del Norte", "aliases": ["crocker"]}, {"name": "Republic", "country": "Estados Unidos", "countryCode": "US", "region": "MO", "continent": "América del Norte", "aliases": ["republic"]}, {"name": "Meridian", "country": "Estados Unidos", "countryCode": "US", "region": "MS", "continent": "América del Norte", "aliases": ["meridian"]}, {"name": "Philadelphia", "country": "Estados Unidos", "countryCode": "US", "region": "MS", "continent": "América del Norte", "aliases": ["philadelphia"]}, {"name": "Charlotte", "country": "Estados Unidos", "countryCode": "US", "region": "NC", "continent": "América del Norte", "aliases": ["charlotte"]}, {"name": "Denver", "country": "Estados Unidos", "countryCode": "US", "region": "NC", "continent": "América del Norte", "aliases": ["denver"]}, {"name": "Beachwood", "country": "Estados Unidos", "countryCode": "US", "region": "NJ", "continent": "América del Norte", "aliases": ["beachwood"]}, {"name": "Highpoint", "country": "Estados Unidos", "countryCode": "US", "region": "OH", "continent": "América del Norte", "aliases": ["highpoint"]}, {"name": "Kenwood", "country": "Estados Unidos", "countryCode": "US", "region": "OH", "continent": "América del Norte", "aliases": ["kenwood"]}, {"name": "Christiana", "country": "Estados Unidos", "countryCode": "US", "region": "PA", "continent": "América del Norte", "aliases": ["christiana"]}, {"name": "Woodfield", "country": "Estados Unidos", "countryCode": "US", "region": "SC", "continent": "América del Norte", "aliases": ["woodfield"]}, {"name": "Midtown", "country": "Estados Unidos", "countryCode": "US", "region": "TN", "continent": "América del Norte", "aliases": ["midtown"]}, {"name": "Eastland", "country": "Estados Unidos", "countryCode": "US", "region": "TX", "continent": "América del Norte", "aliases": ["eastland"]}, {"name": "Ferris", "country": "Estados Unidos", "countryCode": "US", "region": "TX", "continent": "América del Norte", "aliases": ["ferris"]}, {"name": "Italy", "country": "Estados Unidos", "countryCode": "US", "region": "TX", "continent": "América del Norte", "aliases": ["italy"]}, {"name": "West", "country": "Estados Unidos", "countryCode": "US", "region": "TX", "continent": "América del Norte", "aliases": ["west"]}, {"name": "Norfolk", "country": "Estados Unidos", "countryCode": "US", "region": "VA", "continent": "América del Norte", "aliases": ["norfolk"]}, {"name": "Triangle", "country": "Estados Unidos", "countryCode": "US", "region": "VA", "continent": "América del Norte", "aliases": ["triangle"]}, {"name": "Tysons", "country": "Estados Unidos", "countryCode": "US", "region": "VA", "continent": "América del Norte", "aliases": ["tysons"]}, {"name": "Arab", "country": "Estados Unidos", "countryCode": "US", "region": "AL", "continent": "América del Norte", "aliases": ["arab"]}, {"name": "Gurnee", "country": "Estados Unidos", "countryCode": "US", "region": "IL", "continent": "América del Norte", "aliases": ["gurnee"]}, {"name": "Peru", "country": "Estados Unidos", "countryCode": "US", "region": "IL", "continent": "América del Norte", "aliases": ["peru"]}, {"name": "Phoenix", "country": "Estados Unidos", "countryCode": "US", "region": "IL", "continent": "América del Norte", "aliases": ["phoenix"]}, {"name": "Willowbrook", "country": "Estados Unidos", "countryCode": "US", "region": "IL", "continent": "América del Norte", "aliases": ["willowbrook"]}, {"name": "Westfield", "country": "Estados Unidos", "countryCode": "US", "region": "IN", "continent": "América del Norte", "aliases": ["westfield"]}, {"name": "Natick", "country": "Estados Unidos", "countryCode": "US", "region": "MA", "continent": "América del Norte", "aliases": ["natick"]}, {"name": "Orland", "country": "Estados Unidos", "countryCode": "US", "region": "ME", "continent": "América del Norte", "aliases": ["orland"]}, {"name": "Poland", "country": "Estados Unidos", "countryCode": "US", "region": "ME", "continent": "América del Norte", "aliases": ["poland"]}, {"name": "Eagle", "country": "Estados Unidos", "countryCode": "US", "region": "NE", "continent": "América del Norte", "aliases": ["eagle"]}, {"name": "Brick", "country": "Estados Unidos", "countryCode": "US", "region": "NJ", "continent": "América del Norte", "aliases": ["brick"]}, {"name": "Freehold", "country": "Estados Unidos", "countryCode": "US", "region": "NJ", "continent": "América del Norte", "aliases": ["freehold"]}, {"name": "Greece", "country": "Estados Unidos", "countryCode": "US", "region": "NY", "continent": "América del Norte", "aliases": ["greece"]}, {"name": "Ontario", "country": "Estados Unidos", "countryCode": "US", "region": "NY", "continent": "América del Norte", "aliases": ["ontario"]}, {"name": "Roosevelt", "country": "Estados Unidos", "countryCode": "US", "region": "NY", "continent": "América del Norte", "aliases": ["roosevelt"]}, {"name": "Springs", "country": "Estados Unidos", "countryCode": "US", "region": "NY", "continent": "América del Norte", "aliases": ["springs"]}, {"name": "Emporium", "country": "Estados Unidos", "countryCode": "US", "region": "PA", "continent": "América del Norte", "aliases": ["emporium"]}, {"name": "Trafford", "country": "Estados Unidos", "countryCode": "US", "region": "PA", "continent": "América del Norte", "aliases": ["trafford"]}, {"name": "Tea", "country": "Estados Unidos", "countryCode": "US", "region": "SD", "continent": "América del Norte", "aliases": ["tea"]}, {"name": "Belgium", "country": "Estados Unidos", "countryCode": "US", "region": "WI", "continent": "América del Norte", "aliases": ["belgium"]}, {"name": "Castleton", "country": "Estados Unidos", "countryCode": "US", "region": "VT", "continent": "América del Norte", "aliases": ["castleton"]}, {"name": "Empire", "country": "Estados Unidos", "countryCode": "US", "region": "CA", "continent": "América del Norte", "aliases": ["empire"]}, {"name": "Topanga", "country": "Estados Unidos", "countryCode": "US", "region": "CA", "continent": "América del Norte", "aliases": ["topanga"]}, {"name": "Woodland", "country": "Estados Unidos", "countryCode": "US", "region": "CA", "continent": "América del Norte", "aliases": ["woodland"]}, {"name": "Raton", "country": "Estados Unidos", "countryCode": "US", "region": "NM", "continent": "América del Norte", "aliases": ["raton"]}, {"name": "Smith", "country": "Estados Unidos", "countryCode": "US", "region": "NV", "continent": "América del Norte", "aliases": ["smith"]}, {"name": "Beach", "country": "Estados Unidos", "countryCode": "US", "region": "ND", "continent": "América del Norte", "aliases": ["beach"]}, {"name": "Seattle", "country": "Estados Unidos", "countryCode": "US", "region": "WA", "continent": "América del Norte", "aliases": ["seattle"]}, {"name": "Mills", "country": "Estados Unidos", "countryCode": "US", "region": "WY", "continent": "América del Norte", "aliases": ["mills"]}]
+[
+  {
+    "name": "Copenhague",
+    "country": "Dinamarca",
+    "countryCode": "DK",
+    "region": "Hovedstaden",
+    "continent": "Europa",
+    "aliases": [
+      "copenhagen",
+      "kobenhavn",
+      "koebenhavn",
+      "copenhague",
+      "copenh",
+      "copenag",
+      "copenhag",
+      "coph",
+      "kbh",
+      "kbhn",
+      "kobenhavns",
+      "kjoebenhavn",
+      "tivoli",
+      "tivoli gardens",
+      "tivoli copenhagen",
+      "københavn",
+      "copenhagen denmark",
+      "kobenhavn denmark",
+      "tivoli denmark",
+      "tivoli haven"
+    ]
+  },
+  {
+    "name": "Billund",
+    "country": "Dinamarca",
+    "countryCode": "DK",
+    "region": "Syddanmark",
+    "continent": "Europa",
+    "aliases": [
+      "billund",
+      "bllund",
+      "bilund",
+      "bllnd",
+      "billund denmark",
+      "lego house",
+      "legoland billund",
+      "billund airport"
+    ]
+  },
+  {
+    "name": "Madrid",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "Comunidad de Madrid",
+    "continent": "Europa",
+    "aliases": [
+      "madrid",
+      "madrd",
+      "madrld"
+    ]
+  },
+  {
+    "name": "Barcelona",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "Cataluña",
+    "continent": "Europa",
+    "aliases": [
+      "barcelona",
+      "barna",
+      "barcel",
+      "brcl",
+      "barcelna",
+      "barcelon"
+    ]
+  },
+  {
+    "name": "Sevilla",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "Andalucía",
+    "continent": "Europa",
+    "aliases": [
+      "sevilla",
+      "seville",
+      "sevila",
+      "sevilha"
+    ]
+  },
+  {
+    "name": "Valencia",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "Comunidad Valenciana",
+    "continent": "Europa",
+    "aliases": [
+      "valencia",
+      "valncia",
+      "vlencia"
+    ]
+  },
+  {
+    "name": "Bilbao",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "País Vasco",
+    "continent": "Europa",
+    "aliases": [
+      "bilbao",
+      "bilba0",
+      "vilbao"
+    ]
+  },
+  {
+    "name": "Alcalá de Henares",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "Comunidad de Madrid",
+    "continent": "Europa",
+    "aliases": [
+      "alcala de henares",
+      "alcala henares",
+      "alcala d henares"
+    ]
+  },
+  {
+    "name": "Zaragoza",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "Aragón",
+    "continent": "Europa",
+    "aliases": [
+      "zaragoza",
+      "saragossa",
+      "zaragosa"
+    ]
+  },
+  {
+    "name": "Málaga",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "Andalucía",
+    "continent": "Europa",
+    "aliases": [
+      "malaga",
+      "malga"
+    ]
+  },
+  {
+    "name": "Londres",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "Inglaterra",
+    "continent": "Europa",
+    "aliases": [
+      "london",
+      "londres",
+      "londra",
+      "lndn",
+      "londn"
+    ]
+  },
+  {
+    "name": "Manchester",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "Inglaterra",
+    "continent": "Europa",
+    "aliases": [
+      "manchester",
+      "manchestr",
+      "mancehster"
+    ]
+  },
+  {
+    "name": "Edimburgo",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "Escocia",
+    "continent": "Europa",
+    "aliases": [
+      "edinburgh",
+      "edimburgo",
+      "edimburg",
+      "edinbur"
+    ]
+  },
+  {
+    "name": "París",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "Île-de-France",
+    "continent": "Europa",
+    "aliases": [
+      "paris",
+      "par1s",
+      "parjs",
+      "pars"
+    ]
+  },
+  {
+    "name": "Berlín",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "Berlín",
+    "continent": "Europa",
+    "aliases": [
+      "berlin",
+      "belin",
+      "berln"
+    ]
+  },
+  {
+    "name": "Múnich",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "Baviera",
+    "continent": "Europa",
+    "aliases": [
+      "munich",
+      "munchen",
+      "munique",
+      "mnchen",
+      "muenchen"
+    ]
+  },
+  {
+    "name": "Roma",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "Lacio",
+    "continent": "Europa",
+    "aliases": [
+      "rome",
+      "roma"
+    ]
+  },
+  {
+    "name": "Milán",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "Lombardía",
+    "continent": "Europa",
+    "aliases": [
+      "milan",
+      "milano",
+      "miln"
+    ]
+  },
+  {
+    "name": "Nueva York",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "Nueva York",
+    "continent": "América del Norte",
+    "aliases": [
+      "new york",
+      "newyork",
+      "nyc",
+      "nueva york"
+    ]
+  },
+  {
+    "name": "Los Ángeles",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "California",
+    "continent": "América del Norte",
+    "aliases": [
+      "los angeles",
+      "losangeles",
+      "la"
+    ]
+  },
+  {
+    "name": "Chicago",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "Illinois",
+    "continent": "América del Norte",
+    "aliases": [
+      "chicago",
+      "chicgo"
+    ]
+  },
+  {
+    "name": "Tokio",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "Tokio",
+    "continent": "Asia",
+    "aliases": [
+      "tokyo",
+      "tokio",
+      "tkyo"
+    ]
+  },
+  {
+    "name": "Osaka",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "Osaka",
+    "continent": "Asia",
+    "aliases": [
+      "osaka",
+      "osak"
+    ]
+  },
+  {
+    "name": "Ámsterdam",
+    "country": "Países Bajos",
+    "countryCode": "NL",
+    "region": "Holanda del Norte",
+    "continent": "Europa",
+    "aliases": [
+      "amsterdam",
+      "amstrdam",
+      "ams",
+      "amtserdam"
+    ]
+  },
+  {
+    "name": "Lisboa",
+    "country": "Portugal",
+    "countryCode": "PT",
+    "region": "Lisboa",
+    "continent": "Europa",
+    "aliases": [
+      "lisbon",
+      "lisboa",
+      "lisbonne",
+      "lisba"
+    ]
+  },
+  {
+    "name": "Estocolmo",
+    "country": "Suecia",
+    "countryCode": "SE",
+    "region": "Estocolmo",
+    "continent": "Europa",
+    "aliases": [
+      "stockholm",
+      "estocolmo",
+      "stockolm",
+      "sthlm"
+    ]
+  },
+  {
+    "name": "Dubái",
+    "country": "Emiratos Árabes Unidos",
+    "countryCode": "AE",
+    "region": "Dubái",
+    "continent": "Asia",
+    "aliases": [
+      "dubai",
+      "dub",
+      "dubais"
+    ]
+  },
+  {
+    "name": "Sídney",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "Nueva Gales del Sur",
+    "continent": "Oceanía",
+    "aliases": [
+      "sydney",
+      "sidne",
+      "sydne",
+      "syde"
+    ]
+  },
+  {
+    "name": "Singapur",
+    "country": "Singapur",
+    "countryCode": "SG",
+    "region": "Singapur",
+    "continent": "Asia",
+    "aliases": [
+      "singapore",
+      "singapur",
+      "sing"
+    ]
+  },
+  {
+    "name": "Pekín",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "Pekín",
+    "continent": "Asia",
+    "aliases": [
+      "beijing",
+      "pekin",
+      "bejing",
+      "pekn"
+    ]
+  },
+  {
+    "name": "Abu Dhabi",
+    "country": "Emiratos Árabes Unidos",
+    "countryCode": "AE",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "abu dhabi"
+    ]
+  },
+  {
+    "name": "Tītān",
+    "country": "Afganistán",
+    "countryCode": "AF",
+    "region": "09",
+    "continent": "Asia",
+    "aliases": [
+      "titan"
+    ]
+  },
+  {
+    "name": "Puri",
+    "country": "Angola",
+    "countryCode": "AO",
+    "region": "15",
+    "continent": "África",
+    "aliases": [
+      "puri"
+    ]
+  },
+  {
+    "name": "San José",
+    "country": "Argentina",
+    "countryCode": "AR",
+    "region": "14",
+    "continent": "América del Sur",
+    "aliases": [
+      "san jose"
+    ]
+  },
+  {
+    "name": "San Antonio",
+    "country": "Argentina",
+    "countryCode": "AR",
+    "region": "14",
+    "continent": "América del Sur",
+    "aliases": [
+      "san antonio"
+    ]
+  },
+  {
+    "name": "San Francisco",
+    "country": "Argentina",
+    "countryCode": "AR",
+    "region": "05",
+    "continent": "América del Sur",
+    "aliases": [
+      "san francisco",
+      "sf"
+    ]
+  },
+  {
+    "name": "Lincoln",
+    "country": "Argentina",
+    "countryCode": "AR",
+    "region": "01",
+    "continent": "América del Sur",
+    "aliases": [
+      "lincoln"
+    ]
+  },
+  {
+    "name": "Arauco",
+    "country": "Argentina",
+    "countryCode": "AR",
+    "region": "12",
+    "continent": "América del Sur",
+    "aliases": [
+      "arauco"
+    ]
+  },
+  {
+    "name": "América",
+    "country": "Argentina",
+    "countryCode": "AR",
+    "region": "01",
+    "continent": "América del Sur",
+    "aliases": [
+      "america"
+    ]
+  },
+  {
+    "name": "Vienna",
+    "country": "Austria",
+    "countryCode": "AT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "wien",
+      "vienna",
+      "viena"
+    ]
+  },
+  {
+    "name": "Oberhausen",
+    "country": "Austria",
+    "countryCode": "AT",
+    "region": "03",
+    "continent": "Europa",
+    "aliases": [
+      "oberhausen"
+    ]
+  },
+  {
+    "name": "Brand",
+    "country": "Austria",
+    "countryCode": "AT",
+    "region": "08",
+    "continent": "Europa",
+    "aliases": [
+      "brand"
+    ]
+  },
+  {
+    "name": "York",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "08",
+    "continent": "Oceanía",
+    "aliases": [
+      "york"
+    ]
+  },
+  {
+    "name": "Virginia",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "virginia"
+    ]
+  },
+  {
+    "name": "Perth",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "08",
+    "continent": "Oceanía",
+    "aliases": [
+      "perth"
+    ]
+  },
+  {
+    "name": "Moana",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "moana"
+    ]
+  },
+  {
+    "name": "Meadows",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "meadows"
+    ]
+  },
+  {
+    "name": "Marion",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "marion"
+    ]
+  },
+  {
+    "name": "Brighton",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "brighton"
+    ]
+  },
+  {
+    "name": "Bridgewater",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "bridgewater"
+    ]
+  },
+  {
+    "name": "Bellevue",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "08",
+    "continent": "Oceanía",
+    "aliases": [
+      "bellevue"
+    ]
+  },
+  {
+    "name": "Windsor",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "windsor"
+    ]
+  },
+  {
+    "name": "Wellington",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "wellington"
+    ]
+  },
+  {
+    "name": "Townsville",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "townsville"
+    ]
+  },
+  {
+    "name": "Sydney",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "sidne",
+      "sydne",
+      "sydney"
+    ]
+  },
+  {
+    "name": "Sunshine",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "07",
+    "continent": "Oceanía",
+    "aliases": [
+      "sunshine"
+    ]
+  },
+  {
+    "name": "Stratford",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "07",
+    "continent": "Oceanía",
+    "aliases": [
+      "stratford"
+    ]
+  },
+  {
+    "name": "Somerset",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "06",
+    "continent": "Oceanía",
+    "aliases": [
+      "somerset"
+    ]
+  },
+  {
+    "name": "Sheffield",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "06",
+    "continent": "Oceanía",
+    "aliases": [
+      "sheffield"
+    ]
+  },
+  {
+    "name": "Scottsdale",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "06",
+    "continent": "Oceanía",
+    "aliases": [
+      "scottsdale"
+    ]
+  },
+  {
+    "name": "Roseville",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "roseville"
+    ]
+  },
+  {
+    "name": "Richmond",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "06",
+    "continent": "Oceanía",
+    "aliases": [
+      "richmond"
+    ]
+  },
+  {
+    "name": "Penrith",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "penrith"
+    ]
+  },
+  {
+    "name": "Newmarket",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "newmarket"
+    ]
+  },
+  {
+    "name": "Newcastle",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "newcastle"
+    ]
+  },
+  {
+    "name": "Miranda",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "miranda"
+    ]
+  },
+  {
+    "name": "Milton",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "milton"
+    ]
+  },
+  {
+    "name": "Melbourne",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "07",
+    "continent": "Oceanía",
+    "aliases": [
+      "melbourne",
+      "melbourn"
+    ]
+  },
+  {
+    "name": "Liverpool",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "liverpool"
+    ]
+  },
+  {
+    "name": "Lauderdale",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "06",
+    "continent": "Oceanía",
+    "aliases": [
+      "lauderdale"
+    ]
+  },
+  {
+    "name": "Hobart",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "06",
+    "continent": "Oceanía",
+    "aliases": [
+      "hobart"
+    ]
+  },
+  {
+    "name": "Grafton",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "grafton"
+    ]
+  },
+  {
+    "name": "Edmonton",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "edmonton"
+    ]
+  },
+  {
+    "name": "Doncaster",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "07",
+    "continent": "Oceanía",
+    "aliases": [
+      "doncaster"
+    ]
+  },
+  {
+    "name": "Concord",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "concord"
+    ]
+  },
+  {
+    "name": "Clermont",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "clermont"
+    ]
+  },
+  {
+    "name": "Charlestown",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "charlestown"
+    ]
+  },
+  {
+    "name": "Cardiff",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "cardiff"
+    ]
+  },
+  {
+    "name": "Canberra",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "01",
+    "continent": "Oceanía",
+    "aliases": [
+      "canberra"
+    ]
+  },
+  {
+    "name": "Brisbane",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "brisbane"
+    ]
+  },
+  {
+    "name": "Brandon",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "brandon"
+    ]
+  },
+  {
+    "name": "Bondi",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "bondi"
+    ]
+  },
+  {
+    "name": "Paradise",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "paradise"
+    ]
+  },
+  {
+    "name": "Chermside",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "chermside"
+    ]
+  },
+  {
+    "name": "Parkside",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "parkside"
+    ]
+  },
+  {
+    "name": "Parramatta",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "parramatta"
+    ]
+  },
+  {
+    "name": "Macquarie",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "01",
+    "continent": "Oceanía",
+    "aliases": [
+      "macquarie"
+    ]
+  },
+  {
+    "name": "Miami",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "miami"
+    ]
+  },
+  {
+    "name": "Chadstone",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "07",
+    "continent": "Oceanía",
+    "aliases": [
+      "chadstone"
+    ]
+  },
+  {
+    "name": "Ross",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "03",
+    "continent": "Oceanía",
+    "aliases": [
+      "ross"
+    ]
+  },
+  {
+    "name": "Abbey",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "08",
+    "continent": "Oceanía",
+    "aliases": [
+      "abbey"
+    ]
+  },
+  {
+    "name": "Panorama",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "05",
+    "continent": "Oceanía",
+    "aliases": [
+      "panorama"
+    ]
+  },
+  {
+    "name": "Douglas",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "douglas"
+    ]
+  },
+  {
+    "name": "Dallas",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "07",
+    "continent": "Oceanía",
+    "aliases": [
+      "dallas"
+    ]
+  },
+  {
+    "name": "Riverside",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "06",
+    "continent": "Oceanía",
+    "aliases": [
+      "riverside"
+    ]
+  },
+  {
+    "name": "Booragoon",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "08",
+    "continent": "Oceanía",
+    "aliases": [
+      "booragoon"
+    ]
+  },
+  {
+    "name": "Arundel",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "arundel"
+    ]
+  },
+  {
+    "name": "Haven",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "07",
+    "continent": "Oceanía",
+    "aliases": [
+      "haven"
+    ]
+  },
+  {
+    "name": "Robina",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "robina"
+    ]
+  },
+  {
+    "name": "Hillsdale",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "hillsdale"
+    ]
+  },
+  {
+    "name": "Karrinyup",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "08",
+    "continent": "Oceanía",
+    "aliases": [
+      "karrinyup"
+    ]
+  },
+  {
+    "name": "Barton",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "01",
+    "continent": "Oceanía",
+    "aliases": [
+      "barton"
+    ]
+  },
+  {
+    "name": "Bluewater",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "bluewater"
+    ]
+  },
+  {
+    "name": "Chandler",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "chandler"
+    ]
+  },
+  {
+    "name": "Springfield",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "04",
+    "continent": "Oceanía",
+    "aliases": [
+      "springfield"
+    ]
+  },
+  {
+    "name": "Glendale",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "glendale"
+    ]
+  },
+  {
+    "name": "Toronto",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "02",
+    "continent": "Oceanía",
+    "aliases": [
+      "toronto"
+    ]
+  },
+  {
+    "name": "Washington",
+    "country": "AW",
+    "countryCode": "AW",
+    "region": "00",
+    "continent": "Mundial",
+    "aliases": [
+      "washington"
+    ]
+  },
+  {
+    "name": "Sarajevo",
+    "country": "Bosnia y Herzegovina",
+    "countryCode": "BA",
+    "region": "01",
+    "continent": "Europa",
+    "aliases": [
+      "sarajevo"
+    ]
+  },
+  {
+    "name": "Wijnegem",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "VLG",
+    "continent": "Europa",
+    "aliases": [
+      "wijnegem"
+    ]
+  },
+  {
+    "name": "Mal",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "VLG",
+    "continent": "Europa",
+    "aliases": [
+      "mal"
+    ]
+  },
+  {
+    "name": "Lille",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "VLG",
+    "continent": "Europa",
+    "aliases": [
+      "lille"
+    ]
+  },
+  {
+    "name": "Lens",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "WAL",
+    "continent": "Europa",
+    "aliases": [
+      "lens"
+    ]
+  },
+  {
+    "name": "Havré",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "WAL",
+    "continent": "Europa",
+    "aliases": [
+      "havre"
+    ]
+  },
+  {
+    "name": "Essen",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "VLG",
+    "continent": "Europa",
+    "aliases": [
+      "essen"
+    ]
+  },
+  {
+    "name": "Brussels",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "BRU",
+    "continent": "Europa",
+    "aliases": [
+      "bruxelles",
+      "brussels",
+      "bruselas"
+    ]
+  },
+  {
+    "name": "Belgrade",
+    "country": "Bélgica",
+    "countryCode": "BE",
+    "region": "WAL",
+    "continent": "Europa",
+    "aliases": [
+      "belgrade"
+    ]
+  },
+  {
+    "name": "Sofia",
+    "country": "Bulgaria",
+    "countryCode": "BG",
+    "region": "42",
+    "continent": "Europa",
+    "aliases": [
+      "sofia"
+    ]
+  },
+  {
+    "name": "Recife",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "30",
+    "continent": "América del Sur",
+    "aliases": [
+      "recife"
+    ]
+  },
+  {
+    "name": "Porto",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "20",
+    "continent": "América del Sur",
+    "aliases": [
+      "porto",
+      "oporto"
+    ]
+  },
+  {
+    "name": "Jardim",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "06",
+    "continent": "América del Sur",
+    "aliases": [
+      "jardim"
+    ]
+  },
+  {
+    "name": "Fortaleza",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "06",
+    "continent": "América del Sur",
+    "aliases": [
+      "fortaleza"
+    ]
+  },
+  {
+    "name": "Belém",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "02",
+    "continent": "América del Sur",
+    "aliases": [
+      "belem"
+    ]
+  },
+  {
+    "name": "Salvador",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "05",
+    "continent": "América del Sur",
+    "aliases": [
+      "salvador"
+    ]
+  },
+  {
+    "name": "Panamá",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "29",
+    "continent": "América del Sur",
+    "aliases": [
+      "panama"
+    ]
+  },
+  {
+    "name": "Nantes",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "27",
+    "continent": "América del Sur",
+    "aliases": [
+      "nantes"
+    ]
+  },
+  {
+    "name": "Moema",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "15",
+    "continent": "América del Sur",
+    "aliases": [
+      "moema"
+    ]
+  },
+  {
+    "name": "Iguatemi",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "11",
+    "continent": "América del Sur",
+    "aliases": [
+      "iguatemi"
+    ]
+  },
+  {
+    "name": "Goiânia",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "29",
+    "continent": "América del Sur",
+    "aliases": [
+      "goiania"
+    ]
+  },
+  {
+    "name": "Flórida",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "18",
+    "continent": "América del Sur",
+    "aliases": [
+      "florida"
+    ]
+  },
+  {
+    "name": "Cuiabá",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "14",
+    "continent": "América del Sur",
+    "aliases": [
+      "cuiaba"
+    ]
+  },
+  {
+    "name": "Colorado",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "23",
+    "continent": "América del Sur",
+    "aliases": [
+      "colorado"
+    ]
+  },
+  {
+    "name": "Colômbia",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "27",
+    "continent": "América del Sur",
+    "aliases": [
+      "colombia"
+    ]
+  },
+  {
+    "name": "Central",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "05",
+    "continent": "América del Sur",
+    "aliases": [
+      "central"
+    ]
+  },
+  {
+    "name": "Campinas",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "27",
+    "continent": "América del Sur",
+    "aliases": [
+      "campinas"
+    ]
+  },
+  {
+    "name": "Califórnia",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "18",
+    "continent": "América del Sur",
+    "aliases": [
+      "california"
+    ]
+  },
+  {
+    "name": "Barra",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "05",
+    "continent": "América del Sur",
+    "aliases": [
+      "barra"
+    ]
+  },
+  {
+    "name": "Alegre",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "08",
+    "continent": "América del Sur",
+    "aliases": [
+      "alegre"
+    ]
+  },
+  {
+    "name": "Leblon",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "21",
+    "continent": "América del Sur",
+    "aliases": [
+      "leblon"
+    ]
+  },
+  {
+    "name": "Estação",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "23",
+    "continent": "América del Sur",
+    "aliases": [
+      "estacao"
+    ]
+  },
+  {
+    "name": "Morumbi",
+    "country": "Brasil",
+    "countryCode": "BR",
+    "region": "27",
+    "continent": "América del Sur",
+    "aliases": [
+      "morumbi"
+    ]
+  },
+  {
+    "name": "Alderwood",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "alderwood"
+    ]
+  },
+  {
+    "name": "Belfast",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "09",
+    "continent": "América del Norte",
+    "aliases": [
+      "belfast"
+    ]
+  },
+  {
+    "name": "Bridgeport",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "bridgeport"
+    ]
+  },
+  {
+    "name": "Burlington",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "burlington"
+    ]
+  },
+  {
+    "name": "Calgary",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "calgary"
+    ]
+  },
+  {
+    "name": "Crabtree",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "10",
+    "continent": "América del Norte",
+    "aliases": [
+      "crabtree"
+    ]
+  },
+  {
+    "name": "Eastview",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "11",
+    "continent": "América del Norte",
+    "aliases": [
+      "eastview"
+    ]
+  },
+  {
+    "name": "Fairview",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "07",
+    "continent": "América del Norte",
+    "aliases": [
+      "fairview"
+    ]
+  },
+  {
+    "name": "Golden",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "02",
+    "continent": "América del Norte",
+    "aliases": [
+      "golden"
+    ]
+  },
+  {
+    "name": "Houston",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "02",
+    "continent": "América del Norte",
+    "aliases": [
+      "houston"
+    ]
+  },
+  {
+    "name": "King",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "king"
+    ]
+  },
+  {
+    "name": "Landmark",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "03",
+    "continent": "América del Norte",
+    "aliases": [
+      "landmark"
+    ]
+  },
+  {
+    "name": "Langham",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "11",
+    "continent": "América del Norte",
+    "aliases": [
+      "langham"
+    ]
+  },
+  {
+    "name": "Laval",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "10",
+    "continent": "América del Norte",
+    "aliases": [
+      "laval"
+    ]
+  },
+  {
+    "name": "London",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "lndn",
+      "londres",
+      "londra",
+      "london"
+    ]
+  },
+  {
+    "name": "Mission",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "mission"
+    ]
+  },
+  {
+    "name": "Montgomery",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "montgomery"
+    ]
+  },
+  {
+    "name": "Montréal",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "10",
+    "continent": "América del Norte",
+    "aliases": [
+      "montreal"
+    ]
+  },
+  {
+    "name": "Ottawa",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "ottawa"
+    ]
+  },
+  {
+    "name": "Oxford",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "07",
+    "continent": "América del Norte",
+    "aliases": [
+      "oxford"
+    ]
+  },
+  {
+    "name": "Vancouver",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "02",
+    "continent": "América del Norte",
+    "aliases": [
+      "vancouver"
+    ]
+  },
+  {
+    "name": "Westgate",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "westgate"
+    ]
+  },
+  {
+    "name": "Winnipeg",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "03",
+    "continent": "América del Norte",
+    "aliases": [
+      "winnipeg"
+    ]
+  },
+  {
+    "name": "Woodlands",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "woodlands"
+    ]
+  },
+  {
+    "name": "Downtown",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "downtown"
+    ]
+  },
+  {
+    "name": "Walden",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "walden"
+    ]
+  },
+  {
+    "name": "Legacy",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "01",
+    "continent": "América del Norte",
+    "aliases": [
+      "legacy"
+    ]
+  },
+  {
+    "name": "University",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "university"
+    ]
+  },
+  {
+    "name": "Stoneridge",
+    "country": "Canadá",
+    "countryCode": "CA",
+    "region": "07",
+    "continent": "América del Norte",
+    "aliases": [
+      "stoneridge"
+    ]
+  },
+  {
+    "name": "Zürich",
+    "country": "Suiza",
+    "countryCode": "CH",
+    "region": "ZH",
+    "continent": "Europa",
+    "aliases": [
+      "zurich"
+    ]
+  },
+  {
+    "name": "Geneva",
+    "country": "Suiza",
+    "countryCode": "CH",
+    "region": "GE",
+    "continent": "Europa",
+    "aliases": [
+      "geneva"
+    ]
+  },
+  {
+    "name": "Sogo",
+    "country": "CI",
+    "countryCode": "CI",
+    "region": "87",
+    "continent": "Mundial",
+    "aliases": [
+      "sogo"
+    ]
+  },
+  {
+    "name": "Santa",
+    "country": "CI",
+    "countryCode": "CI",
+    "region": "97",
+    "continent": "Mundial",
+    "aliases": [
+      "santa"
+    ]
+  },
+  {
+    "name": "San",
+    "country": "CI",
+    "countryCode": "CI",
+    "region": "87",
+    "continent": "Mundial",
+    "aliases": [
+      "san"
+    ]
+  },
+  {
+    "name": "Métro",
+    "country": "CI",
+    "countryCode": "CI",
+    "region": "97",
+    "continent": "Mundial",
+    "aliases": [
+      "metro"
+    ]
+  },
+  {
+    "name": "Koréa",
+    "country": "CI",
+    "countryCode": "CI",
+    "region": "96",
+    "continent": "Mundial",
+    "aliases": [
+      "korea"
+    ]
+  },
+  {
+    "name": "Kong",
+    "country": "CI",
+    "countryCode": "CI",
+    "region": "87",
+    "continent": "Mundial",
+    "aliases": [
+      "kong"
+    ]
+  },
+  {
+    "name": "Grand",
+    "country": "CI",
+    "countryCode": "CI",
+    "region": "78",
+    "continent": "Mundial",
+    "aliases": [
+      "grand"
+    ]
+  },
+  {
+    "name": "Calama",
+    "country": "Chile",
+    "countryCode": "CL",
+    "region": "03",
+    "continent": "América del Sur",
+    "aliases": [
+      "calama"
+    ]
+  },
+  {
+    "name": "Bali",
+    "country": "CM",
+    "countryCode": "CM",
+    "region": "07",
+    "continent": "Mundial",
+    "aliases": [
+      "bali"
+    ]
+  },
+  {
+    "name": "Baohe",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "29",
+    "continent": "Asia",
+    "aliases": [
+      "baohe"
+    ]
+  },
+  {
+    "name": "Bay",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "13",
+    "continent": "Asia",
+    "aliases": [
+      "bay"
+    ]
+  },
+  {
+    "name": "Zhongxing",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "zhongxing"
+    ]
+  },
+  {
+    "name": "Kunshan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "kunshan"
+    ]
+  },
+  {
+    "name": "Yichang",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "12",
+    "continent": "Asia",
+    "aliases": [
+      "yichang"
+    ]
+  },
+  {
+    "name": "Yantai",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "25",
+    "continent": "Asia",
+    "aliases": [
+      "yantai"
+    ]
+  },
+  {
+    "name": "Yangzhou",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "yangzhou"
+    ]
+  },
+  {
+    "name": "Xixi",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "11",
+    "continent": "Asia",
+    "aliases": [
+      "xixi"
+    ]
+  },
+  {
+    "name": "Xinyi",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "xinyi"
+    ]
+  },
+  {
+    "name": "Xi’an",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "26",
+    "continent": "Asia",
+    "aliases": [
+      "xian"
+    ]
+  },
+  {
+    "name": "Xiamen",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "07",
+    "continent": "Asia",
+    "aliases": [
+      "xiamen"
+    ]
+  },
+  {
+    "name": "Wuxi",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "wuxi"
+    ]
+  },
+  {
+    "name": "Wuhu",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "wuhu"
+    ]
+  },
+  {
+    "name": "Wuhan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "12",
+    "continent": "Asia",
+    "aliases": [
+      "wuhan"
+    ]
+  },
+  {
+    "name": "Wenzhou",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "02",
+    "continent": "Asia",
+    "aliases": [
+      "wenzhou"
+    ]
+  },
+  {
+    "name": "Tangshan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "10",
+    "continent": "Asia",
+    "aliases": [
+      "tangshan"
+    ]
+  },
+  {
+    "name": "Suzhou",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "suzhou"
+    ]
+  },
+  {
+    "name": "Suning",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "10",
+    "continent": "Asia",
+    "aliases": [
+      "suning"
+    ]
+  },
+  {
+    "name": "Chaoyang",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "24",
+    "continent": "Asia",
+    "aliases": [
+      "chaoyang"
+    ]
+  },
+  {
+    "name": "Shijiazhuang",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "10",
+    "continent": "Asia",
+    "aliases": [
+      "shijiazhuang"
+    ]
+  },
+  {
+    "name": "Shenzhen",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "shenzhen"
+    ]
+  },
+  {
+    "name": "Shanghai",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "23",
+    "continent": "Asia",
+    "aliases": [
+      "shanghai",
+      "sanghai"
+    ]
+  },
+  {
+    "name": "Changsha",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "changsha"
+    ]
+  },
+  {
+    "name": "Renhe",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "32",
+    "continent": "Asia",
+    "aliases": [
+      "renhe"
+    ]
+  },
+  {
+    "name": "Qibao",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "23",
+    "continent": "Asia",
+    "aliases": [
+      "qibao"
+    ]
+  },
+  {
+    "name": "Ningbo",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "02",
+    "continent": "Asia",
+    "aliases": [
+      "ningbo"
+    ]
+  },
+  {
+    "name": "Nantong",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "nantong"
+    ]
+  },
+  {
+    "name": "Nanqiao",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "23",
+    "continent": "Asia",
+    "aliases": [
+      "nanqiao"
+    ]
+  },
+  {
+    "name": "Nanning",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "16",
+    "continent": "Asia",
+    "aliases": [
+      "nanning"
+    ]
+  },
+  {
+    "name": "Nanjing",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "nanjing"
+    ]
+  },
+  {
+    "name": "Minhang",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "23",
+    "continent": "Asia",
+    "aliases": [
+      "minhang"
+    ]
+  },
+  {
+    "name": "Luzhou",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "32",
+    "continent": "Asia",
+    "aliases": [
+      "luzhou"
+    ]
+  },
+  {
+    "name": "Daxing",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "29",
+    "continent": "Asia",
+    "aliases": [
+      "daxing"
+    ]
+  },
+  {
+    "name": "Lanzhou",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "15",
+    "continent": "Asia",
+    "aliases": [
+      "lanzhou"
+    ]
+  },
+  {
+    "name": "Kunming",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "29",
+    "continent": "Asia",
+    "aliases": [
+      "kunming"
+    ]
+  },
+  {
+    "name": "Fucheng",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "15",
+    "continent": "Asia",
+    "aliases": [
+      "fucheng"
+    ]
+  },
+  {
+    "name": "Jinan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "25",
+    "continent": "Asia",
+    "aliases": [
+      "jinan"
+    ]
+  },
+  {
+    "name": "Hefei",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "hefei"
+    ]
+  },
+  {
+    "name": "Guilin",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "16",
+    "continent": "Asia",
+    "aliases": [
+      "guilin"
+    ]
+  },
+  {
+    "name": "Guangzhou",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "guangzhou"
+    ]
+  },
+  {
+    "name": "Foshan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "foshan"
+    ]
+  },
+  {
+    "name": "Fangshan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "22",
+    "continent": "Asia",
+    "aliases": [
+      "fangshan"
+    ]
+  },
+  {
+    "name": "Chongqing",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "33",
+    "continent": "Asia",
+    "aliases": [
+      "chongqing"
+    ]
+  },
+  {
+    "name": "Chengdu",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "32",
+    "continent": "Asia",
+    "aliases": [
+      "chengdu"
+    ]
+  },
+  {
+    "name": "Beijing",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "22",
+    "continent": "Asia",
+    "aliases": [
+      "beijing",
+      "pekin"
+    ]
+  },
+  {
+    "name": "Banqiao",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "33",
+    "continent": "Asia",
+    "aliases": [
+      "banqiao"
+    ]
+  },
+  {
+    "name": "Ala",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "15",
+    "continent": "Asia",
+    "aliases": [
+      "ala"
+    ]
+  },
+  {
+    "name": "Shenyang",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "19",
+    "continent": "Asia",
+    "aliases": [
+      "shenyang"
+    ]
+  },
+  {
+    "name": "Anshan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "19",
+    "continent": "Asia",
+    "aliases": [
+      "anshan"
+    ]
+  },
+  {
+    "name": "Xiasha",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "xiasha"
+    ]
+  },
+  {
+    "name": "Binhu",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "binhu"
+    ]
+  },
+  {
+    "name": "Nanmen",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "33",
+    "continent": "Asia",
+    "aliases": [
+      "nanmen"
+    ]
+  },
+  {
+    "name": "Zhongyuan",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "09",
+    "continent": "Asia",
+    "aliases": [
+      "zhongyuan"
+    ]
+  },
+  {
+    "name": "Yintai",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "26",
+    "continent": "Asia",
+    "aliases": [
+      "yintai"
+    ]
+  },
+  {
+    "name": "Mori",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "13",
+    "continent": "Asia",
+    "aliases": [
+      "mori"
+    ]
+  },
+  {
+    "name": "Hongqi",
+    "country": "China",
+    "countryCode": "CN",
+    "region": "09",
+    "continent": "Asia",
+    "aliases": [
+      "hongqi"
+    ]
+  },
+  {
+    "name": "San Diego",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "10",
+    "continent": "América del Sur",
+    "aliases": [
+      "san diego"
+    ]
+  },
+  {
+    "name": "Palermo",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "16",
+    "continent": "América del Sur",
+    "aliases": [
+      "palermo"
+    ]
+  },
+  {
+    "name": "Jordán",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "26",
+    "continent": "América del Sur",
+    "aliases": [
+      "jordan"
+    ]
+  },
+  {
+    "name": "Jardín",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "02",
+    "continent": "América del Sur",
+    "aliases": [
+      "jardin"
+    ]
+  },
+  {
+    "name": "Granada",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "02",
+    "continent": "América del Sur",
+    "aliases": [
+      "granada"
+    ]
+  },
+  {
+    "name": "Génova",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "23",
+    "continent": "América del Sur",
+    "aliases": [
+      "genova"
+    ]
+  },
+  {
+    "name": "Envigado",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "02",
+    "continent": "América del Sur",
+    "aliases": [
+      "envigado"
+    ]
+  },
+  {
+    "name": "Bogotá",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "34",
+    "continent": "América del Sur",
+    "aliases": [
+      "bogota"
+    ]
+  },
+  {
+    "name": "Barranquilla",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "04",
+    "continent": "América del Sur",
+    "aliases": [
+      "barranquilla"
+    ]
+  },
+  {
+    "name": "Angelópolis",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "02",
+    "continent": "América del Sur",
+    "aliases": [
+      "angelopolis"
+    ]
+  },
+  {
+    "name": "Monterrey",
+    "country": "Colombia",
+    "countryCode": "CO",
+    "region": "32",
+    "continent": "América del Sur",
+    "aliases": [
+      "monterrey"
+    ]
+  },
+  {
+    "name": "Escazú",
+    "country": "Costa Rica",
+    "countryCode": "CR",
+    "region": "08",
+    "continent": "América del Norte",
+    "aliases": [
+      "escazu"
+    ]
+  },
+  {
+    "name": "Ángeles",
+    "country": "Costa Rica",
+    "countryCode": "CR",
+    "region": "04",
+    "continent": "América del Norte",
+    "aliases": [
+      "angeles"
+    ]
+  },
+  {
+    "name": "Australia",
+    "country": "Cuba",
+    "countryCode": "CU",
+    "region": "03",
+    "continent": "América del Norte",
+    "aliases": [
+      "australia"
+    ]
+  },
+  {
+    "name": "Prague",
+    "country": "República Checa",
+    "countryCode": "CZ",
+    "region": "52",
+    "continent": "Europa",
+    "aliases": [
+      "praha",
+      "prague",
+      "praga"
+    ]
+  },
+  {
+    "name": "Chodov",
+    "country": "República Checa",
+    "countryCode": "CZ",
+    "region": "52",
+    "continent": "Europa",
+    "aliases": [
+      "chodov"
+    ]
+  },
+  {
+    "name": "Westend",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "16",
+    "continent": "Europa",
+    "aliases": [
+      "westend"
+    ]
+  },
+  {
+    "name": "Valley",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "02",
+    "continent": "Europa",
+    "aliases": [
+      "valley"
+    ]
+  },
+  {
+    "name": "Stuttgart",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "01",
+    "continent": "Europa",
+    "aliases": [
+      "stuttgart"
+    ]
+  },
+  {
+    "name": "Saarbrücken",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "saarbrucken"
+    ]
+  },
+  {
+    "name": "Pasing",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "02",
+    "continent": "Europa",
+    "aliases": [
+      "pasing"
+    ]
+  },
+  {
+    "name": "Osloß",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "06",
+    "continent": "Europa",
+    "aliases": [
+      "oslo"
+    ]
+  },
+  {
+    "name": "Leipzig",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "13",
+    "continent": "Europa",
+    "aliases": [
+      "leipzig"
+    ]
+  },
+  {
+    "name": "Köln",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "07",
+    "continent": "Europa",
+    "aliases": [
+      "koln"
+    ]
+  },
+  {
+    "name": "Hannover",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "06",
+    "continent": "Europa",
+    "aliases": [
+      "hannover"
+    ]
+  },
+  {
+    "name": "Hamburg",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "04",
+    "continent": "Europa",
+    "aliases": [
+      "hamburg"
+    ]
+  },
+  {
+    "name": "Düsseldorf",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "07",
+    "continent": "Europa",
+    "aliases": [
+      "dusseldorf"
+    ]
+  },
+  {
+    "name": "Dresden",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "13",
+    "continent": "Europa",
+    "aliases": [
+      "dresden"
+    ]
+  },
+  {
+    "name": "Bonn",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "07",
+    "continent": "Europa",
+    "aliases": [
+      "bonn"
+    ]
+  },
+  {
+    "name": "Wörth",
+    "country": "Alemania",
+    "countryCode": "DE",
+    "region": "02",
+    "continent": "Europa",
+    "aliases": [
+      "worth"
+    ]
+  },
+  {
+    "name": "Nexø",
+    "country": "Dinamarca",
+    "countryCode": "DK",
+    "region": "17",
+    "continent": "Europa",
+    "aliases": [
+      "nex"
+    ]
+  },
+  {
+    "name": "Copenhagen",
+    "country": "Dinamarca",
+    "countryCode": "DK",
+    "region": "17",
+    "continent": "Europa",
+    "aliases": [
+      "koebenhavn",
+      "copenh",
+      "kobenhavn",
+      "copenhague",
+      "copenhagen",
+      "kbh"
+    ]
+  },
+  {
+    "name": "Chile",
+    "country": "Ecuador",
+    "countryCode": "EC",
+    "region": "12",
+    "continent": "América del Sur",
+    "aliases": [
+      "chile"
+    ]
+  },
+  {
+    "name": "Santafé",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "51",
+    "continent": "Europa",
+    "aliases": [
+      "santafe"
+    ]
+  },
+  {
+    "name": "Mérida",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "57",
+    "continent": "Europa",
+    "aliases": [
+      "merida"
+    ]
+  },
+  {
+    "name": "Cañada",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "60",
+    "continent": "Europa",
+    "aliases": [
+      "canada"
+    ]
+  },
+  {
+    "name": "Villalobos",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "55",
+    "continent": "Europa",
+    "aliases": [
+      "villalobos"
+    ]
+  },
+  {
+    "name": "Súria",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "56",
+    "continent": "Europa",
+    "aliases": [
+      "suria"
+    ]
+  },
+  {
+    "name": "Orio",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "59",
+    "continent": "Europa",
+    "aliases": [
+      "orio"
+    ]
+  },
+  {
+    "name": "Les",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "56",
+    "continent": "Europa",
+    "aliases": [
+      "les"
+    ]
+  },
+  {
+    "name": "Laguardia",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "59",
+    "continent": "Europa",
+    "aliases": [
+      "laguardia"
+    ]
+  },
+  {
+    "name": "Guadalajara",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "54",
+    "continent": "Europa",
+    "aliases": [
+      "guadalajara"
+    ]
+  },
+  {
+    "name": "Centro",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "53",
+    "continent": "Europa",
+    "aliases": [
+      "centro"
+    ]
+  },
+  {
+    "name": "Porta",
+    "country": "España",
+    "countryCode": "ES",
+    "region": "56",
+    "continent": "Europa",
+    "aliases": [
+      "porta"
+    ]
+  },
+  {
+    "name": "Mēga",
+    "country": "ET",
+    "countryCode": "ET",
+    "region": "51",
+    "continent": "Mundial",
+    "aliases": [
+      "mega"
+    ]
+  },
+  {
+    "name": "Helsinki",
+    "country": "Finlandia",
+    "countryCode": "FI",
+    "region": "01",
+    "continent": "Europa",
+    "aliases": [
+      "helsingfors",
+      "helsinki"
+    ]
+  },
+  {
+    "name": "Toulouse",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "76",
+    "continent": "Europa",
+    "aliases": [
+      "toulouse"
+    ]
+  },
+  {
+    "name": "Toulon",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "93",
+    "continent": "Europa",
+    "aliases": [
+      "toulon"
+    ]
+  },
+  {
+    "name": "Strasbourg",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "44",
+    "continent": "Europa",
+    "aliases": [
+      "strasbourg"
+    ]
+  },
+  {
+    "name": "Rennes",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "53",
+    "continent": "Europa",
+    "aliases": [
+      "rennes"
+    ]
+  },
+  {
+    "name": "Nice",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "93",
+    "continent": "Europa",
+    "aliases": [
+      "nice"
+    ]
+  },
+  {
+    "name": "Nancy",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "44",
+    "continent": "Europa",
+    "aliases": [
+      "nancy"
+    ]
+  },
+  {
+    "name": "Metz",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "44",
+    "continent": "Europa",
+    "aliases": [
+      "metz"
+    ]
+  },
+  {
+    "name": "Marseille",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "93",
+    "continent": "Europa",
+    "aliases": [
+      "marseille"
+    ]
+  },
+  {
+    "name": "Lyon",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "84",
+    "continent": "Europa",
+    "aliases": [
+      "lyon"
+    ]
+  },
+  {
+    "name": "Grenoble",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "84",
+    "continent": "Europa",
+    "aliases": [
+      "grenoble"
+    ]
+  },
+  {
+    "name": "Dijon",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "27",
+    "continent": "Europa",
+    "aliases": [
+      "dijon"
+    ]
+  },
+  {
+    "name": "Créteil",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "11",
+    "continent": "Europa",
+    "aliases": [
+      "creteil"
+    ]
+  },
+  {
+    "name": "Coëx",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "52",
+    "continent": "Europa",
+    "aliases": [
+      "coex"
+    ]
+  },
+  {
+    "name": "Cergy",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "11",
+    "continent": "Europa",
+    "aliases": [
+      "cergy"
+    ]
+  },
+  {
+    "name": "Bordeaux",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "75",
+    "continent": "Europa",
+    "aliases": [
+      "bordeaux"
+    ]
+  },
+  {
+    "name": "Biarritz",
+    "country": "Francia",
+    "countryCode": "FR",
+    "region": "75",
+    "continent": "Europa",
+    "aliases": [
+      "biarritz"
+    ]
+  },
+  {
+    "name": "Street",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "street"
+    ]
+  },
+  {
+    "name": "Southgate",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "southgate"
+    ]
+  },
+  {
+    "name": "Southampton",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "southampton"
+    ]
+  },
+  {
+    "name": "Luton",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "luton"
+    ]
+  },
+  {
+    "name": "Leicester",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "leicester"
+    ]
+  },
+  {
+    "name": "Leeds",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "leeds"
+    ]
+  },
+  {
+    "name": "Hill",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "hill"
+    ]
+  },
+  {
+    "name": "Glasgow",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "SCT",
+    "continent": "Europa",
+    "aliases": [
+      "glasgow"
+    ]
+  },
+  {
+    "name": "Edinburgh",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "SCT",
+    "continent": "Europa",
+    "aliases": [
+      "edinbur",
+      "edimburgo",
+      "edinburgh"
+    ]
+  },
+  {
+    "name": "Easton",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "easton"
+    ]
+  },
+  {
+    "name": "Danbury",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "danbury"
+    ]
+  },
+  {
+    "name": "Crossgates",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "SCT",
+    "continent": "Europa",
+    "aliases": [
+      "crossgates"
+    ]
+  },
+  {
+    "name": "Broadway",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "broadway"
+    ]
+  },
+  {
+    "name": "Bristol",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "bristol"
+    ]
+  },
+  {
+    "name": "Bridge",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "bridge"
+    ]
+  },
+  {
+    "name": "Boston",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "boston"
+    ]
+  },
+  {
+    "name": "Birmingham",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "birmingham"
+    ]
+  },
+  {
+    "name": "Beer",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "beer"
+    ]
+  },
+  {
+    "name": "Rock",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "rock"
+    ]
+  },
+  {
+    "name": "Battersea",
+    "country": "Reino Unido",
+    "countryCode": "GB",
+    "region": "ENG",
+    "continent": "Europa",
+    "aliases": [
+      "battersea"
+    ]
+  },
+  {
+    "name": "Java",
+    "country": "Georgia",
+    "countryCode": "GE",
+    "region": "73",
+    "continent": "Asia",
+    "aliases": [
+      "java"
+    ]
+  },
+  {
+    "name": "Athens",
+    "country": "Grecia",
+    "countryCode": "GR",
+    "region": "ESYE31",
+    "continent": "Europa",
+    "aliases": [
+      "athens"
+    ]
+  },
+  {
+    "name": "Thessaloníki",
+    "country": "Grecia",
+    "countryCode": "GR",
+    "region": "ESYE12",
+    "continent": "Europa",
+    "aliases": [
+      "thessaloniki"
+    ]
+  },
+  {
+    "name": "Marína",
+    "country": "Grecia",
+    "countryCode": "GR",
+    "region": "ESYE12",
+    "continent": "Europa",
+    "aliases": [
+      "marina"
+    ]
+  },
+  {
+    "name": "Hong Kong",
+    "country": "Hong Kong",
+    "countryCode": "HK",
+    "region": "General",
+    "continent": "Asia",
+    "aliases": [
+      "hong kong",
+      "hk",
+      "hongkong"
+    ]
+  },
+  {
+    "name": "Veracruz",
+    "country": "HN",
+    "countryCode": "HN",
+    "region": "05",
+    "continent": "Mundial",
+    "aliases": [
+      "veracruz"
+    ]
+  },
+  {
+    "name": "Las Vegas",
+    "country": "HN",
+    "countryCode": "HN",
+    "region": "18",
+    "continent": "Mundial",
+    "aliases": [
+      "las vegas"
+    ]
+  },
+  {
+    "name": "Arizona",
+    "country": "HN",
+    "countryCode": "HN",
+    "region": "01",
+    "continent": "Mundial",
+    "aliases": [
+      "arizona"
+    ]
+  },
+  {
+    "name": "Zagreb",
+    "country": "Croacia",
+    "countryCode": "HR",
+    "region": "21",
+    "continent": "Europa",
+    "aliases": [
+      "zagreb"
+    ]
+  },
+  {
+    "name": "Súr",
+    "country": "Hungría",
+    "countryCode": "HU",
+    "region": "12",
+    "continent": "Europa",
+    "aliases": [
+      "sur"
+    ]
+  },
+  {
+    "name": "Budapest",
+    "country": "Hungría",
+    "countryCode": "HU",
+    "region": "05",
+    "continent": "Europa",
+    "aliases": [
+      "budapest"
+    ]
+  },
+  {
+    "name": "Tunjungan",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "07",
+    "continent": "Asia",
+    "aliases": [
+      "tunjungan"
+    ]
+  },
+  {
+    "name": "Surabaya",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "08",
+    "continent": "Asia",
+    "aliases": [
+      "surabaya"
+    ]
+  },
+  {
+    "name": "Serpong",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "serpong"
+    ]
+  },
+  {
+    "name": "Semarang",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "07",
+    "continent": "Asia",
+    "aliases": [
+      "semarang"
+    ]
+  },
+  {
+    "name": "Kelapa",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "35",
+    "continent": "Asia",
+    "aliases": [
+      "kelapa"
+    ]
+  },
+  {
+    "name": "Bekasi",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "bekasi"
+    ]
+  },
+  {
+    "name": "Sanur",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "02",
+    "continent": "Asia",
+    "aliases": [
+      "sanur"
+    ]
+  },
+  {
+    "name": "Pakuwon",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "pakuwon"
+    ]
+  },
+  {
+    "name": "Senayan",
+    "country": "Indonesia",
+    "countryCode": "ID",
+    "region": "17",
+    "continent": "Asia",
+    "aliases": [
+      "senayan"
+    ]
+  },
+  {
+    "name": "Tower",
+    "country": "Irlanda",
+    "countryCode": "IE",
+    "region": "M",
+    "continent": "Europa",
+    "aliases": [
+      "tower"
+    ]
+  },
+  {
+    "name": "Dublin",
+    "country": "Irlanda",
+    "countryCode": "IE",
+    "region": "L",
+    "continent": "Europa",
+    "aliases": [
+      "baile atha cliath",
+      "dublin"
+    ]
+  },
+  {
+    "name": "Blanchardstown",
+    "country": "Irlanda",
+    "countryCode": "IE",
+    "region": "L",
+    "continent": "Europa",
+    "aliases": [
+      "blanchardstown"
+    ]
+  },
+  {
+    "name": "Bayside",
+    "country": "Irlanda",
+    "countryCode": "IE",
+    "region": "L",
+    "continent": "Europa",
+    "aliases": [
+      "bayside"
+    ]
+  },
+  {
+    "name": "Eilat",
+    "country": "Israel",
+    "countryCode": "IL",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "eilat"
+    ]
+  },
+  {
+    "name": "Ashdod",
+    "country": "Israel",
+    "countryCode": "IL",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "ashdod"
+    ]
+  },
+  {
+    "name": "Pen",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "16",
+    "continent": "Asia",
+    "aliases": [
+      "pen"
+    ]
+  },
+  {
+    "name": "Chennai",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "25",
+    "continent": "Asia",
+    "aliases": [
+      "chennai"
+    ]
+  },
+  {
+    "name": "Kota",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "24",
+    "continent": "Asia",
+    "aliases": [
+      "kota"
+    ]
+  },
+  {
+    "name": "Gurugram",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "10",
+    "continent": "Asia",
+    "aliases": [
+      "gurugram"
+    ]
+  },
+  {
+    "name": "Bāri",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "24",
+    "continent": "Asia",
+    "aliases": [
+      "bari"
+    ]
+  },
+  {
+    "name": "Bengaluru",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "19",
+    "continent": "Asia",
+    "aliases": [
+      "bengaluru"
+    ]
+  },
+  {
+    "name": "Doha",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "10",
+    "continent": "Asia",
+    "aliases": [
+      "doha"
+    ]
+  },
+  {
+    "name": "Hui",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "10",
+    "continent": "Asia",
+    "aliases": [
+      "hui"
+    ]
+  },
+  {
+    "name": "Red",
+    "country": "India",
+    "countryCode": "IN",
+    "region": "16",
+    "continent": "Asia",
+    "aliases": [
+      "red"
+    ]
+  },
+  {
+    "name": "Sīn",
+    "country": "IR",
+    "countryCode": "IR",
+    "region": "28",
+    "continent": "Mundial",
+    "aliases": [
+      "sin"
+    ]
+  },
+  {
+    "name": "Catania",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "15",
+    "continent": "Europa",
+    "aliases": [
+      "catania"
+    ]
+  },
+  {
+    "name": "Cagliari",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "14",
+    "continent": "Europa",
+    "aliases": [
+      "cagliari"
+    ]
+  },
+  {
+    "name": "Arena",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "03",
+    "continent": "Europa",
+    "aliases": [
+      "arena"
+    ]
+  },
+  {
+    "name": "Verona",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "20",
+    "continent": "Europa",
+    "aliases": [
+      "verona"
+    ]
+  },
+  {
+    "name": "Rome",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "07",
+    "continent": "Europa",
+    "aliases": [
+      "rome",
+      "roma"
+    ]
+  },
+  {
+    "name": "Rimini",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "05",
+    "continent": "Europa",
+    "aliases": [
+      "rimini"
+    ]
+  },
+  {
+    "name": "Palazzo",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "18",
+    "continent": "Europa",
+    "aliases": [
+      "palazzo"
+    ]
+  },
+  {
+    "name": "Nave",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "nave"
+    ]
+  },
+  {
+    "name": "Naples",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "04",
+    "continent": "Europa",
+    "aliases": [
+      "naples"
+    ]
+  },
+  {
+    "name": "Monza",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "monza"
+    ]
+  },
+  {
+    "name": "Mel",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "20",
+    "continent": "Europa",
+    "aliases": [
+      "mel"
+    ]
+  },
+  {
+    "name": "Cologne",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "cologne"
+    ]
+  },
+  {
+    "name": "Carugate",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "carugate"
+    ]
+  },
+  {
+    "name": "Brescia",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "brescia"
+    ]
+  },
+  {
+    "name": "Bolzano",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "17",
+    "continent": "Europa",
+    "aliases": [
+      "bolzano"
+    ]
+  },
+  {
+    "name": "Bologna",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "05",
+    "continent": "Europa",
+    "aliases": [
+      "bologna"
+    ]
+  },
+  {
+    "name": "Arese",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "arese"
+    ]
+  },
+  {
+    "name": "Assago",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "assago"
+    ]
+  },
+  {
+    "name": "Carrè",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "20",
+    "continent": "Europa",
+    "aliases": [
+      "carre"
+    ]
+  },
+  {
+    "name": "Boca",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "12",
+    "continent": "Europa",
+    "aliases": [
+      "boca"
+    ]
+  },
+  {
+    "name": "Alto",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "12",
+    "continent": "Europa",
+    "aliases": [
+      "alto"
+    ]
+  },
+  {
+    "name": "Onè",
+    "country": "Italia",
+    "countryCode": "IT",
+    "region": "20",
+    "continent": "Europa",
+    "aliases": [
+      "one"
+    ]
+  },
+  {
+    "name": "Yokohama",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "19",
+    "continent": "Asia",
+    "aliases": [
+      "yokohama"
+    ]
+  },
+  {
+    "name": "Tosu",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "33",
+    "continent": "Asia",
+    "aliases": [
+      "tosu"
+    ]
+  },
+  {
+    "name": "Tokyo",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "40",
+    "continent": "Asia",
+    "aliases": [
+      "tkyo",
+      "tokio",
+      "tokyo"
+    ]
+  },
+  {
+    "name": "Toki",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "09",
+    "continent": "Asia",
+    "aliases": [
+      "toki"
+    ]
+  },
+  {
+    "name": "Tamagawa",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "40",
+    "continent": "Asia",
+    "aliases": [
+      "tamagawa"
+    ]
+  },
+  {
+    "name": "Minato",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "43",
+    "continent": "Asia",
+    "aliases": [
+      "minato"
+    ]
+  },
+  {
+    "name": "Sendai",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "18",
+    "continent": "Asia",
+    "aliases": [
+      "sendai"
+    ]
+  },
+  {
+    "name": "Sano",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "38",
+    "continent": "Asia",
+    "aliases": [
+      "sano"
+    ]
+  },
+  {
+    "name": "Ryūō",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "46",
+    "continent": "Asia",
+    "aliases": [
+      "ryuo"
+    ]
+  },
+  {
+    "name": "Okazaki",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "okazaki"
+    ]
+  },
+  {
+    "name": "Nagoya",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "nagoya"
+    ]
+  },
+  {
+    "name": "Kyoto",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "22",
+    "continent": "Asia",
+    "aliases": [
+      "kioto",
+      "kyoto"
+    ]
+  },
+  {
+    "name": "Kurashiki",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "31",
+    "continent": "Asia",
+    "aliases": [
+      "kurashiki"
+    ]
+  },
+  {
+    "name": "Koshigaya",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "34",
+    "continent": "Asia",
+    "aliases": [
+      "koshigaya"
+    ]
+  },
+  {
+    "name": "Kobe",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "13",
+    "continent": "Asia",
+    "aliases": [
+      "kobe"
+    ]
+  },
+  {
+    "name": "Kisarazu",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "kisarazu"
+    ]
+  },
+  {
+    "name": "Karuizawa",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "26",
+    "continent": "Asia",
+    "aliases": [
+      "karuizawa"
+    ]
+  },
+  {
+    "name": "Gotemba",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "37",
+    "continent": "Asia",
+    "aliases": [
+      "gotemba"
+    ]
+  },
+  {
+    "name": "Fukuoka",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "07",
+    "continent": "Asia",
+    "aliases": [
+      "fukuoka"
+    ]
+  },
+  {
+    "name": "China",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "18",
+    "continent": "Asia",
+    "aliases": [
+      "china"
+    ]
+  },
+  {
+    "name": "Okinawa",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "47",
+    "continent": "Asia",
+    "aliases": [
+      "okinawa"
+    ]
+  },
+  {
+    "name": "Shisui",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "shisui"
+    ]
+  },
+  {
+    "name": "Narita",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "narita"
+    ]
+  },
+  {
+    "name": "Ami",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "14",
+    "continent": "Asia",
+    "aliases": [
+      "ami"
+    ]
+  },
+  {
+    "name": "Sapporo",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "12",
+    "continent": "Asia",
+    "aliases": [
+      "sapporo"
+    ]
+  },
+  {
+    "name": "Kitahiroshima",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "12",
+    "continent": "Asia",
+    "aliases": [
+      "kitahiroshima"
+    ]
+  },
+  {
+    "name": "Umeda",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "32",
+    "continent": "Asia",
+    "aliases": [
+      "umeda"
+    ]
+  },
+  {
+    "name": "Oyabe",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "42",
+    "continent": "Asia",
+    "aliases": [
+      "oyabe"
+    ]
+  },
+  {
+    "name": "Ebina",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "19",
+    "continent": "Asia",
+    "aliases": [
+      "ebina"
+    ]
+  },
+  {
+    "name": "Iruma",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "34",
+    "continent": "Asia",
+    "aliases": [
+      "iruma"
+    ]
+  },
+  {
+    "name": "Saitama",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "34",
+    "continent": "Asia",
+    "aliases": [
+      "saitama"
+    ]
+  },
+  {
+    "name": "Roppongi",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "40",
+    "continent": "Asia",
+    "aliases": [
+      "roppongi"
+    ]
+  },
+  {
+    "name": "Fujimi",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "26",
+    "continent": "Asia",
+    "aliases": [
+      "fujimi"
+    ]
+  },
+  {
+    "name": "Tachikawa",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "22",
+    "continent": "Asia",
+    "aliases": [
+      "tachikawa"
+    ]
+  },
+  {
+    "name": "Usa",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "30",
+    "continent": "Asia",
+    "aliases": [
+      "usa"
+    ]
+  },
+  {
+    "name": "Sanda",
+    "country": "Japón",
+    "countryCode": "JP",
+    "region": "13",
+    "continent": "Asia",
+    "aliases": [
+      "sanda"
+    ]
+  },
+  {
+    "name": "Ulsan",
+    "country": "Corea del Sur",
+    "countryCode": "KR",
+    "region": "21",
+    "continent": "Asia",
+    "aliases": [
+      "ulsan"
+    ]
+  },
+  {
+    "name": "Daejeon",
+    "country": "Corea del Sur",
+    "countryCode": "KR",
+    "region": "19",
+    "continent": "Asia",
+    "aliases": [
+      "daejeon"
+    ]
+  },
+  {
+    "name": "Daegu",
+    "country": "Corea del Sur",
+    "countryCode": "KR",
+    "region": "15",
+    "continent": "Asia",
+    "aliases": [
+      "daegu"
+    ]
+  },
+  {
+    "name": "Suwon",
+    "country": "Corea del Sur",
+    "countryCode": "KR",
+    "region": "13",
+    "continent": "Asia",
+    "aliases": [
+      "suwon"
+    ]
+  },
+  {
+    "name": "Seoul",
+    "country": "Corea del Sur",
+    "countryCode": "KR",
+    "region": "11",
+    "continent": "Asia",
+    "aliases": [
+      "seoul"
+    ]
+  },
+  {
+    "name": "Incheon",
+    "country": "Corea del Sur",
+    "countryCode": "KR",
+    "region": "12",
+    "continent": "Asia",
+    "aliases": [
+      "incheon"
+    ]
+  },
+  {
+    "name": "Creek",
+    "country": "KY",
+    "countryCode": "KY",
+    "region": "00",
+    "continent": "Mundial",
+    "aliases": [
+      "creek"
+    ]
+  },
+  {
+    "name": "Almaty",
+    "country": "Kazajistán",
+    "countryCode": "KZ",
+    "region": "02",
+    "continent": "Asia",
+    "aliases": [
+      "almaty"
+    ]
+  },
+  {
+    "name": "Kazakhstan",
+    "country": "Kazajistán",
+    "countryCode": "KZ",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "kazakhstan"
+    ]
+  },
+  {
+    "name": "Ann",
+    "country": "MM",
+    "countryCode": "MM",
+    "region": "01",
+    "continent": "Mundial",
+    "aliases": [
+      "ann"
+    ]
+  },
+  {
+    "name": "Providence",
+    "country": "MU",
+    "countryCode": "MU",
+    "region": "15",
+    "continent": "Mundial",
+    "aliases": [
+      "providence"
+    ]
+  },
+  {
+    "name": "Saltillo",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "21",
+    "continent": "América del Norte",
+    "aliases": [
+      "saltillo"
+    ]
+  },
+  {
+    "name": "Metepec",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "13",
+    "continent": "América del Norte",
+    "aliases": [
+      "metepec"
+    ]
+  },
+  {
+    "name": "Cancún",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "23",
+    "continent": "América del Norte",
+    "aliases": [
+      "cancun"
+    ]
+  },
+  {
+    "name": "Chihuahua",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "05",
+    "continent": "América del Norte",
+    "aliases": [
+      "chihuahua"
+    ]
+  },
+  {
+    "name": "Querétaro",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "05",
+    "continent": "América del Norte",
+    "aliases": [
+      "queretaro"
+    ]
+  },
+  {
+    "name": "Lindavista",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "30",
+    "continent": "América del Norte",
+    "aliases": [
+      "lindavista"
+    ]
+  },
+  {
+    "name": "Isla",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "30",
+    "continent": "América del Norte",
+    "aliases": [
+      "isla"
+    ]
+  },
+  {
+    "name": "Tijuana",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "02",
+    "continent": "América del Norte",
+    "aliases": [
+      "tijuana"
+    ]
+  },
+  {
+    "name": "Franco",
+    "country": "México",
+    "countryCode": "MX",
+    "region": "11",
+    "continent": "América del Norte",
+    "aliases": [
+      "franco"
+    ]
+  },
+  {
+    "name": "Kuching",
+    "country": "Malasia",
+    "countryCode": "MY",
+    "region": "11",
+    "continent": "Asia",
+    "aliases": [
+      "kuching"
+    ]
+  },
+  {
+    "name": "Putrajaya",
+    "country": "Malasia",
+    "countryCode": "MY",
+    "region": "17",
+    "continent": "Asia",
+    "aliases": [
+      "putrajaya"
+    ]
+  },
+  {
+    "name": "Bangsar",
+    "country": "Malasia",
+    "countryCode": "MY",
+    "region": "14",
+    "continent": "Asia",
+    "aliases": [
+      "bangsar"
+    ]
+  },
+  {
+    "name": "Hong",
+    "country": "NG",
+    "countryCode": "NG",
+    "region": "35",
+    "continent": "Mundial",
+    "aliases": [
+      "hong"
+    ]
+  },
+  {
+    "name": "Utrecht",
+    "country": "Países Bajos",
+    "countryCode": "NL",
+    "region": "09",
+    "continent": "Europa",
+    "aliases": [
+      "utrecht"
+    ]
+  },
+  {
+    "name": "Scheveningen",
+    "country": "Países Bajos",
+    "countryCode": "NL",
+    "region": "11",
+    "continent": "Europa",
+    "aliases": [
+      "scheveningen"
+    ]
+  },
+  {
+    "name": "Rotterdam",
+    "country": "Países Bajos",
+    "countryCode": "NL",
+    "region": "11",
+    "continent": "Europa",
+    "aliases": [
+      "roterdam",
+      "rotterdam"
+    ]
+  },
+  {
+    "name": "Valle",
+    "country": "Noruega",
+    "countryCode": "NO",
+    "region": "42",
+    "continent": "Europa",
+    "aliases": [
+      "valle"
+    ]
+  },
+  {
+    "name": "Auckland",
+    "country": "Nueva Zelanda",
+    "countryCode": "NZ",
+    "region": "E7",
+    "continent": "Oceanía",
+    "aliases": [
+      "auckland"
+    ]
+  },
+  {
+    "name": "Riccarton",
+    "country": "Nueva Zelanda",
+    "countryCode": "NZ",
+    "region": "E9",
+    "continent": "Oceanía",
+    "aliases": [
+      "riccarton"
+    ]
+  },
+  {
+    "name": "David",
+    "country": "Panamá",
+    "countryCode": "PA",
+    "region": "02",
+    "continent": "América del Norte",
+    "aliases": [
+      "david"
+    ]
+  },
+  {
+    "name": "Salaverry",
+    "country": "Perú",
+    "countryCode": "PE",
+    "region": "13",
+    "continent": "América del Sur",
+    "aliases": [
+      "salaverry"
+    ]
+  },
+  {
+    "name": "Parco",
+    "country": "Perú",
+    "countryCode": "PE",
+    "region": "12",
+    "continent": "América del Sur",
+    "aliases": [
+      "parco"
+    ]
+  },
+  {
+    "name": "Asia",
+    "country": "Perú",
+    "countryCode": "PE",
+    "region": "15",
+    "continent": "América del Sur",
+    "aliases": [
+      "asia"
+    ]
+  },
+  {
+    "name": "Arequipa",
+    "country": "Perú",
+    "countryCode": "PE",
+    "region": "04",
+    "continent": "América del Sur",
+    "aliases": [
+      "arequipa"
+    ]
+  },
+  {
+    "name": "Real",
+    "country": "Filipinas",
+    "countryCode": "PH",
+    "region": "01",
+    "continent": "Asia",
+    "aliases": [
+      "real"
+    ]
+  },
+  {
+    "name": "Orion",
+    "country": "Filipinas",
+    "countryCode": "PH",
+    "region": "03",
+    "continent": "Asia",
+    "aliases": [
+      "orion"
+    ]
+  },
+  {
+    "name": "Mexico",
+    "country": "Filipinas",
+    "countryCode": "PH",
+    "region": "03",
+    "continent": "Asia",
+    "aliases": [
+      "mexico"
+    ]
+  },
+  {
+    "name": "Manila",
+    "country": "Filipinas",
+    "countryCode": "PH",
+    "region": "NCR",
+    "continent": "Asia",
+    "aliases": [
+      "manila"
+    ]
+  },
+  {
+    "name": "Egaña",
+    "country": "Filipinas",
+    "countryCode": "PH",
+    "region": "06",
+    "continent": "Asia",
+    "aliases": [
+      "egana"
+    ]
+  },
+  {
+    "name": "Hub",
+    "country": "PK",
+    "countryCode": "PK",
+    "region": "02",
+    "continent": "Mundial",
+    "aliases": [
+      "hub"
+    ]
+  },
+  {
+    "name": "Warsaw",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "78",
+    "continent": "Europa",
+    "aliases": [
+      "varsovia",
+      "warszawa",
+      "warsaw"
+    ]
+  },
+  {
+    "name": "Mokotów",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "78",
+    "continent": "Europa",
+    "aliases": [
+      "mokotow"
+    ]
+  },
+  {
+    "name": "Wrocław",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "72",
+    "continent": "Europa",
+    "aliases": [
+      "wrocaw"
+    ]
+  },
+  {
+    "name": "Poznań",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "86",
+    "continent": "Europa",
+    "aliases": [
+      "poznan"
+    ]
+  },
+  {
+    "name": "Łódź",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "74",
+    "continent": "Europa",
+    "aliases": [
+      "odz"
+    ]
+  },
+  {
+    "name": "Kraków",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "77",
+    "continent": "Europa",
+    "aliases": [
+      "krakow"
+    ]
+  },
+  {
+    "name": "Katowice",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "83",
+    "continent": "Europa",
+    "aliases": [
+      "katowice"
+    ]
+  },
+  {
+    "name": "Gdańsk",
+    "country": "Polonia",
+    "countryCode": "PL",
+    "region": "82",
+    "continent": "Europa",
+    "aliases": [
+      "gdansk"
+    ]
+  },
+  {
+    "name": "Ceiba",
+    "country": "PR",
+    "countryCode": "PR",
+    "region": "037",
+    "continent": "Mundial",
+    "aliases": [
+      "ceiba"
+    ]
+  },
+  {
+    "name": "Coco",
+    "country": "PR",
+    "countryCode": "PR",
+    "region": "123",
+    "continent": "Mundial",
+    "aliases": [
+      "coco"
+    ]
+  },
+  {
+    "name": "Mação",
+    "country": "Portugal",
+    "countryCode": "PT",
+    "region": "18",
+    "continent": "Europa",
+    "aliases": [
+      "macao"
+    ]
+  },
+  {
+    "name": "Lisbon",
+    "country": "Portugal",
+    "countryCode": "PT",
+    "region": "14",
+    "continent": "Europa",
+    "aliases": [
+      "lisbon",
+      "lisboa",
+      "lisbonne"
+    ]
+  },
+  {
+    "name": "Nine",
+    "country": "Portugal",
+    "countryCode": "PT",
+    "region": "04",
+    "continent": "Europa",
+    "aliases": [
+      "nine"
+    ]
+  },
+  {
+    "name": "Timişoara",
+    "country": "Rumanía",
+    "countryCode": "RO",
+    "region": "36",
+    "continent": "Europa",
+    "aliases": [
+      "timisoara"
+    ]
+  },
+  {
+    "name": "Şpring",
+    "country": "Rumanía",
+    "countryCode": "RO",
+    "region": "01",
+    "continent": "Europa",
+    "aliases": [
+      "spring"
+    ]
+  },
+  {
+    "name": "Ploieşti",
+    "country": "Rumanía",
+    "countryCode": "RO",
+    "region": "30",
+    "continent": "Europa",
+    "aliases": [
+      "ploiesti"
+    ]
+  },
+  {
+    "name": "Craiova",
+    "country": "Rumanía",
+    "countryCode": "RO",
+    "region": "17",
+    "continent": "Europa",
+    "aliases": [
+      "craiova"
+    ]
+  },
+  {
+    "name": "Băneasa",
+    "country": "Rumanía",
+    "countryCode": "RO",
+    "region": "18",
+    "continent": "Europa",
+    "aliases": [
+      "baneasa"
+    ]
+  },
+  {
+    "name": "Star’",
+    "country": "Rusia",
+    "countryCode": "RU",
+    "region": "10",
+    "continent": "Europa",
+    "aliases": [
+      "star"
+    ]
+  },
+  {
+    "name": "Makkah",
+    "country": "Arabia Saudita",
+    "countryCode": "SA",
+    "region": "14",
+    "continent": "Asia",
+    "aliases": [
+      "makkah"
+    ]
+  },
+  {
+    "name": "Dhahran",
+    "country": "Arabia Saudita",
+    "countryCode": "SA",
+    "region": "06",
+    "continent": "Asia",
+    "aliases": [
+      "dhahran"
+    ]
+  },
+  {
+    "name": "Riyadh",
+    "country": "Arabia Saudita",
+    "countryCode": "SA",
+    "region": "10",
+    "continent": "Asia",
+    "aliases": [
+      "riyadh"
+    ]
+  },
+  {
+    "name": "Stockholm",
+    "country": "Suecia",
+    "countryCode": "SE",
+    "region": "26",
+    "continent": "Europa",
+    "aliases": [
+      "sthlm",
+      "estocolmo",
+      "stockholm"
+    ]
+  },
+  {
+    "name": "Singapore",
+    "country": "Singapur",
+    "countryCode": "SG",
+    "region": "General",
+    "continent": "Asia",
+    "aliases": [
+      "singapur",
+      "singapore",
+      "sing"
+    ]
+  },
+  {
+    "name": "Sentosa",
+    "country": "Singapur",
+    "countryCode": "SG",
+    "region": "General",
+    "continent": "Asia",
+    "aliases": [
+      "sentosa"
+    ]
+  },
+  {
+    "name": "Ljubljana",
+    "country": "Eslovenia",
+    "countryCode": "SI",
+    "region": "61",
+    "continent": "Europa",
+    "aliases": [
+      "ljubljana"
+    ]
+  },
+  {
+    "name": "Marka",
+    "country": "SO",
+    "countryCode": "SO",
+    "region": "14",
+    "continent": "Mundial",
+    "aliases": [
+      "marka"
+    ]
+  },
+  {
+    "name": "Babīlā",
+    "country": "SY",
+    "countryCode": "SY",
+    "region": "08",
+    "continent": "Mundial",
+    "aliases": [
+      "babila"
+    ]
+  },
+  {
+    "name": "Van",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "65",
+    "continent": "Asia",
+    "aliases": [
+      "van"
+    ]
+  },
+  {
+    "name": "Meydan",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "13",
+    "continent": "Asia",
+    "aliases": [
+      "meydan"
+    ]
+  },
+  {
+    "name": "İzmir",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "35",
+    "continent": "Asia",
+    "aliases": [
+      "izmir"
+    ]
+  },
+  {
+    "name": "Han",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "26",
+    "continent": "Asia",
+    "aliases": [
+      "han"
+    ]
+  },
+  {
+    "name": "Antalya",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "07",
+    "continent": "Asia",
+    "aliases": [
+      "antalya"
+    ]
+  },
+  {
+    "name": "Ankara",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "68",
+    "continent": "Asia",
+    "aliases": [
+      "ankara"
+    ]
+  },
+  {
+    "name": "Adana",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "81",
+    "continent": "Asia",
+    "aliases": [
+      "adana"
+    ]
+  },
+  {
+    "name": "Istanbul",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "34",
+    "continent": "Asia",
+    "aliases": [
+      "istanbul"
+    ]
+  },
+  {
+    "name": "Bursa",
+    "country": "Turquía",
+    "countryCode": "TR",
+    "region": "16",
+    "continent": "Asia",
+    "aliases": [
+      "bursa"
+    ]
+  },
+  {
+    "name": "Taipei",
+    "country": "Taiwán",
+    "countryCode": "TW",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "taipei"
+    ]
+  },
+  {
+    "name": "Tainan",
+    "country": "Taiwán",
+    "countryCode": "TW",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "tainan"
+    ]
+  },
+  {
+    "name": "Taichung",
+    "country": "Taiwán",
+    "countryCode": "TW",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "taichung"
+    ]
+  },
+  {
+    "name": "Kaohsiung",
+    "country": "Taiwán",
+    "countryCode": "TW",
+    "region": "02",
+    "continent": "Asia",
+    "aliases": [
+      "kaohsiung"
+    ]
+  },
+  {
+    "name": "Hsinchu",
+    "country": "Taiwán",
+    "countryCode": "TW",
+    "region": "04",
+    "continent": "Asia",
+    "aliases": [
+      "hsinchu"
+    ]
+  },
+  {
+    "name": "Austin",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "AR",
+    "continent": "América del Norte",
+    "aliases": [
+      "austin"
+    ]
+  },
+  {
+    "name": "Nashville",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "AR",
+    "continent": "América del Norte",
+    "aliases": [
+      "nashville"
+    ]
+  },
+  {
+    "name": "Aventura",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "aventura"
+    ]
+  },
+  {
+    "name": "Century",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "century"
+    ]
+  },
+  {
+    "name": "Gateway",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "gateway"
+    ]
+  },
+  {
+    "name": "Holiday",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "holiday"
+    ]
+  },
+  {
+    "name": "Lakeside",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "lakeside"
+    ]
+  },
+  {
+    "name": "Orlando",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "orlando"
+    ]
+  },
+  {
+    "name": "Sawgrass",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "sawgrass"
+    ]
+  },
+  {
+    "name": "Westchester",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "FL",
+    "continent": "América del Norte",
+    "aliases": [
+      "westchester"
+    ]
+  },
+  {
+    "name": "Atlanta",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "GA",
+    "continent": "América del Norte",
+    "aliases": [
+      "atlanta"
+    ]
+  },
+  {
+    "name": "Columbus",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "GA",
+    "continent": "América del Norte",
+    "aliases": [
+      "columbus"
+    ]
+  },
+  {
+    "name": "Brazil",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "IN",
+    "continent": "América del Norte",
+    "aliases": [
+      "brazil"
+    ]
+  },
+  {
+    "name": "Annapolis",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MD",
+    "continent": "América del Norte",
+    "aliases": [
+      "annapolis"
+    ]
+  },
+  {
+    "name": "Friendly",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MD",
+    "continent": "América del Norte",
+    "aliases": [
+      "friendly"
+    ]
+  },
+  {
+    "name": "Guilford",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MD",
+    "continent": "América del Norte",
+    "aliases": [
+      "guilford"
+    ]
+  },
+  {
+    "name": "Potomac",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MD",
+    "continent": "América del Norte",
+    "aliases": [
+      "potomac"
+    ]
+  },
+  {
+    "name": "Crocker",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MO",
+    "continent": "América del Norte",
+    "aliases": [
+      "crocker"
+    ]
+  },
+  {
+    "name": "Republic",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MO",
+    "continent": "América del Norte",
+    "aliases": [
+      "republic"
+    ]
+  },
+  {
+    "name": "Meridian",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MS",
+    "continent": "América del Norte",
+    "aliases": [
+      "meridian"
+    ]
+  },
+  {
+    "name": "Philadelphia",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MS",
+    "continent": "América del Norte",
+    "aliases": [
+      "philadelphia"
+    ]
+  },
+  {
+    "name": "Charlotte",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NC",
+    "continent": "América del Norte",
+    "aliases": [
+      "charlotte"
+    ]
+  },
+  {
+    "name": "Denver",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NC",
+    "continent": "América del Norte",
+    "aliases": [
+      "denver"
+    ]
+  },
+  {
+    "name": "Beachwood",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NJ",
+    "continent": "América del Norte",
+    "aliases": [
+      "beachwood"
+    ]
+  },
+  {
+    "name": "Highpoint",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "OH",
+    "continent": "América del Norte",
+    "aliases": [
+      "highpoint"
+    ]
+  },
+  {
+    "name": "Kenwood",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "OH",
+    "continent": "América del Norte",
+    "aliases": [
+      "kenwood"
+    ]
+  },
+  {
+    "name": "Christiana",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "PA",
+    "continent": "América del Norte",
+    "aliases": [
+      "christiana"
+    ]
+  },
+  {
+    "name": "Woodfield",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "SC",
+    "continent": "América del Norte",
+    "aliases": [
+      "woodfield"
+    ]
+  },
+  {
+    "name": "Midtown",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "TN",
+    "continent": "América del Norte",
+    "aliases": [
+      "midtown"
+    ]
+  },
+  {
+    "name": "Eastland",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "TX",
+    "continent": "América del Norte",
+    "aliases": [
+      "eastland"
+    ]
+  },
+  {
+    "name": "Ferris",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "TX",
+    "continent": "América del Norte",
+    "aliases": [
+      "ferris"
+    ]
+  },
+  {
+    "name": "Italy",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "TX",
+    "continent": "América del Norte",
+    "aliases": [
+      "italy"
+    ]
+  },
+  {
+    "name": "West",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "TX",
+    "continent": "América del Norte",
+    "aliases": [
+      "west"
+    ]
+  },
+  {
+    "name": "Norfolk",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "VA",
+    "continent": "América del Norte",
+    "aliases": [
+      "norfolk"
+    ]
+  },
+  {
+    "name": "Triangle",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "VA",
+    "continent": "América del Norte",
+    "aliases": [
+      "triangle"
+    ]
+  },
+  {
+    "name": "Tysons",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "VA",
+    "continent": "América del Norte",
+    "aliases": [
+      "tysons"
+    ]
+  },
+  {
+    "name": "Arab",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "AL",
+    "continent": "América del Norte",
+    "aliases": [
+      "arab"
+    ]
+  },
+  {
+    "name": "Gurnee",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "IL",
+    "continent": "América del Norte",
+    "aliases": [
+      "gurnee"
+    ]
+  },
+  {
+    "name": "Peru",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "IL",
+    "continent": "América del Norte",
+    "aliases": [
+      "peru"
+    ]
+  },
+  {
+    "name": "Phoenix",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "IL",
+    "continent": "América del Norte",
+    "aliases": [
+      "phoenix"
+    ]
+  },
+  {
+    "name": "Willowbrook",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "IL",
+    "continent": "América del Norte",
+    "aliases": [
+      "willowbrook"
+    ]
+  },
+  {
+    "name": "Westfield",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "IN",
+    "continent": "América del Norte",
+    "aliases": [
+      "westfield"
+    ]
+  },
+  {
+    "name": "Natick",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "MA",
+    "continent": "América del Norte",
+    "aliases": [
+      "natick"
+    ]
+  },
+  {
+    "name": "Orland",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "ME",
+    "continent": "América del Norte",
+    "aliases": [
+      "orland"
+    ]
+  },
+  {
+    "name": "Poland",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "ME",
+    "continent": "América del Norte",
+    "aliases": [
+      "poland"
+    ]
+  },
+  {
+    "name": "Eagle",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NE",
+    "continent": "América del Norte",
+    "aliases": [
+      "eagle"
+    ]
+  },
+  {
+    "name": "Brick",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NJ",
+    "continent": "América del Norte",
+    "aliases": [
+      "brick"
+    ]
+  },
+  {
+    "name": "Freehold",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NJ",
+    "continent": "América del Norte",
+    "aliases": [
+      "freehold"
+    ]
+  },
+  {
+    "name": "Greece",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NY",
+    "continent": "América del Norte",
+    "aliases": [
+      "greece"
+    ]
+  },
+  {
+    "name": "Ontario",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NY",
+    "continent": "América del Norte",
+    "aliases": [
+      "ontario"
+    ]
+  },
+  {
+    "name": "Roosevelt",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NY",
+    "continent": "América del Norte",
+    "aliases": [
+      "roosevelt"
+    ]
+  },
+  {
+    "name": "Springs",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NY",
+    "continent": "América del Norte",
+    "aliases": [
+      "springs"
+    ]
+  },
+  {
+    "name": "Emporium",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "PA",
+    "continent": "América del Norte",
+    "aliases": [
+      "emporium"
+    ]
+  },
+  {
+    "name": "Trafford",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "PA",
+    "continent": "América del Norte",
+    "aliases": [
+      "trafford"
+    ]
+  },
+  {
+    "name": "Tea",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "SD",
+    "continent": "América del Norte",
+    "aliases": [
+      "tea"
+    ]
+  },
+  {
+    "name": "Belgium",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "WI",
+    "continent": "América del Norte",
+    "aliases": [
+      "belgium"
+    ]
+  },
+  {
+    "name": "Castleton",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "VT",
+    "continent": "América del Norte",
+    "aliases": [
+      "castleton"
+    ]
+  },
+  {
+    "name": "Empire",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "CA",
+    "continent": "América del Norte",
+    "aliases": [
+      "empire"
+    ]
+  },
+  {
+    "name": "Topanga",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "CA",
+    "continent": "América del Norte",
+    "aliases": [
+      "topanga"
+    ]
+  },
+  {
+    "name": "Woodland",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "CA",
+    "continent": "América del Norte",
+    "aliases": [
+      "woodland"
+    ]
+  },
+  {
+    "name": "Raton",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NM",
+    "continent": "América del Norte",
+    "aliases": [
+      "raton"
+    ]
+  },
+  {
+    "name": "Smith",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "NV",
+    "continent": "América del Norte",
+    "aliases": [
+      "smith"
+    ]
+  },
+  {
+    "name": "Beach",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "ND",
+    "continent": "América del Norte",
+    "aliases": [
+      "beach"
+    ]
+  },
+  {
+    "name": "Seattle",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "WA",
+    "continent": "América del Norte",
+    "aliases": [
+      "seattle"
+    ]
+  },
+  {
+    "name": "Mills",
+    "country": "Estados Unidos",
+    "countryCode": "US",
+    "region": "WY",
+    "continent": "América del Norte",
+    "aliases": [
+      "mills"
+    ]
+  }
+]
