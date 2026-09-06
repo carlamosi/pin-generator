@@ -20,5 +20,5 @@ export default defineConfig({
         "tesseract.js",
       ],
     },
-  },
+  } as any,
 });

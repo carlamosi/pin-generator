@@ -375,29 +375,35 @@ function PassportScanPage() {
         return;
       }
 
-      // Run recognition for each slot
+      // Run recognition for all slots with safe error handling and parallel dispatch
       setIsIdentifying(true);
-      const queue: IdentifyState[] = [];
-      for (const slot of activeSlots) {
-        let rec: StampRecognitionResult;
-        try {
-          rec = await recogniseStamp(slot.cropDataUrl ?? "", designs, cities);
-        } catch {
-          rec = {
-            visualHash: "",
-            rawOcrText: "",
-            ocrTokens: [],
-            confidence: "LOW",
-            existingDesign: null,
-            isDuplicate: false,
-            suggestedName: "",
-            suggestedCategory: "SPECIAL",
-            matchedCity: null,
-          };
-        }
+      const defaultRec: StampRecognitionResult = {
+        visualHash: "",
+        rawOcrText: "",
+        ocrTokens: [],
+        confidence: "LOW",
+        existingDesign: null,
+        isDuplicate: false,
+        suggestedName: "",
+        suggestedCategory: "SPECIAL",
+        matchedCity: null,
+      };
 
+      const recognitionPromises = activeSlots.map(async (slot) => {
+        try {
+          const rec = await recogniseStamp(slot.cropDataUrl ?? "", designs, cities);
+          return { slot, rec };
+        } catch (err) {
+          console.warn(`[passport recognition error on slot ${slot.slot_position}]:`, err);
+          return { slot, rec: defaultRec };
+        }
+      });
+
+      const settled = await Promise.all(recognitionPromises);
+
+      const queue: IdentifyState[] = settled.map(({ slot, rec }) => {
         const useExisting = rec.existingDesign !== null;
-        queue.push({
+        return {
           slot,
           recognition: rec,
           rawCropDataUrl: slot.cropDataUrl ?? "",
@@ -410,17 +416,18 @@ function PassportScanPage() {
           editCode: "",
           designMode: useExisting ? "existing" : "new",
           selectedDesignId: rec.existingDesign?.id ?? null,
-          confirmed: rec.confidence === "HIGH",  // HIGH is preselected but user still confirms
-        });
-      }
+          confirmed: rec.confidence === "HIGH",
+        };
+      });
+
       setIdentifyQueue(queue);
       setIdentifyIndex(0);
-      setIsIdentifying(false);
       setStep("identify");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setSaveError("Error al confirmar pagina: " + msg);
+      setSaveError("Error al confirmar página: " + msg);
     } finally {
+      setIsIdentifying(false);
       setIsConfirmingPage(false);
     }
   };

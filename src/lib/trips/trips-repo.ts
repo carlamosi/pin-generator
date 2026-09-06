@@ -526,69 +526,100 @@ export async function upsertPhysicalStamp(stamp: Partial<PhysicalStamp> & { id?:
 }
 
 export async function uploadPassportImage(fileOrDataUrl: File | string, path: string): Promise<string> {
-  let fileBody: File | Blob | Uint8Array;
-  
-  if (typeof fileOrDataUrl === "string") {
-    const res = await fetch(fileOrDataUrl);
-    fileBody = await res.blob();
-  } else {
-    fileBody = fileOrDataUrl;
-  }
+  try {
+    let fileBody: File | Blob | Uint8Array;
+    
+    if (typeof fileOrDataUrl === "string") {
+      const res = await fetch(fileOrDataUrl);
+      fileBody = await res.blob();
+    } else {
+      fileBody = fileOrDataUrl;
+    }
 
-  // Primary target bucket: 'passport-scans'
-  let targetBucket = "passport-scans";
-  let uploadPath = path;
+    // Primary target bucket: 'passport-scans'
+    let targetBucket = "passport-scans";
+    let uploadPath = path;
 
-  let { error } = await supabase.storage
-    .from(targetBucket)
-    .upload(uploadPath, fileBody, {
-      cacheControl: "3600",
-      upsert: true,
-    });
-
-  // Fallback if 'passport-scans' bucket is missing on Supabase project (404 / Bucket not found)
-  if (error) {
-    const errMsg = (error.message || "").toLowerCase();
-    const isBucketNotFound = errMsg.includes("bucket not found") || (error as any).statusCode === "404" || (error as any).status === 404;
-
-    if (isBucketNotFound) {
-      const fallbackBucket = (typeof PIN_CUTOUTS_BUCKET !== "undefined" && PIN_CUTOUTS_BUCKET) ? PIN_CUTOUTS_BUCKET : "pin-cutouts";
-      console.warn(`[lego-passport] Storage bucket '${targetBucket}' not found. Falling back to '${fallbackBucket}'.`);
-      targetBucket = fallbackBucket;
-      uploadPath = `passport-scans/${path}`;
-
-      const retryRes = await supabase.storage
+    const doUpload = async () => {
+      let { error } = await supabase.storage
         .from(targetBucket)
         .upload(uploadPath, fileBody, {
           cacheControl: "3600",
           upsert: true,
         });
 
-      error = retryRes.error;
+      // Fallback if 'passport-scans' bucket is missing on Supabase project (404 / Bucket not found)
+      if (error) {
+        const errMsg = (error.message || "").toLowerCase();
+        const isBucketNotFound = errMsg.includes("bucket not found") || (error as any).statusCode === "404" || (error as any).status === 404;
+
+        if (isBucketNotFound) {
+          const fallbackBucket = (typeof PIN_CUTOUTS_BUCKET !== "undefined" && PIN_CUTOUTS_BUCKET) ? PIN_CUTOUTS_BUCKET : "pin-cutouts";
+          console.warn(`[lego-passport] Storage bucket '${targetBucket}' not found. Falling back to '${fallbackBucket}'.`);
+          targetBucket = fallbackBucket;
+          uploadPath = `passport-scans/${path}`;
+
+          const retryRes = await supabase.storage
+            .from(targetBucket)
+            .upload(uploadPath, fileBody, {
+              cacheControl: "3600",
+              upsert: true,
+            });
+
+          error = retryRes.error;
+        }
+      }
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from(targetBucket)
+        .getPublicUrl(uploadPath);
+
+      return publicUrlData.publicUrl;
+    };
+
+    // Timeout storage upload after 5 seconds to prevent hanging if Supabase storage is slow or unreachable
+    const timeoutPromise = new Promise<string>((_, reject) => {
+      setTimeout(() => reject(new Error("Storage upload timed out after 5000ms")), 5000);
+    });
+
+    return await Promise.race([doUpload(), timeoutPromise]);
+  } catch (err) {
+    console.warn("[lego-passport] uploadPassportImage error, using local fallback:", err);
+    if (typeof fileOrDataUrl === "string") {
+      return fileOrDataUrl;
     }
+    // If it was a File object, create an Object URL or data URL
+    return URL.createObjectURL(fileOrDataUrl);
   }
-
-  if (error) {
-    console.error(`[lego-passport] uploadPassportImage failed in bucket '${targetBucket}':`, error);
-    throw error;
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from(targetBucket)
-    .getPublicUrl(uploadPath);
-
-  return publicUrlData.publicUrl;
 }
 
 export async function getNextPassportPageNumber(): Promise<number> {
-  const { data, error } = await supabase
-    .from("passport_pages")
-    .select("page_number")
-    .order("page_number", { ascending: false })
-    .limit(1);
+  try {
+    const localPages = getLocalItems<PassportPage>("lego_passport_pages");
+    const localMax = localPages.reduce((max, p) => Math.max(max, p.page_number || 0), 0);
 
-  if (error || !data || data.length === 0) {
-    return 1;
+    const queryPromise = supabase
+      .from("passport_pages")
+      .select("page_number")
+      .order("page_number", { ascending: false })
+      .limit(1);
+
+    const timeoutPromise = new Promise<{ data: any; error: any }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error("DB timeout") }), 3000)
+    );
+
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
+    if (error || !data || data.length === 0) {
+      return Math.max(1, localMax + 1);
+    }
+    return Math.max(data[0].page_number + 1, localMax + 1);
+  } catch {
+    const localPages = getLocalItems<PassportPage>("lego_passport_pages");
+    return localPages.length + 1;
   }
-  return data[0].page_number + 1;
 }

@@ -171,6 +171,16 @@ export function hammingDistance(a: string, b: string): number {
 let paddleOcrInstancePromise: Promise<any> | null = null;
 let paddleFailed = false;
 
+function withTimeout<T>(promise: Promise<T>, ms: number, fallbackVal: T): Promise<T> {
+  let timer: any;
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timer = setTimeout(() => {
+      resolve(fallbackVal);
+    }, ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
+}
+
 async function getPaddleOcrInstance(): Promise<any> {
   if (typeof window === "undefined") return null;
   if (paddleFailed) return null;
@@ -178,10 +188,17 @@ async function getPaddleOcrInstance(): Promise<any> {
     paddleOcrInstancePromise = (async () => {
       try {
         const { PaddleOCR } = await import("@paddleocr/paddleocr-js");
-        const ocr = await PaddleOCR.create({
+        // Timeout PaddleOCR creation to 4 seconds in case CDN download or WASM worker stalls
+        const createPromise = PaddleOCR.create({
           worker: true,
           unsupportedBehavior: "warn",
         });
+        const ocr = await withTimeout(createPromise, 4000, null);
+        if (!ocr) {
+          console.warn("[PaddleOCR] Initialization timed out after 4000ms. Falling back to Tesseract.");
+          paddleFailed = true;
+          return null;
+        }
         return ocr;
       } catch (err) {
         console.warn("[PaddleOCR] Worker creation fallback:", err);
@@ -199,12 +216,15 @@ async function getSharedOcrWorker() {
   if (typeof window === "undefined") throw new Error("Window undefined");
   if (!sharedWorkerPromise) {
     sharedWorkerPromise = (async () => {
-      const worker = await createWorker(["eng", "spa", "dan"]);
-      await worker.setParameters({
-        tessedit_pageseg_mode: "6" as any,
-        preserve_interword_spaces: "1" as any,
-      });
-      return worker;
+      const initPromise = (async () => {
+        const worker = await createWorker(["eng", "spa", "dan"]);
+        await worker.setParameters({
+          tessedit_pageseg_mode: "6" as any,
+          preserve_interword_spaces: "1" as any,
+        });
+        return worker;
+      })();
+      return await withTimeout(initPromise, 7000, null);
     })().catch((err) => { sharedWorkerPromise = null; throw err; });
   }
   return sharedWorkerPromise;
@@ -213,7 +233,7 @@ async function getSharedOcrWorker() {
 export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
   const preprocessed = await preprocessForOcr(cropDataUrl);
 
-  // 1. First attempt with high-precision PaddleOCR.js in Web Worker
+  // 1. First attempt with high-precision PaddleOCR.js in Web Worker (max 4s)
   try {
     const paddle = await getPaddleOcrInstance();
     if (paddle) {
@@ -224,7 +244,8 @@ export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
         img.src = preprocessed;
       });
 
-      const results = await paddle.predict(img);
+      const predictPromise = paddle.predict(img);
+      const results: any = await withTimeout(predictPromise, 4000, null);
       if (results && results.length > 0) {
         const textLines: string[] = [];
         for (const res of results) {
@@ -245,11 +266,13 @@ export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
     console.warn("[PaddleOCR error, running fallback]:", paddleErr);
   }
 
-  // 2. High-reliability fallback: Tesseract.js worker
+  // 2. High-reliability fallback: Tesseract.js worker (max 5s)
   try {
     const worker = await getSharedOcrWorker();
-    const result = await worker.recognize(preprocessed);
-    return result.data.text ?? "";
+    if (!worker) return "";
+    const recognizePromise = worker.recognize(preprocessed);
+    const result: any = await withTimeout(recognizePromise, 5000, null);
+    return result?.data?.text ?? "";
   } catch (err) {
     console.error("[OCR error]:", err);
     return "";
