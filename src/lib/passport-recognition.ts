@@ -113,6 +113,34 @@ const CITY_DICT: CityEntry[] = [
     aliases: ["singapore","singapur","sing"] },
   { es: "Pekín", country: "China", region: "Pekín", continent: "Asia",
     aliases: ["beijing","pekin","bejing","pekn"] },
+  { es: "Viena", country: "Austria", region: "Viena", continent: "Europa",
+    aliases: ["vienna","wien","viena"] },
+  { es: "Bruselas", country: "Bélgica", region: "Bruselas", continent: "Europa",
+    aliases: ["brussels","bruxelles","brussel","bruselas"] },
+  { es: "Praga", country: "República Checa", region: "Praga", continent: "Europa",
+    aliases: ["prague","praha","praga"] },
+  { es: "Varsovia", country: "Polonia", region: "Mazovia", continent: "Europa",
+    aliases: ["warsaw","warszawa","varsovia"] },
+  { es: "Frankfurt", country: "Alemania", region: "Hesse", continent: "Europa",
+    aliases: ["frankfurt","frankfrt"] },
+  { es: "Hamburgo", country: "Alemania", region: "Hamburgo", continent: "Europa",
+    aliases: ["hamburg","hamburgo"] },
+  { es: "Colonia", country: "Alemania", region: "Renania", continent: "Europa",
+    aliases: ["cologne","koln","koeln","colonia"] },
+  { es: "Düsseldorf", country: "Alemania", region: "Renania", continent: "Europa",
+    aliases: ["dusseldorf","duesseldorf"] },
+  { es: "Miami", country: "Estados Unidos", region: "Florida", continent: "América del Norte",
+    aliases: ["miami"] },
+  { es: "Orlando", country: "Estados Unidos", region: "Florida", continent: "América del Norte",
+    aliases: ["orlando"] },
+  { es: "San Francisco", country: "Estados Unidos", region: "California", continent: "América del Norte",
+    aliases: ["san francisco","sf"] },
+  { es: "Toronto", country: "Canadá", region: "Ontario", continent: "América del Norte",
+    aliases: ["toronto"] },
+  { es: "Hong Kong", country: "Hong Kong", region: "Hong Kong", continent: "Asia",
+    aliases: ["hong kong","hongkong","hk"] },
+  { es: "Seúl", country: "Corea del Sur", region: "Seúl", continent: "Asia",
+    aliases: ["seoul","seul"] },
 ];
 
 const ALIAS_MAP = new Map<string, CityEntry>();
@@ -188,14 +216,13 @@ async function getPaddleOcrInstance(): Promise<any> {
     paddleOcrInstancePromise = (async () => {
       try {
         const { PaddleOCR } = await import("@paddleocr/paddleocr-js");
-        // Timeout PaddleOCR creation to 4 seconds in case CDN download or WASM worker stalls
         const createPromise = PaddleOCR.create({
           worker: true,
           unsupportedBehavior: "warn",
         });
-        const ocr = await withTimeout(createPromise, 4000, null);
+        const ocr = await withTimeout(createPromise, 6000, null);
         if (!ocr) {
-          console.warn("[PaddleOCR] Initialization timed out after 4000ms. Falling back to Tesseract.");
+          console.warn("[PaddleOCR] Initialization timed out. Falling back to Tesseract.");
           paddleFailed = true;
           return null;
         }
@@ -213,27 +240,31 @@ async function getPaddleOcrInstance(): Promise<any> {
 let sharedWorkerPromise: Promise<any> | null = null;
 
 async function getSharedOcrWorker() {
-  if (typeof window === "undefined") throw new Error("Window undefined");
+  if (typeof window === "undefined") return null;
   if (!sharedWorkerPromise) {
     sharedWorkerPromise = (async () => {
-      const initPromise = (async () => {
-        const worker = await createWorker(["eng", "spa", "dan"]);
+      try {
+        const worker = await createWorker(["eng", "spa"]);
         await worker.setParameters({
-          tessedit_pageseg_mode: "6" as any,
+          tessedit_pageseg_mode: "11" as any, // Sparse text for round/scattered stamps
           preserve_interword_spaces: "1" as any,
         });
         return worker;
-      })();
-      return await withTimeout(initPromise, 7000, null);
-    })().catch((err) => { sharedWorkerPromise = null; throw err; });
+      } catch (err) {
+        console.warn("[Tesseract worker init error]:", err);
+        sharedWorkerPromise = null;
+        return null;
+      }
+    })();
   }
   return sharedWorkerPromise;
 }
 
 export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
+  if (!cropDataUrl) return "";
   const preprocessed = await preprocessForOcr(cropDataUrl);
 
-  // 1. First attempt with high-precision PaddleOCR.js in Web Worker (max 4s)
+  // 1. First attempt with high-precision PaddleOCR.js in Web Worker (max 5s)
   try {
     const paddle = await getPaddleOcrInstance();
     if (paddle) {
@@ -245,20 +276,36 @@ export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
       });
 
       const predictPromise = paddle.predict(img);
-      const results: any = await withTimeout(predictPromise, 4000, null);
-      if (results && results.length > 0) {
+      const results: any = await withTimeout(predictPromise, 5000, null);
+      if (results) {
         const textLines: string[] = [];
-        for (const res of results) {
-          if (res.items && Array.isArray(res.items)) {
-            for (const item of res.items) {
-              if (item.text && item.text.trim()) {
-                textLines.push(item.text.trim());
+        // PaddleOCR returns { items: [{ poly, text, score }] } OR Array of items
+        if (Array.isArray(results)) {
+          for (const res of results) {
+            if (res.items && Array.isArray(res.items)) {
+              for (const item of res.items) {
+                if (item?.text && typeof item.text === "string" && item.text.trim()) {
+                  textLines.push(item.text.trim());
+                }
               }
+            } else if (res?.text && typeof res.text === "string" && res.text.trim()) {
+              textLines.push(res.text.trim());
             }
           }
+        } else if (results.items && Array.isArray(results.items)) {
+          for (const item of results.items) {
+            if (item?.text && typeof item.text === "string" && item.text.trim()) {
+              textLines.push(item.text.trim());
+            }
+          }
+        } else if (typeof results.text === "string" && results.text.trim()) {
+          textLines.push(results.text.trim());
         }
+
         if (textLines.length > 0) {
-          return textLines.join(" ");
+          const recognized = textLines.join(" ");
+          console.debug("[PaddleOCR output]:", recognized);
+          return recognized;
         }
       }
     }
@@ -266,13 +313,17 @@ export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
     console.warn("[PaddleOCR error, running fallback]:", paddleErr);
   }
 
-  // 2. High-reliability fallback: Tesseract.js worker (max 5s)
+  // 2. High-reliability fallback: Tesseract.js worker
   try {
     const worker = await getSharedOcrWorker();
     if (!worker) return "";
     const recognizePromise = worker.recognize(preprocessed);
-    const result: any = await withTimeout(recognizePromise, 5000, null);
-    return result?.data?.text ?? "";
+    const result: any = await withTimeout(recognizePromise, 7000, null);
+    const tesseractText = result?.data?.text?.trim() ?? "";
+    if (tesseractText) {
+      console.debug("[Tesseract output]:", tesseractText);
+    }
+    return tesseractText;
   } catch (err) {
     console.error("[OCR error]:", err);
     return "";
@@ -280,54 +331,54 @@ export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
 }
 
 async function preprocessForOcr(dataUrl: string): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
-      const SCALE = 2.5;
+      const SCALE = 2.0;
       const canvas = document.createElement("canvas");
-      canvas.width  = Math.round(img.width  * SCALE);
+      canvas.width = Math.round(img.width * SCALE);
       canvas.height = Math.round(img.height * SCALE);
       const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("No 2d context"));
+      if (!ctx) return resolve(dataUrl);
+
+      ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const { data } = imageData;
       const total = data.length / 4;
+
+      let minL = 255;
+      let maxL = 0;
       const gray = new Uint8Array(total);
-      const hist = new Int32Array(256);
+
       for (let i = 0; i < total; i++) {
-        const g = Math.round(0.299 * data[i*4] + 0.587 * data[i*4+1] + 0.114 * data[i*4+2]);
-        gray[i] = g; hist[g]++;
+        const g = Math.round(0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2]);
+        gray[i] = g;
+        if (g < minL) minL = g;
+        if (g > maxL) maxL = g;
       }
-      let sumAll = 0;
-      for (let t = 0; t < 256; t++) sumAll += t * hist[t];
-      let sumB = 0, wB = 0, varMax = 0, threshold = 135;
-      for (let t = 0; t < 256; t++) {
-        wB += hist[t];
-        if (!wB) continue;
-        const wF = total - wB;
-        if (!wF) break;
-        sumB += t * hist[t];
-        const v = wB * wF * ((sumB/wB) - ((sumAll-sumB)/wF)) ** 2;
-        if (v > varMax) { varMax = v; threshold = t; }
+
+      const spread = maxL - minL;
+      if (spread > 25) {
+        for (let i = 0; i < total; i++) {
+          const norm = (gray[i] - minL) / spread;
+          // Apply gamma curve (1.2) to sharpen ink contours while preserving anti-aliasing
+          const val = Math.min(255, Math.max(0, Math.round(Math.pow(norm, 1.25) * 255)));
+          data[i * 4] = val;
+          data[i * 4 + 1] = val;
+          data[i * 4 + 2] = val;
+          data[i * 4 + 3] = 255;
+        }
+        ctx.putImageData(imageData, 0, 0);
       }
-      const T = Math.max(100, Math.min(175, threshold));
-      let dark = 0;
-      for (let i = 0; i < total; i++) if (gray[i] < T) dark++;
-      const inverted = dark / total > 0.55;
-      for (let i = 0; i < total; i++) {
-        const isInk = inverted ? gray[i] >= T : gray[i] < T;
-        const out = isInk ? 0 : 255;
-        data[i*4] = data[i*4+1] = data[i*4+2] = out;
-        data[i*4+3] = 255;
-      }
-      ctx.putImageData(imageData, 0, 0);
+
       resolve(canvas.toDataURL("image/png"));
     };
-    img.onerror = reject;
+    img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
 }
@@ -384,18 +435,18 @@ function matchCityFromDict(tokens: string[]): { entry: CityEntry; score: number 
     if (t.length < 3) continue;
     const exact = ALIAS_MAP.get(t);
     if (exact) return { entry: exact, score: 1.0 };
-    if (t.length >= 5) {
+    if (t.length >= 4) {
       for (const [alias, entry] of ALIAS_MAP) {
-        if (alias.length < 5) continue;
+        if (alias.length < 4) continue;
         if (t.includes(alias) || alias.includes(t)) {
-          if (0.92 > bestScore) { bestScore = 0.92; best = entry; }
+          if (0.95 > bestScore) { bestScore = 0.95; best = entry; }
         }
       }
     }
     for (const [alias, entry] of ALIAS_MAP) {
       if (alias.length < 4) continue;
       const sim = textSimilarity(t, alias);
-      if (sim >= 0.82 && sim > bestScore) { bestScore = sim; best = entry; }
+      if (sim >= 0.78 && sim > bestScore) { bestScore = sim; best = entry; }
     }
   }
   return best ? { entry: best, score: bestScore } : null;
@@ -467,7 +518,22 @@ export async function recogniseStamp(
   let matchedCity: City | null = null, bestCityScore = 0;
 
   if (!yearToken) {
-    // 1. User's existing database cities first
+    // 0. Primary: Curated LEGO Store city dictionary and OCR aliases (O(1) & fast substring/Levenshtein)
+    const tokensToSearch = [...tokensLower];
+    if (rawOcrText.trim()) {
+      tokensToSearch.push(stripDiacritics(rawOcrText.trim()));
+    }
+    const dictMatch = matchCityFromDict(tokensToSearch);
+    if (dictMatch && dictMatch.score >= 0.75) {
+      bestCityScore = dictMatch.score;
+      const dbCity = existingCities.find(
+        (c) => normalizeGeoToken(c.name) === normalizeGeoToken(dictMatch.entry.es) ||
+               c.name.toLowerCase() === dictMatch.entry.es.toLowerCase()
+      );
+      matchedCity = dbCity ?? cityEntryToCity(dictMatch.entry);
+    }
+
+    // 1. User's existing database cities
     for (const city of existingCities) {
       const cn = normalizeGeoToken(city.name);
       for (const token of tokensLower) {

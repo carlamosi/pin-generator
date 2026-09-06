@@ -389,17 +389,31 @@ function PassportScanPage() {
         matchedCity: null,
       };
 
-      const recognitionPromises = activeSlots.map(async (slot) => {
+      const settled: { slot: (typeof activeSlots)[0]; rec: StampRecognitionResult }[] = [];
+      for (const slot of activeSlots) {
         try {
           const rec = await recogniseStamp(slot.cropDataUrl ?? "", designs, cities);
-          return { slot, rec };
+          settled.push({ slot, rec });
         } catch (err) {
           console.warn(`[passport recognition error on slot ${slot.slot_position}]:`, err);
-          return { slot, rec: defaultRec };
+          settled.push({ slot, rec: defaultRec });
         }
-      });
+      }
 
-      const settled = await Promise.all(recognitionPromises);
+      // Collect any newly detected cities not in existingCities so the dropdown has them
+      const newCitiesToAdd: City[] = [];
+      for (const { rec } of settled) {
+        if (
+          rec.matchedCity &&
+          !cities.some((c) => c.id === rec.matchedCity!.id) &&
+          !newCitiesToAdd.some((c) => c.id === rec.matchedCity!.id)
+        ) {
+          newCitiesToAdd.push(rec.matchedCity);
+        }
+      }
+      if (newCitiesToAdd.length > 0) {
+        setExistingCities([...cities, ...newCitiesToAdd]);
+      }
 
       const queue: IdentifyState[] = settled.map(({ slot, rec }) => {
         const useExisting = rec.existingDesign !== null;
@@ -460,7 +474,11 @@ function PassportScanPage() {
         }
 
         let finalCityId = item.editCityId || null;
-        if (!finalCityId && item.editName) {
+        if (finalCityId && (finalCityId.startsWith("dict-") || finalCityId.startsWith("geo-"))) {
+          const targetCityName = item.recognition.matchedCity?.name || item.editName;
+          const autoCity = await findOrCreateCityFromGeo(targetCityName);
+          finalCityId = autoCity ? autoCity.id : null;
+        } else if (!finalCityId && item.editName) {
           const autoCity = await findOrCreateCityFromGeo(item.editName);
           if (autoCity) finalCityId = autoCity.id;
         }
@@ -1076,6 +1094,15 @@ function PassportScanPage() {
                         className="w-full bg-[#18181b] text-white border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-white/25"
                       >
                         <option value="" className="bg-[#18181b] text-white py-1.5">— Sin ciudad específica —</option>
+                        {current.recognition.matchedCity &&
+                          !existingCities.some((c) => c.id === current.recognition.matchedCity?.id) && (
+                            <option
+                              value={current.recognition.matchedCity.id}
+                              className="bg-[#18181b] text-emerald-400 font-medium py-1.5"
+                            >
+                              {current.recognition.matchedCity.name}, {current.recognition.matchedCity.country} (Detectado)
+                            </option>
+                        )}
                         {existingCities.map((c) => (
                           <option key={c.id} value={c.id} className="bg-[#18181b] text-white py-1.5">
                             {c.name}, {c.country}
