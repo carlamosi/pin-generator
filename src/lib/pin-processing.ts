@@ -12,18 +12,82 @@ export interface PinLocation {
 }
 
 /**
- * Normalizes text by removing accents, symbols, and excess whitespace.
+ * Normalizes text by removing noise characters but PRESERVING digits
+ * (years, postal codes) and common punctuation that appears in place names.
+ * Minimum token length lowered to 2 to catch short city codes (e.g. "DE").
  */
 export function cleanOcrText(text: string): string[] {
   return text
     .split(/\r?\n/)
     .map((line) =>
       line
-        .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑçÇàèòÀÈÒäëïöüÄËÏÖÜ\s-]/g, " ")
+        // Keep letters (with accents), digits, spaces and hyphens; strip the rest
+        .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑçÇàèòÀÈÒäëïöüÄËÏÖÜ\s\-\.]/g, " ")
         .replace(/\s+/g, " ")
         .trim()
     )
-    .filter((line) => line.length >= 3);
+    .filter((line) => line.length >= 2);
+}
+
+/**
+ * Prepares an image source for maximum OCR accuracy on small badge/stamp text:
+ *  1. Composites the transparent PNG over a pure-white background (transparency
+ *     confuses Tesseract, which interprets alpha=0 as black blobs).
+ *  2. Upscales to at least 1400 px on the longest side (Tesseract accuracy
+ *     improves dramatically above 150 DPI; stamps are small so we push it).
+ *  3. Converts to greyscale and applies a strong contrast boost via pixel
+ *     manipulation so faint ink becomes solid black on white.
+ * Returns the canvas element — pass `.toDataURL()` directly to Tesseract.
+ */
+function prepareOcrCanvas(source: HTMLCanvasElement | HTMLImageElement): HTMLCanvasElement {
+  const srcW = source instanceof HTMLCanvasElement ? source.width  : source.naturalWidth;
+  const srcH = source instanceof HTMLCanvasElement ? source.height : source.naturalHeight;
+
+  // Scale up so shortest side is at least 1400 px
+  const SCALE_TARGET = 1400;
+  const scale = Math.max(SCALE_TARGET / srcW, SCALE_TARGET / srcH, 1);
+  const dstW = Math.round(srcW * scale);
+  const dstH = Math.round(srcH * scale);
+
+  const out = document.createElement("canvas");
+  out.width  = dstW;
+  out.height = dstH;
+  const ctx = out.getContext("2d")!;
+
+  // Step 1: white background (prevents transparent pixels → black in Tesseract)
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, dstW, dstH);
+
+  // Step 2: draw source upscaled
+  ctx.drawImage(source, 0, 0, dstW, dstH);
+
+  // Step 3: greyscale + contrast boost via pixel manipulation
+  const imageData = ctx.getImageData(0, 0, dstW, dstH);
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    // Flatten alpha: blend with white
+    const a = d[i + 3] / 255;
+    const r = d[i]     * a + 255 * (1 - a);
+    const g = d[i + 1] * a + 255 * (1 - a);
+    const b = d[i + 2] * a + 255 * (1 - a);
+
+    // Luminance (perceptual greyscale)
+    let lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+    // Contrast stretch: push dark toward black, light toward white
+    // factor 1.8 increases contrast around the 128 midpoint
+    const factor = 1.8;
+    lum = (lum - 128) * factor + 128;
+    lum = Math.max(0, Math.min(255, lum));
+
+    d[i]     = lum;
+    d[i + 1] = lum;
+    d[i + 2] = lum;
+    d[i + 3] = 255; // fully opaque
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  return out;
 }
 
 /**
@@ -712,17 +776,58 @@ export async function processPinImage(
           pinWidthMm = Math.round((35.0 * aspect) * 10) / 10;
         }
 
-        // 2. Multilingual OCR on clean cutout (eng, spa, cat)
+        // 2. High-accuracy multilingual OCR — preprocess image first, then
+        //    run 3 Tesseract passes with different PSM modes and pick the best.
         let rawOcrText = "";
         let pinLocation: PinLocation | undefined = undefined;
         try {
-          console.log(`${tag} running OCR recognition...`);
-          const worker = await createWorker(["eng", "spa", "cat"]);
-          try {
-            const ocrResult = await worker.recognize(removedBgBlob);
-            rawOcrText = ocrResult.data.text ?? "";
-          } finally {
-            await worker.terminate();
+          console.log(`${tag} running high-accuracy OCR (3-pass)...`);
+
+          // Build a white-background, high-contrast, upscaled grayscale canvas.
+          // Running OCR on the *image element* (not the blob) lets us composite
+          // transparent areas over white, preventing them from being read as black ink.
+          const ocrCanvas = prepareOcrCanvas(cleanImg);
+          const ocrDataUrl = ocrCanvas.toDataURL("image/png");
+
+          // PSM modes to try (in order of confidence):
+          //   11 = sparse text — best for circular / curved stamp text
+          //    6 = assume uniform block of text — good for rectangular badges
+          //    3 = fully automatic (Tesseract default)
+          const PSM_MODES = [11, 6, 3] as const;
+
+          type TessPSM = typeof PSM_MODES[number];
+          type PassResult = { text: string; confidence: number };
+
+          // Reuse one worker for all 3 passes (avoids repeated model loading)
+          const worker = await createWorker(["eng", "spa", "cat"], 1, {
+            // OEM 1 = LSTM only (most accurate neural model)
+          });
+
+          const passes: PassResult[] = [];
+          for (const psm of PSM_MODES) {
+            try {
+              await worker.setParameters({ tessedit_pageseg_mode: psm as any });
+              const res = await worker.recognize(ocrDataUrl);
+              const text = res.data.text ?? "";
+              const confidence = res.data.confidence ?? 0;
+              passes.push({ text, confidence });
+              console.log(`${tag} OCR PSM ${psm}: confidence=${confidence.toFixed(1)}, chars=${text.length}`);
+            } catch (passErr) {
+              console.warn(`${tag} OCR PSM ${psm} failed:`, passErr);
+            }
+          }
+          await worker.terminate();
+
+          // Pick the pass with the highest confidence score.
+          // Tie-break: prefer longer text (more content extracted).
+          if (passes.length > 0) {
+            const best = passes.reduce((a, b) => {
+              if (b.confidence > a.confidence + 5) return b; // clear winner
+              if (a.confidence > b.confidence + 5) return a;
+              return b.text.length >= a.text.length ? b : a; // tie → more text
+            });
+            rawOcrText = best.text;
+            console.log(`${tag} OCR best pass: confidence=${best.confidence.toFixed(1)}, text="${rawOcrText.slice(0, 120)}"`);
           }
 
           const cleanTokens = cleanOcrText(rawOcrText);
