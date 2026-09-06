@@ -6,6 +6,7 @@ import {
   Upload, Wand2, CheckCircle2, Loader2, Camera, FileArchive,
   RotateCcw, Save, Sparkles, Image as ImageIcon, Check,
   AlertCircle, RefreshCw, X, Layers, Calendar,
+  ChevronLeft, ChevronRight, Trash2, MapPin, Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,9 @@ interface BatchItem {
   status: "pending" | "processing" | "done" | "error";
   tripId?: string;
   cityId?: string;
+  date?: string;
+  poi?: string;
+  rawText?: string;
 }
 
 function parseLocationFromFilename(filename: string): { city?: string; year?: string } {
@@ -83,7 +87,10 @@ function StudioPage() {
   // Batch ZIP states
   const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
   const [batchProcessing, setBatchProcessing] = useState(false);
+  const [batchSaving, setBatchSaving] = useState(false);
   const [batchTripId, setBatchTripId] = useState<string>("");
+  const [batchDate, setBatchDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [selectedBatchIdx, setSelectedBatchIdx] = useState<number | null>(null);
   const [isDraggingZip, setIsDraggingZip] = useState(false);
 
   // Live Camera with Level Gauge & Crosshairs states
@@ -409,11 +416,18 @@ function StudioPage() {
           const fileName = relativePath.split("/").pop() || relativePath;
           const parsed = parseLocationFromFilename(fileName);
 
+          const matchedCity = parsed.city
+            ? cities.find((c) => c.name.toLowerCase() === parsed.city?.toLowerCase())
+            : undefined;
+
           items.push({
             id: nanoid(),
             name: fileName,
             dataUrl,
-            city: parsed.city,
+            city: matchedCity?.name || parsed.city || "",
+            country: matchedCity?.country || "",
+            tripId: matchedCity?.trip_id || batchTripId || undefined,
+            date: parsed.year ? `${parsed.year}-06-01` : batchDate,
             status: "pending",
           });
         }
@@ -424,7 +438,8 @@ function StudioPage() {
         return;
       }
       setBatchItems(items);
-      toast.success(`${items.length} imágenes extraídas del ZIP ✓`);
+      setSelectedBatchIdx(0);
+      toast.success(`${items.length} imágenes extraídas — ahora puedes catalogar y guardar ✓`);
     } catch {
       toast.dismiss(toastId);
       toast.error("Error al leer el archivo ZIP");
@@ -450,16 +465,150 @@ function StudioPage() {
     await processZipBlob(file);
   };
 
+  // Helper functions for per-item and batch editing
+  const updateBatchItem = (idx: number, updates: Partial<BatchItem>) => {
+    setBatchItems((prev) =>
+      prev.map((it, i) => (i === idx ? { ...it, ...updates } : it))
+    );
+  };
+
+  const handleBatchCountryChange = (idx: number, country: string) => {
+    const norm = country.toLowerCase().trim();
+    const suggestion = SUGGESTED_CAPITALS[norm];
+    updateBatchItem(idx, {
+      country,
+      ...(suggestion && !batchItems[idx]?.city ? { city: suggestion.city, region: suggestion.region } : {}),
+    });
+  };
+
+  const removeBatchItem = (idx: number) => {
+    setBatchItems((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      if (selectedBatchIdx !== null) {
+        if (next.length === 0) setSelectedBatchIdx(null);
+        else if (selectedBatchIdx >= next.length) setSelectedBatchIdx(next.length - 1);
+      }
+      return next;
+    });
+    toast.info("Pin eliminado del lote");
+  };
+
+  const applyGlobalToAll = () => {
+    setBatchItems((prev) =>
+      prev.map((it) => ({
+        ...it,
+        tripId: batchTripId || it.tripId,
+        date: batchDate || it.date,
+      }))
+    );
+    toast.success("Viaje y fecha aplicados a todos los pines del lote ✓");
+  };
+
+  const saveSingleBatchItem = async (idx: number) => {
+    const item = batchItems[idx];
+    if (!item) return;
+
+    const toastId = toast.loading(`Guardando "${item.city || item.name}"...`);
+    try {
+      let cutoutUrl = item.cutoutUrl;
+      let widthMm = item.widthMm || 35;
+      let heightMm = item.heightMm || 35;
+      let shape = item.region || "regular";
+
+      if (!cutoutUrl) {
+        try {
+          const img = await loadImage(item.dataUrl);
+          const res = await processPinImage(img, item.name);
+          if (res.status === "ok") {
+            const cutoutData = res.thumbnailDataUrl ?? item.dataUrl;
+            cutoutUrl = await uploadCutout(item.id, cutoutData);
+            widthMm = res.widthMm;
+            heightMm = res.heightMm;
+            shape = res.location?.region || res.shape || shape;
+          } else {
+            cutoutUrl = await uploadCutout(item.id, item.dataUrl);
+          }
+        } catch {
+          cutoutUrl = await uploadCutout(item.id, item.dataUrl);
+        }
+      }
+
+      const cityName = (item.city || "Ciudad").trim();
+      const countryName = (item.country || "Desconocido").trim();
+      const tripId = item.tripId || batchTripId || null;
+      const acquisitionDate = item.date || batchDate || new Date().toISOString().split("T")[0];
+
+      let matchedCity = cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+      let cityId = matchedCity?.id;
+
+      if (!matchedCity && cityName !== "Ciudad") {
+        const newCityId = nanoid();
+        const pinCode = `${(item.poi || cityName).slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
+        const { error: cityErr } = await supabase.from("cities").insert({
+          id: newCityId,
+          trip_id: tripId,
+          name: cityName,
+          region: shape || null,
+          country: countryName,
+          continent: "Europa",
+          has_pin: true,
+          pin_code: pinCode,
+          start_date: acquisitionDate,
+          end_date: acquisitionDate,
+        });
+        if (!cityErr) {
+          cityId = newCityId;
+        }
+      } else if (matchedCity) {
+        await supabase.from("cities").update({
+          has_pin: true,
+          trip_id: tripId || matchedCity.trip_id || null,
+          start_date: matchedCity.start_date || acquisitionDate,
+        }).eq("id", matchedCity.id);
+      }
+
+      const pinCode = matchedCity?.pin_code ||
+        `${(item.poi || cityName).slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
+      const displayCity = item.poi ? `${cityName} · ${item.poi}` : cityName;
+
+      await supabase.from("pins").upsert({
+        id: item.id,
+        trip_id: tripId,
+        city_id: cityId || null,
+        pin_id: pinCode,
+        city: displayCity,
+        country: countryName,
+        region: shape || null,
+        acquisition_date: acquisitionDate,
+        dimensions: { width_mm: widthMm, height_mm: heightMm },
+        shape: shape,
+        transparent_image_url: cutoutUrl,
+      }, { onConflict: "id" });
+
+      listCities().then(setCities).catch(() => {});
+      toast.dismiss(toastId);
+      toast.success(`Pin de ${displayCity} guardado en el álbum ✓`);
+
+      updateBatchItem(idx, {
+        status: "done",
+        cutoutUrl,
+        city: cityName,
+        country: countryName,
+      });
+    } catch {
+      toast.dismiss(toastId);
+      toast.error("Error al guardar el pin");
+    }
+  };
+
+  // PHASE 1: AI processing only — extracts cutout, OCR, shape. No DB writes.
   const processBatchAll = async () => {
     if (!cvReady || batchItems.length === 0) return;
     setBatchProcessing(true);
 
-    let savedCount = 0;
-    let errorCount = 0;
-
     for (let i = 0; i < batchItems.length; i++) {
       const item = batchItems[i];
-      if (item.status === "done") { savedCount++; continue; }
+      if (item.status === "done" && item.cutoutUrl) continue;
 
       setBatchItems((prev) =>
         prev.map((it, idx) => (idx === i ? { ...it, status: "processing" } : it))
@@ -467,80 +616,35 @@ function StudioPage() {
 
       try {
         const img = await loadImage(item.dataUrl);
-        const pinId = nanoid();
+        const pinId = item.id;
         const res = await processPinImage(img, item.name);
         if (res.status !== "ok") {
           setBatchItems((prev) =>
             prev.map((it, idx) => (idx === i ? { ...it, status: "error" } : it))
           );
-          errorCount++;
           continue;
         }
+
         const cutoutData = res.thumbnailDataUrl ?? item.dataUrl;
         const cutoutUrl = await uploadCutout(pinId, cutoutData);
 
-        // --- City sync (same logic as saveSinglePin) ---
-        const cityName = (item.city || res.rawText?.split("\n")[0]?.trim() || "Ciudad").trim();
-        const countryName = (item.country || "Desconocido").trim();
-
-        let matchedCity = cities.find(
-          (c) => c.name.toLowerCase() === cityName.toLowerCase()
-        );
-        let cityId = matchedCity?.id;
-
-        if (!matchedCity && cityName !== "Ciudad") {
-          const newCityId = nanoid();
-          const pinCode = `${cityName.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
-          const { error: cityErr } = await supabase.from("cities").insert({
-            id: newCityId,
-            trip_id: batchTripId || null,
-            name: cityName,
-            region: res.shape || null,
-            country: countryName,
-            continent: "Europa",
-            has_pin: true,
-            pin_code: pinCode,
-          });
-          if (!cityErr) {
-            cityId = newCityId;
-          }
-        } else if (matchedCity) {
-          await supabase.from("cities").update({
-            has_pin: true,
-            trip_id: batchTripId || matchedCity.trip_id || null,
-          }).eq("id", matchedCity.id);
-        }
-
-        const tripId = batchTripId || matchedCity?.trip_id || null;
-        const pinCode = matchedCity?.pin_code || `${cityName.slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
-
-        await supabase.from("pins").upsert({
-          id: pinId,
-          trip_id: tripId,
-          city_id: cityId || null,
-          pin_id: pinCode,
-          city: matchedCity?.name || cityName,
-          country: countryName,
-          region: matchedCity?.region || res.shape,
-          dimensions: { width_mm: res.widthMm, height_mm: res.heightMm },
-          shape: res.shape,
-          transparent_image_url: cutoutUrl,
-        }, { onConflict: "id" });
-
-        savedCount++;
+        const ocrCity = item.city || res.location?.city || undefined;
+        const ocrCountry = item.country || res.location?.country || undefined;
 
         setBatchItems((prev) =>
           prev.map((it, idx) =>
             idx === i
               ? {
                   ...it,
+                  id: pinId,
                   status: "done",
                   cutoutUrl,
-                  city: matchedCity?.name || cityName,
-                  country: countryName,
+                  city: ocrCity || it.city,
+                  country: ocrCountry || it.country,
+                  region: res.location?.region || res.shape,
                   widthMm: res.widthMm,
                   heightMm: res.heightMm,
-                  region: matchedCity?.region || undefined,
+                  rawText: res.rawText,
                 }
               : it
           )
@@ -549,16 +653,133 @@ function StudioPage() {
         setBatchItems((prev) =>
           prev.map((it, idx) => (idx === i ? { ...it, status: "error" } : it))
         );
-        errorCount++;
       }
     }
 
-    // Refresh cities list so new ones appear in dropdowns
-    listCities().then(setCities).catch(() => {});
-
     setBatchProcessing(false);
+    const doneCount = batchItems.filter((it) => it.status !== "error").length;
+    toast.success(`✓ ${doneCount} pines aislados con IA — catalogación lista para guardar`);
+    if (selectedBatchIdx === null && batchItems.length > 0) {
+      setSelectedBatchIdx(0);
+    }
+  };
+
+  // PHASE 2: Save all catalogued items to Supabase (cities + pins tables)
+  const saveAllBatch = async () => {
+    if (batchItems.length === 0) return;
+    setBatchSaving(true);
+
+    let savedCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < batchItems.length; i++) {
+      const item = batchItems[i];
+      try {
+        let cutoutUrl = item.cutoutUrl;
+        let widthMm = item.widthMm || 35;
+        let heightMm = item.heightMm || 35;
+        let shape = item.region || "regular";
+
+        // If cutout was not generated yet, isolate/upload now
+        if (!cutoutUrl) {
+          setBatchItems((prev) =>
+            prev.map((it, idx) => (idx === i ? { ...it, status: "processing" } : it))
+          );
+          try {
+            const img = await loadImage(item.dataUrl);
+            const res = await processPinImage(img, item.name);
+            if (res.status === "ok") {
+              const cutoutData = res.thumbnailDataUrl ?? item.dataUrl;
+              cutoutUrl = await uploadCutout(item.id, cutoutData);
+              widthMm = res.widthMm;
+              heightMm = res.heightMm;
+              shape = res.location?.region || res.shape || shape;
+            } else {
+              cutoutUrl = await uploadCutout(item.id, item.dataUrl);
+            }
+          } catch {
+            cutoutUrl = await uploadCutout(item.id, item.dataUrl);
+          }
+        }
+
+        const cityName = (item.city || "Ciudad").trim();
+        const countryName = (item.country || "Desconocido").trim();
+        const tripId = item.tripId || batchTripId || null;
+        const acquisitionDate = item.date || batchDate || new Date().toISOString().split("T")[0];
+
+        // City sync
+        let matchedCity = cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+        let cityId = matchedCity?.id;
+
+        if (!matchedCity && cityName !== "Ciudad") {
+          const newCityId = nanoid();
+          const pinCode = `${(item.poi || cityName).slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
+          const { error: cityErr } = await supabase.from("cities").insert({
+            id: newCityId,
+            trip_id: tripId,
+            name: cityName,
+            region: shape || null,
+            country: countryName,
+            continent: "Europa",
+            has_pin: true,
+            pin_code: pinCode,
+            start_date: acquisitionDate,
+            end_date: acquisitionDate,
+          });
+          if (!cityErr) {
+            cityId = newCityId;
+          }
+        } else if (matchedCity) {
+          await supabase.from("cities").update({
+            has_pin: true,
+            trip_id: tripId || matchedCity.trip_id || null,
+            start_date: matchedCity.start_date || acquisitionDate,
+          }).eq("id", matchedCity.id);
+        }
+
+        const pinCode = matchedCity?.pin_code ||
+          `${(item.poi || cityName).slice(0, 3).toUpperCase()}-${new Date().getFullYear()}`;
+        const displayCity = item.poi ? `${cityName} · ${item.poi}` : cityName;
+
+        await supabase.from("pins").upsert({
+          id: item.id,
+          trip_id: tripId,
+          city_id: cityId || null,
+          pin_id: pinCode,
+          city: displayCity,
+          country: countryName,
+          region: shape || null,
+          acquisition_date: acquisitionDate,
+          dimensions: { width_mm: widthMm, height_mm: heightMm },
+          shape: shape,
+          transparent_image_url: cutoutUrl,
+        }, { onConflict: "id" });
+
+        savedCount++;
+        setBatchItems((prev) =>
+          prev.map((it, idx) =>
+            idx === i
+              ? { ...it, status: "done", cutoutUrl, city: cityName, country: countryName }
+              : it
+          )
+        );
+      } catch (err) {
+        console.error("Error saving batch item:", err);
+        errorCount++;
+        setBatchItems((prev) =>
+          prev.map((it, idx) => (idx === i ? { ...it, status: "error" } : it))
+        );
+      }
+    }
+
+    // Refresh cities list
+    listCities().then(setCities).catch(() => {});
+    setBatchSaving(false);
+
     if (errorCount === 0) {
-      toast.success(`✓ ${savedCount} pin${savedCount !== 1 ? "es" : ""} guardados y ciudades sincronizadas`);
+      toast.success(`✓ ${savedCount} pin${savedCount !== 1 ? "es" : ""} guardados y catalogados en tu álbum`);
+      setBatchItems([]);
+      setSelectedBatchIdx(null);
     } else {
       toast.warning(`${savedCount} guardados · ${errorCount} con error`);
     }
@@ -898,17 +1119,35 @@ function StudioPage() {
         {/* 2. BATCH ZIP TAB */}
         <TabsContent value="zip" className="space-y-6">
           <div className="glass-strong rounded-3xl p-6 border border-white/15 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+            {/* Top Toolbar */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/10">
               <div>
-                <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">
-                  Procesamiento por Lotes desde ZIP
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">
+                    Lote Masivo ZIP
+                  </h3>
+                  {batchItems.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-white/10 text-white border-white/20 text-[10px] font-mono">
+                        {batchItems.length} pines
+                      </Badge>
+                      <Badge className="bg-neon/15 text-neon border-neon/30 text-[10px] font-mono">
+                        {batchItems.filter((i) => i.status === "done").length} listos
+                      </Badge>
+                      {batchItems.some((i) => i.status === "pending") && (
+                        <Badge className="bg-cyan/15 text-cyan border-cyan/30 text-[10px] font-mono">
+                          {batchItems.filter((i) => i.status === "pending").length} pendientes
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <p className="text-xs text-muted-fg mt-0.5">
-                  Arrastra o selecciona un archivo .zip para procesar múltiples fotos en secuencia.
+                  Extrae imágenes de un archivo comprimido, clasifícalas por ciudad y guárdalas en el álbum.
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <input
                   type="file"
                   ref={zipInputRef}
@@ -916,77 +1155,358 @@ function StudioPage() {
                   accept=".zip"
                   className="hidden"
                 />
-                <Button
-                  onClick={() => zipInputRef.current?.click()}
-                  variant="outline"
-                  className="bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs font-semibold gap-2"
-                >
-                  <FileArchive className="h-4 w-4 text-violet" />
-                  Cargar Archivo ZIP
-                </Button>
-                <Button
-                  onClick={processBatchAll}
-                  disabled={batchItems.length === 0 || batchProcessing || !cvReady}
-                  className="bg-gradient-to-r from-violet to-cyan text-white font-semibold text-xs rounded-xl shadow-[0_0_20px_-4px_rgba(108,99,255,0.6)] gap-2"
-                >
-                  {batchProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                  Procesar Todo el Lote ({batchItems.length})
-                </Button>
+
+                {batchItems.length === 0 ? (
+                  <Button
+                    onClick={() => zipInputRef.current?.click()}
+                    className="bg-violet hover:bg-violet/90 text-white rounded-xl text-xs font-semibold gap-2 shadow-[0_0_20px_-4px_rgba(108,99,255,0.6)]"
+                  >
+                    <FileArchive className="h-4 w-4" />
+                    Cargar Archivo ZIP
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={processBatchAll}
+                      disabled={batchProcessing || !cvReady}
+                      variant="outline"
+                      className="bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs font-semibold gap-2"
+                    >
+                      {batchProcessing ? <Loader2 className="h-4 w-4 animate-spin text-cyan" /> : <Wand2 className="h-4 w-4 text-cyan" />}
+                      1. Aislar con IA ({batchItems.length})
+                    </Button>
+
+                    <Button
+                      onClick={saveAllBatch}
+                      disabled={batchSaving || batchProcessing}
+                      className="bg-neon hover:bg-neon/90 text-black font-semibold text-xs rounded-xl shadow-[0_0_20px_-4px_#00ffb2] gap-2 px-4"
+                    >
+                      {batchSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      2. Guardar Lote en Álbum ({batchItems.length})
+                    </Button>
+
+                    <Button
+                      onClick={() => {
+                        setBatchItems([]);
+                        setSelectedBatchIdx(null);
+                      }}
+                      variant="ghost"
+                      size="icon"
+                      title="Descartar lote y cargar otro"
+                      className="text-muted-fg hover:text-white hover:bg-white/10 rounded-xl h-9 w-9"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Drag and Drop Zone for ZIP */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setIsDraggingZip(true); }}
-              onDragLeave={() => setIsDraggingZip(false)}
-              onDrop={handleZipDrop}
-              onClick={() => zipInputRef.current?.click()}
-              className={cn(
-                "border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 text-center",
-                isDraggingZip
-                  ? "border-violet bg-violet/10 scale-[1.01]"
-                  : "border-white/10 hover:border-violet/40 bg-white/[0.01] hover:bg-white/[0.03]"
-              )}
-            >
-              <FileArchive className="h-10 w-10 mb-2 text-violet opacity-80 animate-bounce" />
-              <p className="text-sm font-semibold text-white">
-                Arrastra tu archivo ZIP aquí o haz clic para explorar
-              </p>
-              <p className="text-xs text-muted-fg mt-1 font-mono">
-                Soporta .zip con imágenes directas o subcarpetas
-              </p>
-            </div>
+            {/* Drag and Drop Zone if empty */}
+            {batchItems.length === 0 && (
+              <div
+                onDragOver={(e) => { e.preventDefault(); setIsDraggingZip(true); }}
+                onDragLeave={() => setIsDraggingZip(false)}
+                onDrop={handleZipDrop}
+                onClick={() => zipInputRef.current?.click()}
+                className={cn(
+                  "border-2 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 text-center min-h-[280px]",
+                  isDraggingZip
+                    ? "border-violet bg-violet/10 scale-[1.01]"
+                    : "border-white/10 hover:border-violet/40 bg-white/[0.01] hover:bg-white/[0.03]"
+                )}
+              >
+                <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-violet mb-4 shadow-[0_0_30px_-4px_rgba(108,99,255,0.4)]">
+                  <FileArchive className="h-8 w-8" />
+                </div>
+                <p className="text-base font-display font-semibold text-white">
+                  Arrastra tu archivo ZIP aquí o haz clic para explorar
+                </p>
+                <p className="text-xs text-muted-fg mt-1.5 max-w-sm">
+                  Soporta imágenes individuales o carpetas. Se detectarán automáticamente nombres de ciudades, años y fondos transparentes.
+                </p>
+              </div>
+            )}
 
+            {/* If Batch Loaded: Show Quick Global Settings + Master-Detail */}
             {batchItems.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pt-4">
-                {batchItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="glass rounded-2xl p-3 border border-white/10 flex flex-col items-center space-y-2 relative overflow-hidden"
-                  >
-                    <div className="h-24 w-full rounded-xl checker-bg flex items-center justify-center p-2">
-                      <img
-                        src={item.cutoutUrl || item.dataUrl}
-                        alt={item.name}
-                        className="max-h-full object-contain"
+              <div className="space-y-6">
+                {/* Global Batch Defaults Bar */}
+                <div className="glass rounded-2xl p-4 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-xs font-semibold text-muted-fg uppercase tracking-wider font-mono">
+                      Ajustes rápidos para todo el lote:
+                    </span>
+                    <div className="w-52">
+                      <Select value={batchTripId} onValueChange={setBatchTripId}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9">
+                          <SelectValue placeholder="Asignar viaje común..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#0a0a14] border-white/15 text-white">
+                          {trips.map((t) => (
+                            <SelectItem key={t.id} value={t.id}>
+                              {t.name} ({t.transport || "Viaje"})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-36">
+                      <Input
+                        type="date"
+                        value={batchDate}
+                        onChange={(e) => setBatchDate(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9"
                       />
                     </div>
-                    <div className="w-full text-center">
-                      <p className="text-xs font-semibold text-white truncate">{item.city || item.name}</p>
-                      <Badge
-                        className={cn(
-                          "mt-1 text-[9px] font-mono px-2 py-0.5",
-                          item.status === "done" && "bg-neon/15 text-neon border-neon/30",
-                          item.status === "processing" && "bg-cyan/15 text-cyan border-cyan/30 animate-pulse",
-                          item.status === "pending" && "bg-white/5 text-muted-fg border-white/10",
-                          item.status === "error" && "bg-coral/15 text-coral border-coral/30"
-                        )}
-                      >
-                        {item.status === "done" ? "✓ Listo" : item.status === "processing" ? "Procesando..." : item.status}
-                      </Badge>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={applyGlobalToAll}
+                    className="bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs h-9"
+                  >
+                    Aplicar a Todos
+                  </Button>
+                </div>
+
+                {/* Master-Detail: Grid on Left (7 cols) + Cataloguing Panel on Right (5 cols) */}
+                <div className="grid grid-cols-12 gap-6 items-start">
+                  {/* Left: Pins Grid */}
+                  <div className="col-span-12 lg:col-span-7 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-muted-fg font-mono uppercase tracking-wider">
+                        Selecciona un pin para catalogar ({batchItems.length})
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[640px] overflow-y-auto pr-1">
+                      {batchItems.map((item, idx) => {
+                        const isSelected = selectedBatchIdx === idx;
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => setSelectedBatchIdx(idx)}
+                            className={cn(
+                              "rounded-2xl p-2.5 border cursor-pointer transition-all duration-200 flex flex-col space-y-2 relative group",
+                              isSelected
+                                ? "border-cyan bg-cyan/10 ring-2 ring-cyan/60 shadow-[0_0_20px_rgba(0,212,255,0.25)]"
+                                : "border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.05]"
+                            )}
+                          >
+                            <div className="h-24 w-full rounded-xl checker-bg flex items-center justify-center p-2 relative overflow-hidden">
+                              <img
+                                src={item.cutoutUrl || item.dataUrl}
+                                alt={item.name}
+                                className="max-h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform"
+                              />
+                              <span className="absolute top-1.5 left-1.5 text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 text-white/80 backdrop-blur-sm">
+                                #{idx + 1}
+                              </span>
+                            </div>
+
+                            <div className="space-y-0.5">
+                              <p className="text-xs font-semibold text-white truncate">
+                                {item.city || item.name}
+                              </p>
+                              <p className="text-[10px] text-muted-fg truncate">
+                                {item.country || "Sin país"} {item.poi ? `· ${item.poi}` : ""}
+                              </p>
+                              <Badge
+                                className={cn(
+                                  "mt-1 text-[9px] font-mono px-1.5 py-0.2",
+                                  item.status === "done" && "bg-neon/15 text-neon border-neon/30",
+                                  item.status === "processing" && "bg-cyan/15 text-cyan border-cyan/30 animate-pulse",
+                                  item.status === "pending" && "bg-white/5 text-muted-fg border-white/10",
+                                  item.status === "error" && "bg-coral/15 text-coral border-coral/30"
+                                )}
+                              >
+                                {item.status === "done" ? "✓ Listo" : item.status === "processing" ? "Aislando..." : item.status === "error" ? "Error" : "Pendiente"}
+                              </Badge>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
+
+                  {/* Right: Cataloguing & Detail Inspector */}
+                  <div className="col-span-12 lg:col-span-5">
+                    {selectedBatchIdx !== null && batchItems[selectedBatchIdx] ? (
+                      (() => {
+                        const cur = batchItems[selectedBatchIdx];
+                        return (
+                          <div className="glass-strong rounded-3xl p-5 border border-white/15 space-y-4 sticky top-6 shadow-2xl">
+                            {/* Panel Header */}
+                            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                              <div>
+                                <span className="font-display font-bold text-xs tracking-wider text-white uppercase flex items-center gap-1.5">
+                                  <MapPin className="h-3.5 w-3.5 text-cyan" />
+                                  Catalogar Pin #{selectedBatchIdx + 1}
+                                </span>
+                                <p className="text-[10px] text-muted-fg truncate max-w-[200px] mt-0.5 font-mono">
+                                  {cur.name}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  disabled={selectedBatchIdx === 0}
+                                  onClick={() => setSelectedBatchIdx(selectedBatchIdx - 1)}
+                                  className="h-8 w-8 text-white/70 hover:text-white rounded-lg"
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  disabled={selectedBatchIdx === batchItems.length - 1}
+                                  onClick={() => setSelectedBatchIdx(selectedBatchIdx + 1)}
+                                  className="h-8 w-8 text-white/70 hover:text-white rounded-lg"
+                                >
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeBatchItem(selectedBatchIdx)}
+                                  className="h-8 w-8 text-coral hover:text-coral/80 hover:bg-coral/10 rounded-lg"
+                                  title="Eliminar este pin del lote"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Preview Area */}
+                            <div className="checker-bg rounded-2xl h-44 flex items-center justify-center p-3 border border-white/10 relative">
+                              <img
+                                src={cur.cutoutUrl || cur.dataUrl}
+                                alt={cur.name}
+                                className="max-h-full object-contain filter drop-shadow-xl"
+                              />
+                              {cur.cutoutUrl && (
+                                <Badge className="absolute top-2 right-2 bg-neon/20 text-neon border-neon/30 text-[9px] font-mono">
+                                  Fondo Aislado
+                                </Badge>
+                              )}
+                            </div>
+
+                            {/* Form Fields for the Selected Pin */}
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-2.5">
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-semibold text-muted-fg flex items-center gap-1">
+                                    <Globe className="h-3 w-3 text-cyan" />
+                                    País
+                                  </Label>
+                                  <Input
+                                    value={cur.country || ""}
+                                    onChange={(e) => handleBatchCountryChange(selectedBatchIdx, e.target.value)}
+                                    placeholder="Ej: Dinamarca"
+                                    className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-semibold text-muted-fg flex items-center gap-1">
+                                    <MapPin className="h-3 w-3 text-cyan" />
+                                    Ciudad Base
+                                  </Label>
+                                  <Input
+                                    value={cur.city || ""}
+                                    onChange={(e) => updateBatchItem(selectedBatchIdx, { city: e.target.value })}
+                                    placeholder="Ej: Copenhagen"
+                                    className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label className="text-[11px] font-semibold text-muted-fg">
+                                  Lugar de Interés / POI (Opcional)
+                                </Label>
+                                <Input
+                                  value={cur.poi || ""}
+                                  onChange={(e) => updateBatchItem(selectedBatchIdx, { poi: e.target.value })}
+                                  placeholder="Ej: Tivoli / Amalienborg"
+                                  className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9"
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-2.5">
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-semibold text-muted-fg flex items-center gap-1">
+                                    <Calendar className="h-3 w-3 text-cyan" />
+                                    Fecha
+                                  </Label>
+                                  <Input
+                                    type="date"
+                                    value={cur.date || batchDate}
+                                    onChange={(e) => updateBatchItem(selectedBatchIdx, { date: e.target.value })}
+                                    className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-semibold text-muted-fg">Expedición</Label>
+                                  <Select
+                                    value={cur.tripId || batchTripId}
+                                    onValueChange={(val) => updateBatchItem(selectedBatchIdx, { tripId: val })}
+                                  >
+                                    <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl text-xs h-9">
+                                      <SelectValue placeholder="Elegir viaje..." />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#0a0a14] border-white/15 text-white">
+                                      {trips.map((t) => (
+                                        <SelectItem key={t.id} value={t.id}>
+                                          {t.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* OCR Hint if any */}
+                              {cur.rawText && (
+                                <div className="p-2 rounded-xl bg-white/[0.02] border border-white/10 text-[10px] text-muted-fg">
+                                  <span className="text-cyan font-mono font-semibold">Texto OCR: </span>
+                                  <span className="italic">"{cur.rawText.replace(/\n/g, " ").slice(0, 80)}"</span>
+                                </div>
+                              )}
+
+                              {/* Save Single Button */}
+                              <div className="pt-2">
+                                <Button
+                                  type="button"
+                                  onClick={() => saveSingleBatchItem(selectedBatchIdx)}
+                                  variant="outline"
+                                  className="w-full bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs h-9 gap-2"
+                                >
+                                  <Check className="h-3.5 w-3.5 text-neon" />
+                                  Guardar Solo Este Pin en Álbum
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="glass rounded-3xl p-8 border border-white/10 flex flex-col items-center justify-center text-center text-muted-fg min-h-[300px]">
+                        <Sparkles className="h-8 w-8 text-cyan/40 mb-2" />
+                        <p className="text-xs text-white">Ningún pin seleccionado</p>
+                        <p className="text-[11px] text-muted-fg mt-1">
+                          Haz clic en cualquier imagen de la izquierda para catalogar su ciudad, país y fecha.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
