@@ -16,6 +16,7 @@ import {
   Scan,
   Edit3,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import {
   listPassportPages,
@@ -27,6 +28,7 @@ import {
   insertStampDesign,
   upsertPhysicalStamp,
   findOrCreateStampingLocation,
+  deletePassportPage,
   type PassportPage,
   type FullPhysicalStamp,
   type StampDesign,
@@ -312,6 +314,39 @@ function LegoPassportPage() {
     }
   };
 
+  const [pageToDelete, setPageToDelete] = useState<PassportPage | null>(null);
+  const [isDeletingPage, setIsDeletingPage] = useState(false);
+
+  const handleDeletePage = async () => {
+    if (!pageToDelete) return;
+    setIsDeletingPage(true);
+    try {
+      await deletePassportPage(pageToDelete.id);
+      const updatedPages = pages.filter((p) => p.id !== pageToDelete.id);
+      const updatedStamps = stamps.filter((s) => s.passport_page_id !== pageToDelete.id);
+      setPages(updatedPages);
+      setStamps(updatedStamps);
+      if (selectedStamp && selectedStamp.passport_page_id === pageToDelete.id) {
+        setSelectedStamp(null);
+      }
+      setPageToDelete(null);
+      if (updatedPages.length === 0) {
+        setActivePageIndex("cover");
+      } else {
+        setActivePageIndex((prev) => {
+          if (typeof prev === "number") {
+            return Math.min(prev, updatedPages.length - 1);
+          }
+          return "cover";
+        });
+      }
+    } catch (err) {
+      console.error("Error deleting passport page:", err);
+    } finally {
+      setIsDeletingPage(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-16 pt-2">
       {/* ── Header ── */}
@@ -552,6 +587,24 @@ function LegoPassportPage() {
             )}
           </div>
 
+          {/* Action bar below book for active passport page */}
+          {currentPage && activePageIndex !== "cover" && (
+            <div className="w-full max-w-[340px] sm:max-w-[390px] flex items-center justify-between mt-3 px-1">
+              <span className="text-[11px] font-mono text-muted-fg">
+                Página {currentPage.page_number} de {totalPages} &bull; {currentPageStamps.length}/6 sellos
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPageToDelete(currentPage)}
+                className="h-7 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 gap-1.5 px-2.5 rounded-lg transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Borrar página
+              </Button>
+            </div>
+          )}
+
           {/* Page tab strip */}
           <div className="flex items-center gap-2 mt-6 overflow-x-auto max-w-full pb-2 px-2">
             <button
@@ -780,41 +833,17 @@ function LegoPassportPage() {
               </div>
             </div>
           ) : (
-            /* Guide panel */
-            <div className="rounded-2xl glass border border-white/10 p-6 space-y-5">
-              <div className="flex items-center gap-2 text-amber-400">
-                <Info className="h-4 w-4" />
-                <h3 className="font-display font-semibold text-sm tracking-wide text-white uppercase">
-                  Guia del Pasaporte
-                </h3>
+            <div className="rounded-2xl glass border border-white/5 p-8 flex flex-col items-center justify-center text-center space-y-3 min-h-[300px]">
+              <div className="h-12 w-12 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center text-muted-fg/60">
+                <Stamp className="h-6 w-6" />
               </div>
-              <p className="text-xs text-muted-fg leading-relaxed">
-                Haz clic sobre cualquier sello colocado en la pagina de
-                pasaporte para inspeccionar su trazabilidad completa o editar sus
-                datos y vinculaciones de viaje.
-              </p>
-              <div className="space-y-3 pt-2">
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <p className="text-xs font-semibold text-white flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-amber-400" />
-                    Edición Directa
-                  </p>
-                  <p className="text-[11px] text-muted-fg">
-                    Puedes modificar el nombre, ciudad, tienda LEGO o viaje
-                    asociado a cualquier sello en cualquier momento.
-                  </p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <p className="text-xs font-semibold text-white flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-cyan-400" />
-                    Categorias Extensibles
-                  </p>
-                  <p className="text-[11px] text-muted-fg">
-                    Soporta sellos de Ciudad, Tienda LEGO, Aeropuerto,
-                    Terminales, Tematicos (Pride, World Cup) y Ediciones
-                    Anuales (2026).
-                  </p>
-                </div>
+              <div className="space-y-1 max-w-xs">
+                <h4 className="text-sm font-semibold text-white/90">
+                  Ningún sello seleccionado
+                </h4>
+                <p className="text-xs text-muted-fg/70 leading-relaxed">
+                  Haz clic en cualquier sello de la página para inspeccionar o editar sus datos.
+                </p>
               </div>
             </div>
           )}
@@ -951,6 +980,62 @@ function LegoPassportPage() {
                   </>
                 ) : (
                   "Guardar Cambios"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Page Confirmation Modal ── */}
+      {pageToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#18181b] border border-white/10 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="h-10 w-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">
+                  ¿Borrar Página {pageToDelete.page_number}?
+                </h3>
+                <p className="text-xs text-muted-fg mt-0.5">
+                  Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-fg leading-relaxed">
+              Se eliminará la página entera del pasaporte junto con todos los sellos oficiales vinculados a sus posiciones.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPageToDelete(null)}
+                disabled={isDeletingPage}
+                className="border-white/10 text-xs hover:bg-white/5"
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeletePage}
+                disabled={isDeletingPage}
+                className="bg-red-600 hover:bg-red-500 text-white text-xs gap-1.5 font-semibold"
+              >
+                {isDeletingPage ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Borrando…
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Borrar Página
+                  </>
                 )}
               </Button>
             </div>

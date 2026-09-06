@@ -501,6 +501,39 @@ export async function upsertPassportPage(page: Partial<PassportPage> & { id?: st
   return data as PassportPage;
 }
 
+export async function deletePassportPage(pageId: string): Promise<boolean> {
+  try {
+    // 1. Delete associated physical stamps locally & from Supabase
+    try {
+      if (typeof window !== "undefined") {
+        const localStamps = getLocalItems<FullPhysicalStamp>("lego_physical_stamps");
+        const filteredStamps = localStamps.filter((s) => s.passport_page_id !== pageId);
+        localStorage.setItem("lego_physical_stamps", JSON.stringify(filteredStamps));
+      }
+    } catch {}
+
+    await supabase.from("physical_stamps").delete().eq("passport_page_id", pageId);
+
+    // 2. Delete the passport page locally & from Supabase
+    try {
+      if (typeof window !== "undefined") {
+        const localPages = getLocalItems<PassportPage>("lego_passport_pages");
+        const filteredPages = localPages.filter((p) => p.id !== pageId);
+        localStorage.setItem("lego_passport_pages", JSON.stringify(filteredPages));
+      }
+    } catch {}
+
+    const { error } = await supabase.from("passport_pages").delete().eq("id", pageId);
+    if (error) {
+      console.warn("[lego-passport] deletePassportPage DB warning:", error);
+    }
+    return true;
+  } catch (err) {
+    console.error("[lego-passport] deletePassportPage error:", err);
+    return false;
+  }
+}
+
 export async function upsertPhysicalStamp(stamp: Partial<PhysicalStamp> & { id?: string }): Promise<PhysicalStamp | null> {
   const stampId = stamp.id || `stamp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const recordToSave = {
