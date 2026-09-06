@@ -18,25 +18,25 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   {
     to: "/",
-    label: "Dashboard",
+    label: "Panel de control",
     icon: Globe2,
     accent: "text-cyan",
   },
   {
     to: "/trips",
-    label: "Mis Viajes",
+    label: "Mis viajes",
     icon: Compass,
     accent: "text-violet",
   },
   {
     to: "/studio",
-    label: "El Estudio",
+    label: "El estudio",
     icon: Wand2,
     accent: "text-cyan",
   },
   {
     to: "/collection",
-    label: "Mi Álbum",
+    label: "Mi álbum",
     icon: BookImage,
     accent: "text-coral",
   },
@@ -48,7 +48,7 @@ const NAV_ITEMS = [
   },
   {
     to: "/generator",
-    label: "Centro Satelital",
+    label: "Centro satelital",
     icon: Satellite,
     accent: "text-neon",
   },
@@ -77,7 +77,7 @@ export function AppSidebar() {
                 PIN COLLECTOR
               </h1>
               <p className="text-[11px] font-sans text-muted-fg mt-0.5 tracking-normal">
-                Colección de Pines
+                Colección de pines
               </p>
             </div>
           )}

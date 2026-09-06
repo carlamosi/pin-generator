@@ -892,7 +892,7 @@ function StudioPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
-            El Estudio de Digitalización
+            El estudio de digitalización
           </h2>
           <p className="text-muted-fg text-sm mt-1 max-w-2xl">
             Captura con cruceta y nivel, importa fotos o procesa paquetes masivos ZIP directamente en el navegador.
@@ -909,7 +909,7 @@ function StudioPage() {
           </TabsTrigger>
           <TabsTrigger value="zip" className="gap-2 text-xs font-semibold rounded-xl text-muted-fg data-[state=active]:bg-white/10 data-[state=active]:text-white">
             <FileArchive className="h-3.5 w-3.5 text-violet" />
-            Lote Masivo ZIP ({batchItems.length})
+            Lote masivo ZIP ({batchItems.length})
           </TabsTrigger>
         </TabsList>
 
@@ -940,7 +940,7 @@ function StudioPage() {
                     </div>
                     <div>
                       <p className="font-display font-semibold text-sm text-white">
-                        Hacer Foto o Importar Pines
+                        Hacer foto o importar pines
                       </p>
                       <p className="text-xs text-muted-fg font-mono mt-1">
                         Cámara en vivo con cruceta y nivel o galería (JPG, PNG, WEBP)
@@ -953,7 +953,7 @@ function StudioPage() {
                         className="bg-cyan hover:bg-cyan/90 text-black font-semibold text-xs rounded-xl shadow-[0_0_16px_-4px_#00d4ff] gap-2 h-9 px-4"
                       >
                         <Camera className="h-4 w-4" />
-                        Hacer Foto
+                        Hacer foto
                       </Button>
                       <Button
                         type="button"
@@ -962,7 +962,7 @@ function StudioPage() {
                         onClick={() => fileInputRef.current?.click()}
                         className="bg-white/5 border-white/15 text-white hover:bg-white/10 text-xs rounded-xl h-9"
                       >
-                        Galería (Múltiple)
+                        Galería (múltiple)
                       </Button>
                     </div>
                   </div>
@@ -984,7 +984,7 @@ function StudioPage() {
                   className="flex-1 bg-gradient-to-r from-violet to-cyan text-white font-semibold text-xs h-11 rounded-2xl shadow-[0_0_20px_-4px_rgba(108,99,255,0.5)] gap-2 hover:opacity-95"
                 >
                   {singleProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                  {singleProcessing ? "Aislando con IA..." : "Procesar y Aislar Pin"}
+                  {singleProcessing ? "Aislando con IA..." : "Procesar y aislar pin"}
                 </Button>
                 {singleImage && (
                   <Button
@@ -1008,7 +1008,7 @@ function StudioPage() {
                     </span>
                     {singleResult && (
                       <Badge className="bg-neon/15 text-neon border-neon/30 text-[10px] font-mono">
-                        ✓ Listo para Colección
+                        ✓ Listo para colección
                       </Badge>
                     )}
                   </div>
@@ -1036,7 +1036,7 @@ function StudioPage() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[11px] font-semibold text-muted-fg">Ciudad Base</Label>
+                          <Label className="text-[11px] font-semibold text-muted-fg">Ciudad base</Label>
                           <Input
                             value={singleCity}
                             onChange={(e) => setSingleCity(e.target.value)}
@@ -1050,7 +1050,7 @@ function StudioPage() {
                       <div className="space-y-1">
                         <Label className="text-[11px] font-semibold text-muted-fg flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-cyan" />
-                          Fecha del Viaje / Adquisición
+                          Fecha del viaje / adquisición
                         </Label>
                         <Input
                           type="date"
@@ -1063,7 +1063,7 @@ function StudioPage() {
                       {/* Point of Interest / Landmark */}
                       <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/10">
                         <div className="flex items-center justify-between mb-1">
-                          <Label className="text-[11px] font-semibold text-cyan">Lugar de Interés / Monumento (Opcional)</Label>
+                          <Label className="text-[11px] font-semibold text-cyan">Lugar de interés / monumento (opcional)</Label>
                           <span className="text-[10px] text-muted-fg font-mono">Ej: Tivoli</span>
                         </div>
                         <Input
@@ -1078,7 +1078,7 @@ function StudioPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-[11px] font-semibold text-muted-fg">Asignar a Expedición / Viaje</Label>
+                        <Label className="text-[11px] font-semibold text-muted-fg">Asignar a expedición / viaje</Label>
                         <Select value={singleTripId} onValueChange={setSingleTripId}>
                           <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl text-xs">
                             <SelectValue placeholder="Seleccionar viaje..." />
@@ -1108,7 +1108,7 @@ function StudioPage() {
                     className="w-full mt-4 bg-neon hover:bg-neon/90 text-black font-semibold text-xs h-11 rounded-2xl shadow-[0_0_20px_-4px_#00ffb2]"
                   >
                     {singleSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                    Guardar Pin en el Álbum
+                    Guardar pin en el álbum
                   </Button>
                 )}
               </div>
@@ -1124,7 +1124,7 @@ function StudioPage() {
               <div>
                 <div className="flex items-center gap-3">
                   <h3 className="font-display font-bold text-sm text-white uppercase tracking-wider">
-                    Lote Masivo ZIP
+                    Lote masivo ZIP
                   </h3>
                   {batchItems.length > 0 && (
                     <div className="flex items-center gap-2">
@@ -1162,7 +1162,7 @@ function StudioPage() {
                     className="bg-violet hover:bg-violet/90 text-white rounded-xl text-xs font-semibold gap-2 shadow-[0_0_20px_-4px_rgba(108,99,255,0.6)]"
                   >
                     <FileArchive className="h-4 w-4" />
-                    Cargar Archivo ZIP
+                    Cargar archivo ZIP
                   </Button>
                 ) : (
                   <>
@@ -1182,7 +1182,7 @@ function StudioPage() {
                       className="bg-neon hover:bg-neon/90 text-black font-semibold text-xs rounded-xl shadow-[0_0_20px_-4px_#00ffb2] gap-2 px-4"
                     >
                       {batchSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                      2. Guardar Lote en Álbum ({batchItems.length})
+                      2. Guardar lote en álbum ({batchItems.length})
                     </Button>
 
                     <Button
@@ -1267,7 +1267,7 @@ function StudioPage() {
                     onClick={applyGlobalToAll}
                     className="bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs h-9"
                   >
-                    Aplicar a Todos
+                    Aplicar a todos
                   </Button>
                 </div>
 
@@ -1343,7 +1343,7 @@ function StudioPage() {
                               <div>
                                 <span className="font-display font-bold text-xs tracking-wider text-white uppercase flex items-center gap-1.5">
                                   <MapPin className="h-3.5 w-3.5 text-cyan" />
-                                  Catalogar Pin #{selectedBatchIdx + 1}
+                                  Catalogar pin #{selectedBatchIdx + 1}
                                 </span>
                                 <p className="text-[10px] text-muted-fg truncate max-w-[200px] mt-0.5 font-mono">
                                   {cur.name}
@@ -1393,7 +1393,7 @@ function StudioPage() {
                               />
                               {cur.cutoutUrl && (
                                 <Badge className="absolute top-2 right-2 bg-neon/20 text-neon border-neon/30 text-[9px] font-mono">
-                                  Fondo Aislado
+                                  Fondo aislado
                                 </Badge>
                               )}
                             </div>
@@ -1416,7 +1416,7 @@ function StudioPage() {
                                 <div className="space-y-1">
                                   <Label className="text-[11px] font-semibold text-muted-fg flex items-center gap-1">
                                     <MapPin className="h-3 w-3 text-cyan" />
-                                    Ciudad Base
+                                    Ciudad base
                                   </Label>
                                   <Input
                                     value={cur.city || ""}
@@ -1429,7 +1429,7 @@ function StudioPage() {
 
                               <div className="space-y-1">
                                 <Label className="text-[11px] font-semibold text-muted-fg">
-                                  Lugar de Interés / POI (Opcional)
+                                  Lugar de interés / POI (opcional)
                                 </Label>
                                 <Input
                                   value={cur.poi || ""}
@@ -1489,7 +1489,7 @@ function StudioPage() {
                                   className="w-full bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs h-9 gap-2"
                                 >
                                   <Check className="h-3.5 w-3.5 text-neon" />
-                                  Guardar Solo Este Pin en Álbum
+                                  Guardar solo este pin en álbum
                                 </Button>
                               </div>
                             </div>

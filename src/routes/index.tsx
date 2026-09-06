@@ -1,14 +1,13 @@
-﻿import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Globe2, Pin, BookImage, Satellite, Compass, Sparkles,
+  Globe2, Pin, BookImage, Satellite, Compass,
   Wifi, ArrowRight, MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@tanstack/react-router";
 import { listTrips, listCities, listCountries, listAllPins, type Trip, type City, type Country, type FullPin } from "@/lib/trips/trips-repo";
-import { FinishedCard } from "@/components/FinishedCard";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -123,7 +122,6 @@ function DashboardPage() {
   }, []);
 
   const nfcCount = useMemo(() => (pins ?? []).filter((p) => p?.nfc_uid).length, [pins]);
-  const featuredPins = useMemo(() => (pins ?? []).slice(0, 3), [pins]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
@@ -131,7 +129,7 @@ function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">
-            Panel de Control
+            Panel de control
           </h2>
           <p className="text-muted-fg text-xs mt-1 max-w-2xl leading-relaxed">
             Resumen de tus viajes, catálogo de pines físicos y cartulinas satelitales.
@@ -141,7 +139,7 @@ function DashboardPage() {
         <div className="flex items-center gap-3">
           <Badge className="bg-neon/10 text-neon border-neon/30 gap-2 py-1 px-3">
             <span className="h-1.5 w-1.5 rounded-full bg-neon animate-pulse" />
-            <span className="text-xs font-sans">{nfcCount} Pines NFC</span>
+            <span className="text-xs font-sans">{nfcCount} pines NFC</span>
           </Badge>
         </div>
       </div>
@@ -150,7 +148,7 @@ function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Globe2}
-          label="Viajes Registrados"
+          label="Viajes registrados"
           value={trips.length}
           sublabel="Base de datos completa"
           accentClass="text-cyan"
@@ -166,7 +164,7 @@ function DashboardPage() {
         />
         <StatCard
           icon={Pin}
-          label="Pines Físicos"
+          label="Pines físicos"
           value={pins.length}
           sublabel={`${nfcCount} con chip NFC`}
           accentClass="text-coral"
@@ -174,7 +172,7 @@ function DashboardPage() {
         />
         <StatCard
           icon={BookImage}
-          label="Páginas de Álbum"
+          label="Páginas de álbum"
           value={Math.max(1, Math.ceil(pins.length / 12))}
           sublabel="Formato 12 pines por página"
           accentClass="text-neon"
@@ -191,8 +189,8 @@ function DashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Compass className="h-4 w-4 text-cyan" />
-                <h3 className="font-display font-semibold text-xs tracking-wide text-white uppercase">
-                  Países Visitados
+                <h3 className="font-display font-semibold text-xs tracking-wide text-white">
+                  Países visitados
                 </h3>
               </div>
               <span className="text-xs text-muted-fg">{countries.length} países</span>
@@ -216,8 +214,8 @@ function DashboardPage() {
             <div className="px-5 py-3.5 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Globe2 className="h-4 w-4 text-violet" />
-                <h3 className="font-display font-semibold text-xs tracking-wide text-white uppercase">
-                  Últimos Viajes
+                <h3 className="font-display font-semibold text-xs tracking-wide text-white">
+                  Últimos viajes
                 </h3>
               </div>
               <Link to="/trips">
@@ -260,58 +258,36 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* Right: Quick Navigation & Showcase */}
+        {/* Right: Quick Navigation */}
         <div className="col-span-12 lg:col-span-5 space-y-6">
           <div className="glass rounded-2xl p-5 space-y-3">
-            <h3 className="font-display font-semibold text-xs text-muted-fg uppercase tracking-wide">
+            <h3 className="font-display font-semibold text-xs text-muted-fg tracking-wide">
               Secciones
             </h3>
             <div className="space-y-2 pt-1">
               <QuickAction
                 icon={Compass}
-                label="Mis Viajes"
+                label="Mis viajes"
                 description="Listado de expediciones y ciudades"
                 to="/trips"
                 iconColor="text-violet"
               />
               <QuickAction
                 icon={BookImage}
-                label="Mi Álbum"
+                label="Mi álbum"
                 description="Cartulinas en formato físico cronológico"
                 to="/collection"
                 iconColor="text-coral"
               />
               <QuickAction
                 icon={Satellite}
-                label="Centro Satelital"
+                label="Centro satelital"
                 description="Personalizar encuadre y coordenadas"
                 to="/generator"
                 iconColor="text-neon"
               />
             </div>
           </div>
-
-          {featuredPins.length > 0 && (
-            <div className="glass-strong rounded-2xl p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-neon" />
-                  <h3 className="font-display font-semibold text-xs tracking-wide text-white uppercase">
-                    Cartulinas Destacadas
-                  </h3>
-                </div>
-                <Link to="/collection">
-                  <span className="text-xs text-cyan hover:underline">Ver Álbum →</span>
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 pt-1">
-                {featuredPins.map((p) => (
-                  <FinishedCard key={p.id} pin={p} />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

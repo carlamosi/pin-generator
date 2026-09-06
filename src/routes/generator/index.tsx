@@ -153,7 +153,7 @@ function GeneratorPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
-            Centro Satelital
+            Centro satelital
           </h2>
           <p className="text-muted-fg text-sm mt-1 max-w-2xl">
             Ajusta encuadre, zoom y coordenadas satelitales en vivo. Observa en tiempo real cómo queda la cartulina física (#F4F1E8) antes de imprimir.
@@ -167,7 +167,7 @@ function GeneratorPage() {
             className="bg-gradient-to-r from-neon to-cyan text-black font-semibold text-xs px-5 h-11 rounded-2xl shadow-[0_0_24px_-4px_rgba(0,255,178,0.6)] gap-2 hover:opacity-95 transition-opacity"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Guardar Cartulina
+            Guardar cartulina
           </Button>
         </div>
       </div>
@@ -211,8 +211,8 @@ function GeneratorPage() {
           <div className="glass-strong rounded-3xl p-6 border border-white/15 space-y-6">
             {/* Pin Selector */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-fg">
-                Seleccionar Pin a Personalizar
+              <Label className="text-xs font-semibold text-muted-fg">
+                Seleccionar pin a personalizar
               </Label>
               <Select
                 value={selectedPinId}
@@ -238,11 +238,11 @@ function GeneratorPage() {
               <TabsList className="bg-white/5 p-1 rounded-2xl w-full grid grid-cols-2 border border-white/10">
                 <TabsTrigger value="map" className="gap-2 text-xs font-semibold rounded-xl text-muted-fg data-[state=active]:bg-white/10 data-[state=active]:text-white">
                   <MapPin className="h-3.5 w-3.5 text-cyan" />
-                  Encuadre y Zoom Satelital
+                  Encuadre y zoom satelital
                 </TabsTrigger>
                 <TabsTrigger value="text" className="gap-2 text-xs font-semibold rounded-xl text-muted-fg data-[state=active]:bg-white/10 data-[state=active]:text-white">
                   <Type className="h-3.5 w-3.5 text-violet" />
-                  Tipografía y Etiquetas
+                  Tipografía y etiquetas
                 </TabsTrigger>
               </TabsList>
 
@@ -250,7 +250,7 @@ function GeneratorPage() {
               <TabsContent value="map" className="space-y-5">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-semibold text-white/90">Nivel de Zoom Satelital</Label>
+                    <Label className="text-xs font-semibold text-white/90">Nivel de zoom satelital</Label>
                     <span className="font-mono text-xs text-cyan font-bold bg-cyan/10 px-2 py-0.5 rounded-md border border-cyan/20">
                       {zoom} / 18
                     </span>
@@ -297,7 +297,7 @@ function GeneratorPage() {
               {/* Typography and Labeling */}
               <TabsContent value="text" className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-muted-fg">Nombre de la Ciudad</Label>
+                  <Label className="text-xs font-semibold text-muted-fg">Nombre de la ciudad</Label>
                   <Input
                     value={customCity}
                     onChange={(e) => setCustomCity(e.target.value)}
@@ -316,7 +316,7 @@ function GeneratorPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-muted-fg">Código de Pin</Label>
+                    <Label className="text-xs font-semibold text-muted-fg">Código de pin</Label>
                     <Input
                       value={customPinCode}
                       onChange={(e) => setCustomPinCode(e.target.value)}
@@ -334,8 +334,8 @@ function GeneratorPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileArchive className="h-4 w-4 text-cyan" />
-                <h3 className="font-display font-semibold text-xs text-white uppercase tracking-wider">
-                  Almacenamiento ZIP de Salida
+                <h3 className="font-display font-semibold text-xs text-white">
+                  Almacenamiento ZIP de salida
                 </h3>
               </div>
               {zipSuccess && (

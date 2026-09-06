@@ -387,15 +387,15 @@ function TripsPage() {
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">Mis Viajes</h2>
+          <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">Mis viajes</h2>
           <p className="text-muted-fg text-xs mt-1 leading-relaxed">Historial de expediciones, transportes, múltiples ciudades y registro de pines.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={openCreateCity} variant="outline" className="border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs h-10 px-4 rounded-xl gap-2">
-            <Building2 className="h-4 w-4 text-cyan" /> Añadir Ciudad
+            <Building2 className="h-4 w-4 text-cyan" /> Añadir ciudad
           </Button>
           <Button onClick={openCreateTrip} className="bg-gradient-to-r from-violet to-cyan text-white font-semibold text-xs px-5 h-10 rounded-xl shadow-[0_0_20px_-4px_rgba(108,99,255,0.5)] gap-2 hover:opacity-95">
-            <Plus className="h-4 w-4" /> Añadir Viaje
+            <Plus className="h-4 w-4" /> Añadir viaje
           </Button>
         </div>
       </div>
@@ -423,7 +423,7 @@ function TripsPage() {
           {activeTab === "cities" && (
             <Button variant="ghost" size="sm" onClick={() => setShowPinCode(!showPinCode)} className="h-8 text-xs text-muted-fg hover:text-white gap-1.5 px-2.5 rounded-lg">
               {showPinCode ? <EyeOff className="h-3.5 w-3.5 text-cyan" /> : <Eye className="h-3.5 w-3.5" />}
-              {showPinCode ? "Ocultar Códigos" : "Ver Códigos"}
+              {showPinCode ? "Ocultar códigos" : "Ver códigos"}
             </Button>
           )}
           <div className="flex items-center p-1 rounded-xl bg-white/5 border border-white/10">
@@ -444,7 +444,7 @@ function TripsPage() {
               <thead className="bg-white/[0.03] text-muted-fg font-medium text-[11px] border-b border-white/10">
                 <tr>
                   <th className="py-3.5 px-5">Transporte</th>
-                  <th className="py-3.5 px-5">Nombre del Viaje</th>
+                  <th className="py-3.5 px-5">Nombre del viaje</th>
                   <th className="py-3.5 px-5">Ciudades</th>
                   <th className="py-3.5 px-5">Motivo</th>
                   <th className="py-3.5 px-5">Fechas</th>
@@ -510,8 +510,8 @@ function TripsPage() {
                 <tr>
                   <th className="py-3.5 px-5">Ciudad</th>
                   <th className="py-3.5 px-5">País / Región</th>
-                  <th className="py-3.5 px-5">Fecha Inicio / Fin</th>
-                  <th className="py-3.5 px-5">Pin Físico</th>
+                  <th className="py-3.5 px-5">Fecha inicio / fin</th>
+                  <th className="py-3.5 px-5">Pin físico</th>
                   {showPinCode && <th className="py-3.5 px-5 font-mono">Código</th>}
                   <th className="py-3.5 px-5 text-right">Acciones</th>
                 </tr>
@@ -519,22 +519,23 @@ function TripsPage() {
               <tbody className="divide-y divide-white/[0.05]">
                 {filteredCities.map((c) => (
                   <tr key={c.id} className="hover:bg-white/[0.025] transition-colors">
-                    <td className="py-3.5 px-5 font-medium text-white">{c.name}</td>
-                    <td className="py-3.5 px-5">
-                      <span>{c.country}</span>
-                      {c.region && <span className="text-muted-fg text-[11px] block">{c.region}</span>}
+                    <td className="py-3.5 px-5 font-medium text-white flex items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5 text-cyan" /> {c.name}
                     </td>
+                    <td className="py-3.5 px-5 text-muted-fg">{c.country}{c.region ? ` · ${c.region}` : ""}</td>
                     <td className="py-3.5 px-5 text-muted-fg whitespace-nowrap">
                       {c.start_date ? new Date(c.start_date).toLocaleDateString("es") : "—"}
-                      {c.end_date && ` → ${new Date(c.end_date).toLocaleDateString("es")}`}
                     </td>
                     <td className="py-3.5 px-5">
-                      {c.has_pin
-                        ? <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20"><Check className="h-3 w-3" /> Tengo Pin</span>
-                        : <span className="text-muted-fg text-[11px]">Sin pin</span>
-                      }
+                      {c.has_pin ? (
+                        <span className="text-emerald-400 font-medium text-[11px] flex items-center gap-1">✓ Sí</span>
+                      ) : (
+                        <span className="text-muted-fg text-[11px]">Pendiente</span>
+                      )}
                     </td>
-                    {showPinCode && <td className="py-3.5 px-5 font-mono text-cyan text-[11px]">{c.pin_code ?? "—"}</td>}
+                    {showPinCode && (
+                      <td className="py-3.5 px-5 font-mono text-[11px] text-cyan">{c.pin_code || "—"}</td>
+                    )}
                     <td className="py-3.5 px-5 text-right whitespace-nowrap space-x-1">
                       <Button variant="ghost" size="sm" onClick={() => openEditCity(c)} className="h-7 w-7 p-0 text-muted-fg hover:text-white rounded-lg">
                         <Edit3 className="h-3.5 w-3.5" />
@@ -555,11 +556,11 @@ function TripsPage() {
       <Dialog open={tripModalOpen} onOpenChange={setTripModalOpen}>
         <DialogContent className="max-w-xl bg-[#09090e] border-white/15 text-white rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="font-display text-base font-bold">{editingTrip ? "Editar Viaje" : "Añadir Viaje"}</DialogTitle>
+            <DialogTitle className="font-display text-base font-bold">{editingTrip ? "Editar viaje" : "Añadir viaje"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <label className="text-xs font-medium text-muted-fg mb-1 block">Nombre del Viaje</label>
+              <label className="text-xs font-medium text-muted-fg mb-1 block">Nombre del viaje</label>
               <Input placeholder="Ej: Dinamarca y Suecia 2024" value={tripName} onChange={(e) => setTripName(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -590,16 +591,16 @@ function TripsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha Inicio</label>
+                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha inicio</label>
                 <Input type="date" value={tripStartDate} onChange={(e) => setTripStartDate(e.target.value)} className="bg-white/5 border-white/10 text-white rounded-xl text-xs" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha Fin</label>
+                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha fin</label>
                 <Input type="date" value={tripEndDate} onChange={(e) => setTripEndDate(e.target.value)} className="bg-white/5 border-white/10 text-white rounded-xl text-xs" />
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-fg mb-1 block">Descripción de Ruta / Notas</label>
+              <label className="text-xs font-medium text-muted-fg mb-1 block">Descripción de ruta / notas</label>
               <Input placeholder="Ej: Copenhague, Hillerød, Christiania, Malmö" value={tripDescription} onChange={(e) => setTripDescription(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
             </div>
 
@@ -661,7 +662,7 @@ function TripsPage() {
           <DialogFooter className="pt-4 border-t border-white/10">
             <Button variant="outline" onClick={() => setTripModalOpen(false)} className="bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs">Cancelar</Button>
             <Button onClick={handleSaveTrip} disabled={tripSaving} className="bg-gradient-to-r from-violet to-cyan text-white font-semibold rounded-xl text-xs">
-              {tripSaving ? "Guardando..." : "Guardar Viaje"}
+              {tripSaving ? "Guardando..." : "Guardar viaje"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -671,11 +672,11 @@ function TripsPage() {
       <Dialog open={cityModalOpen} onOpenChange={setCityModalOpen}>
         <DialogContent className="max-w-lg bg-[#09090e] border-white/15 text-white rounded-2xl p-6 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="font-display text-base font-bold">{editingCity ? "Editar Ciudad" : "Añadir Ciudad"}</DialogTitle>
+            <DialogTitle className="font-display text-base font-bold">{editingCity ? "Editar ciudad" : "Añadir ciudad"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <label className="text-xs font-medium text-muted-fg mb-1 block">Nombre de la Ciudad</label>
+              <label className="text-xs font-medium text-muted-fg mb-1 block">Nombre de la ciudad</label>
               <Input placeholder="Escribe la ciudad (ej: Malmö, Copenhagen...)" value={cityName} onChange={(e) => handleCityNameChange(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
               <span className="text-[10px] text-muted-fg mt-1 block">Determina automáticamente región y país si no los introduces.</span>
             </div>
@@ -691,17 +692,17 @@ function TripsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha Inicio</label>
+                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha inicio</label>
                 <Input type="date" value={cityStartDate} onChange={(e) => setCityStartDate(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha Fin</label>
+                <label className="text-xs font-medium text-muted-fg mb-1 block">Fecha fin</label>
                 <Input type="date" value={cityEndDate} onChange={(e) => setCityEndDate(e.target.value)} className="bg-white/5 border-white/10 text-white text-xs rounded-xl" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-fg mb-1 block">Asignar a Viaje</label>
+                <label className="text-xs font-medium text-muted-fg mb-1 block">Asignar a viaje</label>
                 <Select value={cityTripId} onValueChange={setCityTripId}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl text-xs"><SelectValue placeholder="Sin viaje" /></SelectTrigger>
                   <SelectContent className="bg-[#09090e] border-white/15 text-white">
@@ -712,7 +713,7 @@ function TripsPage() {
               </div>
               <div className="flex flex-col justify-end">
                 <button type="button" onClick={() => setCityHasPin(!cityHasPin)} className={cn("h-10 rounded-xl border text-xs font-medium flex items-center justify-center gap-2 transition-all", cityHasPin ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-white/5 text-muted-fg border-white/10")}>
-                  <Check className="h-4 w-4" /> {cityHasPin ? "Tengo Pin" : "Sin pin"}
+                  <Check className="h-4 w-4" /> {cityHasPin ? "Tengo pin" : "Sin pin"}
                 </button>
               </div>
             </div>
@@ -720,7 +721,7 @@ function TripsPage() {
           <DialogFooter className="pt-4 border-t border-white/10">
             <Button variant="outline" onClick={() => setCityModalOpen(false)} className="bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl text-xs">Cancelar</Button>
             <Button onClick={handleSaveCity} disabled={citySaving} className="bg-gradient-to-r from-violet to-cyan text-white font-semibold rounded-xl text-xs">
-              {citySaving ? "Guardando..." : "Guardar Ciudad"}
+              {citySaving ? "Guardando..." : "Guardar ciudad"}
             </Button>
           </DialogFooter>
         </DialogContent>

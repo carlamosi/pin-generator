@@ -142,7 +142,7 @@ function CollectionPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">
-            Álbum Físico
+            Álbum físico
           </h2>
           <p className="text-muted-fg text-xs mt-1 leading-relaxed">
             Hojas físicas de 12 cartulinas (3 columnas × 4 filas) ordenadas cronológicamente con sincronización en tiempo real.
@@ -282,7 +282,7 @@ function CollectionPage() {
               className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl"
             >
               <ChevronLeft className="h-4 w-4" />
-              Página Anterior
+              Página anterior
             </Button>
 
             <span className="text-xs font-mono font-semibold text-cyan">
@@ -296,7 +296,7 @@ function CollectionPage() {
               disabled={page >= totalPages - 1}
               className="gap-2 text-xs font-mono bg-white/5 border-white/15 text-white hover:bg-white/10 rounded-xl"
             >
-              Página Siguiente
+              Página siguiente
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -310,7 +310,7 @@ function CollectionPage() {
             <div className="space-y-4">
               <DialogHeader>
                 <DialogTitle className="font-display text-base font-bold flex items-center justify-between">
-                  <span>Modificar Cartulina / Pin</span>
+                  <span>Modificar cartulina / pin</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -371,7 +371,7 @@ function CollectionPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-medium text-muted-fg mb-1 block">Código de Pin</Label>
+                    <Label className="text-xs font-medium text-muted-fg mb-1 block">Código de pin</Label>
                     <Input
                       value={editPinId}
                       onChange={(e) => setEditPinId(e.target.value)}
@@ -407,7 +407,7 @@ function CollectionPage() {
                   className="bg-gradient-to-r from-violet to-cyan text-white font-semibold rounded-xl text-xs gap-1.5"
                 >
                   <Save className="h-3.5 w-3.5" />
-                  {savingPin ? "Guardando..." : "Guardar Cambios"}
+                  {savingPin ? "Guardando..." : "Guardar cambios"}
                 </Button>
               </DialogFooter>
             </div>
