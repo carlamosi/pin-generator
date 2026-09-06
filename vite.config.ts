@@ -12,4 +12,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  nitro: {
+    rollupConfig: {
+      external: [
+        "@paddleocr/paddleocr-js",
+        "@techstark/opencv-js",
+        "tesseract.js",
+      ],
+    },
+  },
 });

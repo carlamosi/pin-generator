@@ -1,4 +1,4 @@
-﻿/**
+/**
  * passport-recognition.ts - REWRITE
  * Client-side stamp recognition pipeline.
  * Changes vs previous:
@@ -14,6 +14,12 @@
 import { createWorker } from "tesseract.js";
 import { normalizeString } from "./pin-processing";
 import type { StampDesign, City } from "./trips/trips-repo";
+import {
+  fuzzyMatchCity,
+  bundledEntryToCity,
+  normalizeGeoToken,
+  tokenSimilarity,
+} from "./cities-db";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -162,6 +168,31 @@ export function hammingDistance(a: string, b: string): number {
 // OCR
 // ---------------------------------------------------------------------------
 
+let paddleOcrInstancePromise: Promise<any> | null = null;
+let paddleFailed = false;
+
+async function getPaddleOcrInstance(): Promise<any> {
+  if (typeof window === "undefined") return null;
+  if (paddleFailed) return null;
+  if (!paddleOcrInstancePromise) {
+    paddleOcrInstancePromise = (async () => {
+      try {
+        const { PaddleOCR } = await import("@paddleocr/paddleocr-js");
+        const ocr = await PaddleOCR.create({
+          worker: true,
+          unsupportedBehavior: "warn",
+        });
+        return ocr;
+      } catch (err) {
+        console.warn("[PaddleOCR] Worker creation fallback:", err);
+        paddleFailed = true;
+        return null;
+      }
+    })();
+  }
+  return paddleOcrInstancePromise;
+}
+
 let sharedWorkerPromise: Promise<any> | null = null;
 
 async function getSharedOcrWorker() {
@@ -181,9 +212,48 @@ async function getSharedOcrWorker() {
 
 export async function runOcrOnCrop(cropDataUrl: string): Promise<string> {
   const preprocessed = await preprocessForOcr(cropDataUrl);
-  const worker = await getSharedOcrWorker();
-  const result = await worker.recognize(preprocessed);
-  return result.data.text ?? "";
+
+  // 1. First attempt with high-precision PaddleOCR.js in Web Worker
+  try {
+    const paddle = await getPaddleOcrInstance();
+    if (paddle) {
+      const img = new Image();
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = preprocessed;
+      });
+
+      const results = await paddle.predict(img);
+      if (results && results.length > 0) {
+        const textLines: string[] = [];
+        for (const res of results) {
+          if (res.items && Array.isArray(res.items)) {
+            for (const item of res.items) {
+              if (item.text && item.text.trim()) {
+                textLines.push(item.text.trim());
+              }
+            }
+          }
+        }
+        if (textLines.length > 0) {
+          return textLines.join(" ");
+        }
+      }
+    }
+  } catch (paddleErr) {
+    console.warn("[PaddleOCR error, running fallback]:", paddleErr);
+  }
+
+  // 2. High-reliability fallback: Tesseract.js worker
+  try {
+    const worker = await getSharedOcrWorker();
+    const result = await worker.recognize(preprocessed);
+    return result.data.text ?? "";
+  } catch (err) {
+    console.error("[OCR error]:", err);
+    return "";
+  }
 }
 
 async function preprocessForOcr(dataUrl: string): Promise<string> {
@@ -310,13 +380,19 @@ function matchCityFromDict(tokens: string[]): { entry: CityEntry; score: number 
 
 function cityEntryToCity(entry: CityEntry): City {
   return {
-    id: `dict-${entry.es.toLowerCase().replace(/\s+/g,"-")}`,
+    id: `dict-${entry.es.toLowerCase().replace(/\s+/g, "-")}`,
     name: entry.es,
     country: entry.country,
     region: entry.region,
     continent: entry.continent,
-    trip_id: null, start_date: null, end_date: null, notes: null,
-  } as City;
+    trip_id: null,
+    start_date: null,
+    end_date: null,
+    note: null,
+    has_pin: false,
+    pin_code: null,
+    created_at: new Date().toISOString(),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -368,35 +444,43 @@ export async function recogniseStamp(
   let matchedCity: City | null = null, bestCityScore = 0;
 
   if (!yearToken) {
-    // DB cities first
+    // 1. User's existing database cities first
     for (const city of existingCities) {
-      const cn = stripDiacritics(city.name);
+      const cn = normalizeGeoToken(city.name);
       for (const token of tokensLower) {
-        if (token.length < 4) continue;
-        const score = textSimilarity(token, cn);
-        if (score >= 0.80 && score > bestCityScore) { bestCityScore = score; matchedCity = city; }
-      }
-    }
-    // Built-in dictionary (always wins if better score)
-    const dictMatch = matchCityFromDict(tokensLower);
-    if (dictMatch && dictMatch.score > bestCityScore) {
-      bestCityScore = dictMatch.score;
-      const dbCity = existingCities.find((c) => stripDiacritics(c.name) === stripDiacritics(dictMatch.entry.es));
-      matchedCity = dbCity ?? cityEntryToCity(dictMatch.entry);
-    }
-    // Full-text fallback: search raw OCR for alias substrings
-    if (!matchedCity || bestCityScore < 0.75) {
-      const rawStripped = stripDiacritics(rawOcrText);
-      for (const [alias, entry] of ALIAS_MAP) {
-        if (alias.length < 5) continue;
-        if (rawStripped.includes(alias)) {
-          const dbCity = existingCities.find((c) => stripDiacritics(c.name) === stripDiacritics(entry.es));
-          matchedCity = dbCity ?? cityEntryToCity(entry);
-          bestCityScore = 0.95;
-          break;
+        if (token.length < 3) continue;
+        const score = tokenSimilarity(token, cn);
+        if (score >= 0.80 && score > bestCityScore) {
+          bestCityScore = score;
+          matchedCity = city;
         }
       }
     }
+
+    // 2. Offline GeoNames / LEGO world cities dataset fuzzy matching (e.g. KOBENHAVN -> Copenhagen)
+    const geoMatch = fuzzyMatchCity(tokensLower);
+    if (geoMatch && geoMatch.score > bestCityScore) {
+      bestCityScore = geoMatch.score;
+      const dbCity = existingCities.find(
+        (c) => normalizeGeoToken(c.name) === normalizeGeoToken(geoMatch.city.name)
+      );
+      matchedCity = dbCity ?? bundledEntryToCity(geoMatch.city);
+    }
+
+    // 3. Full-text fallback: Search raw OCR text normalized
+    if (!matchedCity || bestCityScore < 0.75) {
+      const rawNormalized = normalizeGeoToken(rawOcrText);
+      const rawTokens = rawNormalized.split(/\s+/).filter((w) => w.length >= 3);
+      const rawMatch = fuzzyMatchCity([rawNormalized, ...rawTokens]);
+      if (rawMatch && rawMatch.score >= 0.80) {
+        const dbCity = existingCities.find(
+          (c) => normalizeGeoToken(c.name) === normalizeGeoToken(rawMatch.city.name)
+        );
+        matchedCity = dbCity ?? bundledEntryToCity(rawMatch.city);
+        bestCityScore = rawMatch.score;
+      }
+    }
+
     if (bestCityScore < 0.75) matchedCity = null;
   }
 

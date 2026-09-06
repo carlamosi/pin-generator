@@ -288,7 +288,7 @@ function LegoPassportPage() {
 
       await upsertPhysicalStamp({
         ...editingStamp,
-        stamped_at: editForm.stampedAt || null,
+        stamped_at: editForm.stampedAt || "",
         stamping_location_id: locId,
         trip_id: editForm.tripId || null,
       });

@@ -64,7 +64,7 @@ export async function findOrCreateCityFromGeo(cityName: string): Promise<City | 
     trip_id: null,
     start_date: null,
     end_date: null,
-    notes: "Auto-detectado por escáner de pasaporte",
+    note: "Auto-detectado por escáner de pasaporte",
   };
 
   const { data, error } = await supabase

@@ -68,6 +68,9 @@ interface IdentifyState {
   rawCropDataUrl: string;
 
   // Editable fields (user overrides recognition)
+  editName: string;
+  editCategory: string;
+  editCityId: string;
   editLocationName: string; // Manual name of LEGO Store or location
   editTripId: string;       // Associated trip
   editStampedAt: string;
